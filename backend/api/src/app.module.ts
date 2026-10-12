@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
 
+
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
 @Module({

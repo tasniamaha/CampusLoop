@@ -64,4 +64,18 @@ export class UsersService {
       createdAt: savedUser.createdAt,
     };
   }
+  async findByEmailWithPassword(email: string) {
+    return this.usersRepository
+        .createQueryBuilder('user')
+        .addSelect('user.passwordHash')
+        .where('user.email = :email', {
+        email: email.trim().toLowerCase(),
+        })
+        .getOne();
+    }
+    async findById(id: string) {
+        return this.usersRepository.findOne({
+            where: { id },
+        });
+    }
 }
