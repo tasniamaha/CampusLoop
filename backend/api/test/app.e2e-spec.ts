@@ -1,29 +1,35 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import 'reflect-metadata';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { Test } from '@nestjs/testing';
+import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types.js';
-import { AppModule } from './../src/app.module.js';
+import { AppModule } from '../src/app.module.js';
 
-describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+describe('App (e2e)', () => {
+  let app: INestApplication;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleRef.createNestApplication();
     await app.init();
+  }, 60_000);
+
+  afterAll(async () => {
+    await app?.close();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  it('GET / without a token is rejected by the global JWT guard', async () => {
+    await request(app.getHttpServer()).get('/').expect(401);
   });
 
-  afterEach(async () => {
-    await app.close();
+  it('GET /resources without a token is rejected', async () => {
+    await request(app.getHttpServer()).get('/resources').expect(401);
+  });
+
+  it('GET /borrow-requests without a token is rejected', async () => {
+    await request(app.getHttpServer()).get('/borrow-requests?role=incoming').expect(401);
   });
 });

@@ -1,15 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import 'reflect-metadata';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { Test } from '@nestjs/testing';
 import { AuthController } from './auth.controller.js';
 
 describe('AuthController', () => {
   let controller: AuthController;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       controllers: [AuthController],
-    }).compile();
+    })
+      .useMocker(() => ({}))
+      .compile();
 
-    controller = module.get<AuthController>(AuthController);
+    controller = module.get(AuthController);
   });
 
   it('should be defined', () => {

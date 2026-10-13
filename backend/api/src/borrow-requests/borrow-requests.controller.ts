@@ -1,7 +1,18 @@
-import { Body, Controller, Param, ParseUUIDPipe, Patch, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { BorrowRequestsService } from './borrow-requests.service.js';
 import { CreateBorrowRequestDto } from './dto/create-borrow-request.dto.js';
+import { ListBorrowRequestsQueryDto } from './dto/list-borrow-requests-query.dto.js';
 
 interface AuthenticatedRequest extends Request {
   user: { sub: string; role: string };
@@ -10,6 +21,11 @@ interface AuthenticatedRequest extends Request {
 @Controller('borrow-requests')
 export class BorrowRequestsController {
   constructor(private readonly service: BorrowRequestsService) {}
+
+  @Get()
+  list(@Req() req: AuthenticatedRequest, @Query() query: ListBorrowRequestsQueryDto) {
+    return this.service.list(req.user.sub, query);
+  }
 
   @Post()
   create(@Req() req: AuthenticatedRequest, @Body() dto: CreateBorrowRequestDto) {
@@ -29,5 +45,10 @@ export class BorrowRequestsController {
   @Patch(':id/return')
   markReturned(@Req() req: AuthenticatedRequest, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.service.markReturned(id, req.user.sub);
+  }
+
+  @Patch(':id/cancel')
+  cancel(@Req() req: AuthenticatedRequest, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.service.cancel(id, req.user.sub);
   }
 }
