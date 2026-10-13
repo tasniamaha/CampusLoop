@@ -27,6 +27,11 @@ export class BorrowRequestsController {
     return this.service.list(req.user.sub, query);
   }
 
+  @Get(':id/events')
+  history(@Req() req: AuthenticatedRequest, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.service.history(id, req.user.sub);
+  }
+
   @Post()
   create(@Req() req: AuthenticatedRequest, @Body() dto: CreateBorrowRequestDto) {
     return this.service.create(req.user.sub, dto);

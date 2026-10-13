@@ -10,6 +10,8 @@ import { APP_GUARD } from '@nestjs/core'
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 import { ResourcesModule } from './resources/resources.module.js';
 import { BorrowRequestsModule } from './borrow-requests/borrow-requests.module.js';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { AppThrottlerGuard } from './common/app-throttler.guard.js';
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
 @Module({
@@ -19,6 +21,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     ConfigModule.forRoot({
       isGlobal:true
     }),
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]), // 120 requests/minute per tracker
     TypeOrmModule.forRootAsync({
       imports:[ConfigModule],
       inject:[ConfigService],
@@ -43,6 +46,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
   ],
   controllers: [AppController],
   providers: [AppService,
+    { provide: APP_GUARD, useClass: AppThrottlerGuard },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

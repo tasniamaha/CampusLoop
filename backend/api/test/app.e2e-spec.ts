@@ -32,4 +32,16 @@ describe('App (e2e)', () => {
   it('GET /borrow-requests without a token is rejected', async () => {
     await request(app.getHttpServer()).get('/borrow-requests?role=incoming').expect(401);
   });
+    it('rate-limits repeated login attempts for the same email', async () => {
+    const body = { email: 'nobody@example.com', password: 'not-a-real-password-1' };
+    const statuses: number[] = [];
+
+    for (let i = 0; i < 7; i++) {
+      const res = await request(app.getHttpServer()).post('/auth/login').send(body);
+      statuses.push(res.status);
+    }
+
+    expect(statuses.slice(0, 5).every((s) => s !== 429)).toBe(true);
+    expect(statuses.slice(5)).toEqual([429, 429]);
+  });
 });

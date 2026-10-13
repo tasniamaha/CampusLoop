@@ -13,6 +13,10 @@ import { ResourceCategory } from '../src/resources/entities/resource-category.en
 import { ResourceImage } from '../src/resources/entities/resource-image.entity.js';
 import { ResourceFavorite } from '../src/resources/entities/resource-favorite.entity.js';
 import { ResourceMarketplace1792000000000 } from '../src/database/migrations/1792000000000-ResourceMarketplace.js';
+import { LoanEvent, LoanEventType } from '../src/borrow-requests/entities/loan-event.entity.js';
+import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
+import { ResourcesService } from '../src/resources/resources.service.js';
+import { ImageStorageService } from '../src/resources/storage/image-storage.service.js';
 let ds: DataSource;
 let service: BorrowRequestsService;
 
@@ -70,11 +74,12 @@ beforeAll(async () => {
     username: process.env.TEST_DB_USER ?? 'root',
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
-        entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite],
+    entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent],
     migrations: [
       CreateUsers1791838335819,
       CreateResourcesAndBorrowRequests1791900000000,
       ResourceMarketplace1792000000000,
+      CreateLoanEvents1792100000000,
     ],
     dropSchema: true,
     synchronize: false,
@@ -90,7 +95,7 @@ afterAll(async () => {
 });
 
 describe('double-booking protection', () => {
-  it(`exactly one of ${BORROWERS} simultaneous approvals succeeds (x${ROUNDS} rounds)`, async () => {
+    it(`exactly one of ${BORROWERS} simultaneous approvals succeeds (x${ROUNDS} rounds)`, async () => {
     for (let round = 0; round < ROUNDS; round++) {
       const { owner, resource, requests } = await seedScenario(BORROWERS);
 
@@ -111,6 +116,11 @@ describe('double-booking protection', () => {
         where: { resourceId: resource.id, status: BorrowStatus.APPROVED },
       });
       expect(approved).toBe(1);
+
+      const approvedEvents = await ds.getRepository(LoanEvent).count({
+        where: { resourceId: resource.id, eventType: LoanEventType.APPROVED },
+      });
+      expect(approvedEvents).toBe(1); // losers leave no event behind
     }
   }, 120_000);
 
@@ -179,5 +189,92 @@ describe('double-booking protection', () => {
     await expect(service.approve(requests[1].id, owner.id)).resolves.toMatchObject({
       status: BorrowStatus.APPROVED,
     });
+        const expiredEvents = await ds.getRepository(LoanEvent).find({
+      where: { borrowRequestId: requests[0].id },
+    });
+    expect(expiredEvents.map((e) => e.eventType)).toEqual([LoanEventType.EXPIRED]);
+    expect(expiredEvents[0].actorId).toBeNull();
+  });
+});
+describe('loan event history', () => {
+  async function seedResource() {
+    const owner = await seedUser('owner');
+    const category = await ds.getRepository(ResourceCategory).findOneByOrFail({ slug: 'calculators' });
+    const resource = await ds.getRepository(Resource).save(
+      ds.getRepository(Resource).create({
+        ownerId: owner.id,
+        categoryId: category.id,
+        title: 'Lab coat',
+        description: null,
+        isListed: true,
+      }),
+    );
+    return { owner, resource };
+  }
+
+  it('records requested, approved and returned in order with a consistent status chain', async () => {
+    const { owner, resource } = await seedResource();
+    const borrower = await seedUser('borrower');
+
+    const req = await service.create(borrower.id, {
+      resourceId: resource.id,
+      dueDate: new Date(Date.now() + 2 * 24 * 3600 * 1000).toISOString(),
+    });
+    await service.approve(req.id, owner.id);
+    await service.markReturned(req.id, owner.id);
+
+    const history = await service.history(req.id, borrower.id);
+    expect(history.items.map((e) => e.eventType)).toEqual(['requested', 'approved', 'returned']);
+    expect(history.items.map((e) => [e.fromStatus, e.toStatus])).toEqual([
+      [null, 'pending'],
+      ['pending', 'approved'],
+      ['approved', 'returned'],
+    ]);
+    expect(history.items[1].actor?.id).toBe(owner.id);
+  });
+
+  it('records a cancelled event when the borrower withdraws an approved request', async () => {
+    const { owner, resource } = await seedResource();
+    const borrower = await seedUser('borrower');
+    const req = await service.create(borrower.id, {
+      resourceId: resource.id,
+      dueDate: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+    });
+    await service.approve(req.id, owner.id);
+    await service.cancel(req.id, borrower.id);
+
+    const history = await service.history(req.id, owner.id);
+    expect(history.items.map((e) => e.eventType)).toEqual(['requested', 'approved', 'cancelled']);
+    expect(history.items[2].fromStatus).toBe('approved');
+  });
+
+  it('only the borrower and the owner can read the history', async () => {
+    const { owner, resource } = await seedResource();
+    const borrower = await seedUser('borrower');
+    const stranger = await seedUser('stranger');
+    const req = await service.create(borrower.id, {
+      resourceId: resource.id,
+      dueDate: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+    });
+
+    await expect(service.history(req.id, owner.id)).resolves.toBeDefined();
+    await expect(service.history(req.id, borrower.id)).resolves.toBeDefined();
+    await expect(service.history(req.id, stranger.id)).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('removing a resource cancels pending requests and records one event for each', async () => {
+    const { owner, resource, requests } = await seedScenario(3);
+    const resources = new ResourcesService(ds, new ImageStorageService());
+
+    const result = await resources.remove(resource.id, owner.id);
+    expect(result.cancelledPendingRequests).toBe(3);
+
+    const events = await ds.getRepository(LoanEvent).find({ where: { resourceId: resource.id } });
+    expect(events).toHaveLength(3);
+    expect(events.every((e) => e.eventType === LoanEventType.CANCELLED)).toBe(true);
+
+    const rows = await ds.getRepository(BorrowRequest).find({ where: { resourceId: resource.id } });
+    expect(rows.every((r) => r.status === BorrowStatus.CANCELLED)).toBe(true);
+    expect(requests).toHaveLength(3);
   });
 });

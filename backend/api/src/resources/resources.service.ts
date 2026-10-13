@@ -22,6 +22,8 @@ import { ListResourcesQueryDto } from './dto/list-resources-query.dto.js';
 import { ImageStorageService } from './storage/image-storage.service.js';
 import { detectImageType } from './storage/image-type.js';
 import type { UploadedImageFile } from './storage/uploaded-file.js';
+import { LoanEventType } from '../borrow-requests/entities/loan-event.entity.js';
+import { recordLoanEvent } from '../borrow-requests/loan-events.js';
 export const MAX_IMAGES_PER_RESOURCE = 5;
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -127,13 +129,31 @@ export class ResourcesService {
         throw new ConflictException('Cannot delete a resource that is currently on loan');
       }
 
-      const cancelled = await m.update(
-        BorrowRequest,
-        { resourceId: id, status: BorrowStatus.PENDING },
-        { status: BorrowStatus.CANCELLED },
-      );
+      const pending = await m.find(BorrowRequest, {
+        select: { id: true },
+        where: { resourceId: id, status: BorrowStatus.PENDING },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (pending.length > 0) {
+        await m.update(
+          BorrowRequest,
+          { id: In(pending.map((p) => p.id)) },
+          { status: BorrowStatus.CANCELLED },
+        );
+        for (const p of pending) {
+          await recordLoanEvent(m, {
+            borrowRequestId: p.id,
+            resourceId: id,
+            actorId: userId,
+            eventType: LoanEventType.CANCELLED,
+            fromStatus: BorrowStatus.PENDING,
+            toStatus: BorrowStatus.CANCELLED,
+            note: 'Resource was removed by its owner',
+          });
+        }
+      }
       await m.softDelete(Resource, id);
-      return { deleted: true, cancelledPendingRequests: cancelled.affected ?? 0 };
+      return { deleted: true, cancelledPendingRequests: pending.length };
     });
   }
 

@@ -13,9 +13,11 @@ import {
   BorrowStatus,
   OCCUPYING_STATUSES,
 } from './entities/borrow-request.entity.js';
+import { LoanEvent, LoanEventType } from './entities/loan-event.entity.js';
 import { CreateBorrowRequestDto } from './dto/create-borrow-request.dto.js';
 import { ListBorrowRequestsQueryDto } from './dto/list-borrow-requests-query.dto.js';
 import { isDuplicateEntry } from '../common/db-errors.js';
+import { recordLoanEvent } from './loan-events.js';
 
 interface RawListRow {
   id: string;
@@ -30,6 +32,17 @@ interface RawListRow {
   borrowerName: string;
   ownerId: string;
   ownerName: string;
+}
+
+interface RawEventRow {
+  id: string;
+  eventType: LoanEventType;
+  fromStatus: BorrowStatus | null;
+  toStatus: BorrowStatus;
+  note: string | null;
+  createdAt: Date;
+  actorId: string | null;
+  actorName: string | null;
 }
 
 @Injectable()
@@ -62,8 +75,7 @@ export class BorrowRequestsService {
       );
     }
 
-    const repo = this.dataSource.getRepository(BorrowRequest);
-    const existing = await repo.count({
+    const existing = await this.dataSource.getRepository(BorrowRequest).count({
       where: {
         resourceId: dto.resourceId,
         borrowerId,
@@ -74,15 +86,26 @@ export class BorrowRequestsService {
       throw new ConflictException('You already have a pending request for this resource');
     }
 
-    return repo.save(
-      repo.create({
-        resourceId: dto.resourceId,
-        borrowerId,
-        dueDate,
-        message: dto.message?.trim() ?? null,
-        status: BorrowStatus.PENDING,
-      }),
-    );
+    return this.dataSource.transaction(async (m) => {
+      const saved = await m.save(
+        m.create(BorrowRequest, {
+          resourceId: dto.resourceId,
+          borrowerId,
+          dueDate,
+          message: dto.message?.trim() ?? null,
+          status: BorrowStatus.PENDING,
+        }),
+      );
+      await recordLoanEvent(m, {
+        borrowRequestId: saved.id,
+        resourceId: saved.resourceId,
+        actorId: borrowerId,
+        eventType: LoanEventType.REQUESTED,
+        fromStatus: null,
+        toStatus: BorrowStatus.PENDING,
+      });
+      return saved;
+    });
   }
 
   // ---------------- list ----------------
@@ -133,6 +156,52 @@ export class BorrowRequestsService {
     return { items, total, page, limit };
   }
 
+  // ---------------- history ----------------
+
+  /** Visible only to the borrower and the resource owner. */
+  async history(requestId: string, userId: string) {
+    const request = await this.dataSource
+      .getRepository(BorrowRequest)
+      .findOne({ where: { id: requestId } });
+    if (!request) throw new NotFoundException('Borrow request not found');
+
+    const resource = await this.dataSource
+      .getRepository(Resource)
+      .findOne({ where: { id: request.resourceId }, withDeleted: true });
+
+    if (request.borrowerId !== userId && resource?.ownerId !== userId) {
+      throw new ForbiddenException('Only the borrower or the resource owner can view this history');
+    }
+
+    const rows = await this.dataSource
+      .createQueryBuilder()
+      .from(LoanEvent, 'e')
+      .leftJoin(User, 'u', 'u.id = e.actorId')
+      .select('e.id', 'id')
+      .addSelect('e.eventType', 'eventType')
+      .addSelect('e.fromStatus', 'fromStatus')
+      .addSelect('e.toStatus', 'toStatus')
+      .addSelect('e.note', 'note')
+      .addSelect('e.createdAt', 'createdAt')
+      .addSelect('e.actorId', 'actorId')
+      .addSelect('u.name', 'actorName')
+      .where('e.borrowRequestId = :requestId', { requestId })
+      .orderBy('e.createdAt', 'ASC')
+      .getRawMany<RawEventRow>();
+
+    return {
+      items: rows.map((r) => ({
+        id: r.id,
+        eventType: r.eventType,
+        fromStatus: r.fromStatus,
+        toStatus: r.toStatus,
+        note: r.note,
+        createdAt: r.createdAt,
+        actor: r.actorId ? { id: r.actorId, name: r.actorName } : null, // null = system
+      })),
+    };
+  }
+
   // ---------------- approve (owner) ----------------
 
   /** Serialised per resource via row lock; DB unique index is the backstop. */
@@ -152,6 +221,15 @@ export class BorrowRequestsService {
         // Mark it expired and commit that change (do not throw inside the transaction).
         if (new Date(request.dueDate).getTime() <= Date.now()) {
           await manager.update(BorrowRequest, { id: requestId }, { status: BorrowStatus.EXPIRED });
+          await recordLoanEvent(manager, {
+            borrowRequestId: requestId,
+            resourceId,
+            actorId: null,
+            eventType: LoanEventType.EXPIRED,
+            fromStatus: BorrowStatus.PENDING,
+            toStatus: BorrowStatus.EXPIRED,
+            note: 'Due date passed before the owner approved',
+          });
           return { expired: true as const };
         }
 
@@ -166,11 +244,20 @@ export class BorrowRequestsService {
         }
 
         await manager.update(BorrowRequest, { id: requestId }, { status: BorrowStatus.APPROVED });
+        await recordLoanEvent(manager, {
+          borrowRequestId: requestId,
+          resourceId,
+          actorId: ownerId,
+          eventType: LoanEventType.APPROVED,
+          fromStatus: BorrowStatus.PENDING,
+          toStatus: BorrowStatus.APPROVED,
+        });
         request.status = BorrowStatus.APPROVED;
         return { approved: request };
       });
     } catch (err) {
-      // Backstop: if the lock logic is ever bypassed or broken, the DB still refuses.
+      // Backstop: if the lock logic is ever bypassed or broken, the DB still refuses
+      // (and the transaction, including its event row, rolls back).
       if (isDuplicateEntry(err)) {
         throw new ConflictException('Resource is already on loan');
       }
@@ -188,7 +275,13 @@ export class BorrowRequestsService {
   // ---------------- reject / return (owner) ----------------
 
   reject(requestId: string, ownerId: string) {
-    return this.ownerTransition(requestId, ownerId, [BorrowStatus.PENDING], BorrowStatus.REJECTED);
+    return this.ownerTransition(
+      requestId,
+      ownerId,
+      [BorrowStatus.PENDING],
+      BorrowStatus.REJECTED,
+      LoanEventType.REJECTED,
+    );
   }
 
   /** Owner confirms the item came back; releases the resource. */
@@ -198,6 +291,7 @@ export class BorrowRequestsService {
       ownerId,
       [BorrowStatus.APPROVED, BorrowStatus.ACTIVE],
       BorrowStatus.RETURNED,
+      LoanEventType.RETURNED,
     );
   }
 
@@ -231,7 +325,16 @@ export class BorrowRequestsService {
         throw new ConflictException(`Cannot cancel a request that is ${request.status}`);
       }
 
+      const from = request.status;
       await manager.update(BorrowRequest, { id: requestId }, { status: BorrowStatus.CANCELLED });
+      await recordLoanEvent(manager, {
+        borrowRequestId: requestId,
+        resourceId,
+        actorId: borrowerId,
+        eventType: LoanEventType.CANCELLED,
+        fromStatus: from,
+        toStatus: BorrowStatus.CANCELLED,
+      });
       request.status = BorrowStatus.CANCELLED;
       return request;
     });
@@ -295,6 +398,7 @@ export class BorrowRequestsService {
     ownerId: string,
     allowedFrom: BorrowStatus[],
     to: BorrowStatus,
+    eventType: LoanEventType,
   ) {
     const resourceId = await this.peekResourceId(requestId);
     return this.dataSource.transaction(async (manager) => {
@@ -302,7 +406,16 @@ export class BorrowRequestsService {
       if (!allowedFrom.includes(request.status)) {
         throw new ConflictException(`Cannot move request from ${request.status} to ${to}`);
       }
+      const from = request.status;
       await manager.update(BorrowRequest, { id: requestId }, { status: to });
+      await recordLoanEvent(manager, {
+        borrowRequestId: requestId,
+        resourceId,
+        actorId: ownerId,
+        eventType,
+        fromStatus: from,
+        toStatus: to,
+      });
       request.status = to;
       return request;
     });
