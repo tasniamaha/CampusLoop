@@ -8,7 +8,8 @@ import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { APP_GUARD } from '@nestjs/core'
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
-
+import { ResourcesModule } from './resources/resources.module.js';
+import { BorrowRequestsModule } from './borrow-requests/borrow-requests.module.js';
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
 @Module({
@@ -38,7 +39,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       serviceId: 'api',
     }),
     UsersModule,
-    AuthModule,
+    AuthModule,ResourcesModule, BorrowRequestsModule
   ],
   controllers: [AppController],
   providers: [AppService,
