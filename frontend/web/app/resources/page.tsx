@@ -149,6 +149,12 @@ export default function ResourcesPage() {
           <nav className="flex items-center gap-2 text-sm">
             <Link href="/dashboard" className="rounded-lg px-3 py-2 font-medium text-slate-600 hover:bg-slate-100">Dashboard</Link>
             <span className="rounded-lg bg-emerald-50 px-3 py-2 font-semibold text-emerald-800">Resources</span>
+            <Link
+                href="/borrowings"
+                className="rounded-lg px-3 py-2 font-semibold text-emerald-700 hover:bg-emerald-50"
+            >
+            My borrowings
+            </Link>
           </nav>
         </div>
       </header>
@@ -215,11 +221,15 @@ export default function ResourcesPage() {
                   </div>
                   <div className="flex flex-1 flex-col p-4">
                     <div className="flex items-center justify-between gap-2"><span className="truncate text-[11px] font-bold uppercase tracking-wide text-emerald-700">{resource.category?.name || 'Resource'}</span><span className="shrink-0 rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold capitalize text-slate-600">{resource.itemCondition}</span></div>
-                    <h3 className="mt-2 line-clamp-1 text-base font-semibold">{resource.title}</h3>
+                    <h3 className="mt-2 line-clamp-1 text-base font-semibold"><Link href={`/resources/${resource.id}`} className="hover:underline">{resource.title}</Link></h3>
                     <p className="mt-1 line-clamp-2 min-h-10 text-sm leading-5 text-slate-500">{resource.description || 'No description provided.'}</p>
                     <div className="mt-4 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-500"><p className="flex items-center gap-2"><span className="text-slate-400">◉</span> Listed by <span className="font-semibold text-slate-700">{resource.owner?.name || 'Campus member'}</span></p><p className="flex items-center gap-2"><span className="text-slate-400">⌖</span>{resource.pickupLocation || 'Pickup location to be agreed'}</p><p className="flex items-center gap-2"><span className="text-slate-400">◷</span>Up to {resource.maxLoanDays} days</p></div>
-                    <button className={`${buttonClass} mt-4 w-full`} disabled={!resource.available || busyId === resource.id || mode === 'mine'} onClick={() => void requestBorrow(resource)}>{busyId === resource.id ? 'Please wait…' : mode === 'mine' ? 'Your listing' : resource.available ? 'Request to borrow' : 'Currently unavailable'}</button>
-                  </div>
+                    <div className="mt-4 flex gap-2">
+                      <Link href={`/resources/${resource.id}`} className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">{mode === 'mine' ? 'Manage listing' : 'View details'}</Link>
+                      {mode !== 'mine' && (
+                        <button className={`${buttonClass} flex-1`} disabled={!resource.available || busyId === resource.id} onClick={() => void requestBorrow(resource)}>{busyId === resource.id ? 'Please wait...' : resource.available ? 'Request to borrow' : 'Currently unavailable'}</button>
+                      )}
+                    </div>                  </div>
                 </article>)}
               </div>
             )}

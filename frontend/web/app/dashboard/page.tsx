@@ -29,6 +29,12 @@ export default async function DashboardPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link href="/resources" className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">Open resource marketplace</Link>
+            <Link
+              href="/borrowings"
+              className="text-sm font-semibold text-emerald-700 hover:underline"
+            >
+              My borrowings
+            </Link>
             <LogoutButton />
           </div>
         </header>
