@@ -1,0 +1,12 @@
+// Refuses to run DB-touching e2e tests against anything that is not clearly a test database.
+// borrow-concurrency.e2e-spec.ts uses dropSchema: true, so pointing it at a real DB would wipe it.
+const names = { DB_DATABASE: process.env.DB_DATABASE, TEST_DB_NAME: process.env.TEST_DB_NAME };
+
+for (const [key, value] of Object.entries(names)) {
+  if (value && !/_test$/.test(value)) {
+    throw new Error(
+      `Refusing to run e2e tests: ${key}="${value}" does not end with "_test". ` +
+        `Point it at a throwaway test database (e.g. campusloop_test).`,
+    );
+  }
+}

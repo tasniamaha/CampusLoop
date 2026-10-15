@@ -11,7 +11,7 @@ import { AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { Public } from './public.decorator.js';
-import { Throttle } from '@nestjs/throttler';
+import { LoginThrottle } from '../common/login-throttle.js';
 interface AuthenticatedRequest extends Request {
   user: {
     sub: string;
@@ -30,7 +30,7 @@ export class AuthController {
   getProfile(@Req() req: AuthenticatedRequest) {
     return this.authService.getProfile(req.user.sub);
   }
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @LoginThrottle()
   @Public()
   @Post('login')
   login(@Body() dto: LoginDto) {

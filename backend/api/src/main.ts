@@ -1,13 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule, ObserveInstrument } from './app.module.js';
+import { AppModule } from './app.module.js';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { mkdirSync, writeFileSync } from 'node:fs';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    instrument: ObserveInstrument,
-  });
+  const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -15,6 +13,15 @@ async function bootstrap() {
       transform: true,
     }),
   );
+    // Only trust X-Forwarded-For when the API sits behind a proxy YOU control that overwrites it.
+  // TRUST_PROXY examples: "1" (one hop), "loopback", "10.0.0.0/8". Unset = ignore the header.
+  const trustProxy = process.env.TRUST_PROXY;
+  if (trustProxy) {
+    app
+      .getHttpAdapter()
+      .getInstance()
+      .set('trust proxy', /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
+  }
   app.setGlobalPrefix('api')
   app.enableCors({
     origin: 'http://localhost:3000',

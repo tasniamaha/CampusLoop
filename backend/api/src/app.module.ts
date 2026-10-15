@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import {ConfigModule,ConfigService} from '@nestjs/config'
@@ -10,18 +9,42 @@ import { APP_GUARD } from '@nestjs/core'
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 import { ResourcesModule } from './resources/resources.module.js';
 import { BorrowRequestsModule } from './borrow-requests/borrow-requests.module.js';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { AppThrottlerGuard } from './common/app-throttler.guard.js';
-export const { ObserveModule, ObserveInstrument } = createObserveModule();
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import {
+  defaultTracker,
+  isLoginHandler,
+  loginAccountTracker,
+  loginIpTracker,
+} from './common/login-throttle.js';
 
 @Module({
   imports: [
-    // Distributed tracing, auto-correlated logs, request/job metrics, error
-    // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
     ConfigModule.forRoot({
       isGlobal:true
     }),
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]), // 120 requests/minute per tracker
+    ThrottlerModule.forRoot({
+      getTracker: defaultTracker,
+      throttlers: [
+        // Everything: 120 req/min per verified user id, or per IP when anonymous.
+        { name: 'default', ttl: 60_000, limit: 120 },
+        // Login only: 5 attempts/min per (IP + email) ...
+        {
+          name: 'login-account',
+          ttl: 60_000,
+          limit: 5,
+          getTracker: loginAccountTracker,
+          skipIf: (ctx) => !isLoginHandler(ctx),
+        },
+        // ... and 20 attempts/min per IP across all emails.
+        {
+          name: 'login-ip',
+          ttl: 60_000,
+          limit: 20,
+          getTracker: loginIpTracker,
+          skipIf: (ctx) => !isLoginHandler(ctx),
+        },
+      ],
+    }),    
     TypeOrmModule.forRootAsync({
       imports:[ConfigModule],
       inject:[ConfigService],
@@ -36,17 +59,12 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         synchronize: false,
       }),
     }),
-    ObserveModule.forRoot({
-      appKey: 'YOUR_APP_KEY',
-      appSecret: 'YOUR_APP_SECRET',
-      serviceId: 'api',
-    }),
     UsersModule,
     AuthModule,ResourcesModule, BorrowRequestsModule
   ],
   controllers: [AppController],
   providers: [AppService,
-    { provide: APP_GUARD, useClass: AppThrottlerGuard },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

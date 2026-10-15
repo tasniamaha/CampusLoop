@@ -3,15 +3,18 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const forwardedFor = request.headers.get('x-forwarded-for');
 
     const response = await fetch(`${process.env.API_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(forwardedFor ? { 'X-Forwarded-For': forwardedFor } : {}),
       },
       body: JSON.stringify(body),
       cache: 'no-store',
     });
+
 
     const data = await response.json();
 
