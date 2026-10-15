@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import { ChangeEvent, Suspense, useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 type Category = { id: string; name: string; slug: string };
@@ -46,7 +46,7 @@ async function readError(response: Response) {
   }
 }
 
-export default function ResourceDetailPage() {
+function ResourceDetailContent() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -377,5 +377,12 @@ export default function ResourceDetailPage() {
         </section>
       </div>
     </main>
+  );
+}
+export default function ResourceDetailPage() {
+  return (
+    <Suspense fallback={<main className="mx-auto max-w-4xl px-4 py-10 text-sm text-slate-500">Loading...</main>}>
+      <ResourceDetailContent />
+    </Suspense>
   );
 }
