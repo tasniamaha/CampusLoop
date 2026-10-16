@@ -93,7 +93,11 @@ function ResourceDetailContent() {
   }, [id, router]);
 
   useEffect(() => {
-    void load();
+    const timeout = window.setTimeout(() => {
+      void load();
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [load]);
 
   async function send(url: string, init: RequestInit, success: string) {

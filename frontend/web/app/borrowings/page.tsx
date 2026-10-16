@@ -46,7 +46,7 @@ const EVENT_LABELS: Record<string, string> = {
   approved: 'Approved by owner',
   rejected: 'Rejected by owner',
   cancelled: 'Cancelled',
-  returned: 'Marked as returned',
+  returned: 'Return confirmed by owner (handover not verified)',
   expired: 'Expired',
   handed_over: 'Handed over',
 };
@@ -109,6 +109,7 @@ export default function BorrowingsPage() {
   const [historyLoading, setHistoryLoading] = useState('');
 
   const load = useCallback(async () => {
+    await Promise.resolve();
     setLoading(true);
     setError('');
     try {
@@ -130,7 +131,8 @@ export default function BorrowingsPage() {
   }, [role, statusFilter, router]);
 
   useEffect(() => {
-    void load();
+    const timeout = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(timeout);
   }, [load]);
 
   const loadHistory = useCallback(
@@ -166,7 +168,10 @@ export default function BorrowingsPage() {
   async function runAction(item: BorrowItem, action: Action) {
     if (action === 'reject' && !window.confirm('Reject this request?')) return;
     if (action === 'cancel' && !window.confirm('Cancel this request?')) return;
-
+    if (action === 'return' && !window.confirm('Mark this item as returned? This records the owner’s confirmation only; it does not independently verify the physical handover.',)
+) {
+  return;
+}
     setBusyId(item.id);
     setNotice('');
     setError('');
@@ -292,7 +297,12 @@ export default function BorrowingsPage() {
                     </div>
                   )}
                 </dl>
-
+                  {item.status === 'returned' && (
+                    <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                      Return recorded by the resource owner. Physical handover has not been
+                        independently verified.
+                    </p>
+                  )}
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   {actions.map((action) => (
                     <button

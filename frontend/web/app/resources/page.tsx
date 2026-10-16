@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -53,9 +54,9 @@ export default function ResourcesPage() {
 
   const loadCategories = useCallback(async () => {
     const response = await fetch('/api/backend/resource-categories', { cache: 'no-store' });
-    if (response.status === 401) { router.replace('/login'); return; }
+    if (response.status === 401) { router.replace('/login'); return null; }
     if (!response.ok) throw new Error(await readError(response));
-    setCategories(await response.json());
+    return await response.json() as Category[];
   }, [router]);
 
   const loadResources = useCallback(async () => {
@@ -81,7 +82,13 @@ export default function ResourcesPage() {
     }
   }, [query, category, condition, mode, router]);
 
-  useEffect(() => { loadCategories().catch((e) => setError(e instanceof Error ? e.message : 'Could not load categories.')); }, [loadCategories]);
+  useEffect(() => {
+    let active = true;
+    loadCategories()
+      .then((items) => { if (active && items) setCategories(items); })
+      .catch((e) => { if (active) setError(e instanceof Error ? e.message : 'Could not load categories.'); });
+    return () => { active = false; };
+  }, [loadCategories]);
   useEffect(() => { const timer = setTimeout(() => { void loadResources(); }, 200); return () => clearTimeout(timer); }, [loadResources]);
 
   async function toggleFavorite(resource: Resource) {
@@ -97,8 +104,10 @@ export default function ResourcesPage() {
   }
 
   async function requestBorrow(resource: Resource) {
-    const due = new Date(); due.setDate(due.getDate() + Math.min(resource.maxLoanDays || 7, 7));
-    const dueDate = new Date(due.getTime() - due.getTimezoneOffset() * 60000).toISOString();
+    const due = new Date();
+    due.setDate(due.getDate() + Math.min(resource.maxLoanDays || 7, 7));
+    due.setTime(due.getTime() - 60_000);
+    const dueDate = due.toISOString();
     setBusyId(resource.id); setNotice(''); setError('');
     try {
       const response = await fetch('/api/backend/borrow-requests', {
@@ -215,7 +224,7 @@ export default function ResourcesPage() {
               <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {resources.map((resource) => <article key={resource.id} className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg hover:shadow-slate-200/60">
                   <div className="relative flex h-36 items-center justify-center bg-gradient-to-br from-emerald-50 via-slate-50 to-teal-100">
-                    {resource.imageUrl ? <img src={`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api').replace(/\/$/, '')}${resource.imageUrl.replace(/^\/api/, '')}`} alt={resource.title} className="h-full w-full object-cover" /> : <div className="grid h-16 w-16 place-items-center rounded-2xl border border-white bg-white/80 text-2xl font-semibold text-emerald-800 shadow-sm">{resource.title.slice(0, 1).toUpperCase()}</div>}
+                    {resource.imageUrl ? <Image src={`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api').replace(/\/$/, '')}${resource.imageUrl.replace(/^\/api/, '')}`} alt={resource.title} fill sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw" unoptimized className="object-cover" /> : <div className="grid h-16 w-16 place-items-center rounded-2xl border border-white bg-white/80 text-2xl font-semibold text-emerald-800 shadow-sm">{resource.title.slice(0, 1).toUpperCase()}</div>}
                     <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-bold ${resource.available ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>{resource.available ? 'Available' : resource.onLoan ? 'On loan' : 'Not listed'}</span>
                     <button aria-label={resource.favorited ? 'Remove from saved resources' : 'Save resource'} disabled={busyId === resource.id} onClick={() => void toggleFavorite(resource)} className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full border border-white/80 bg-white/90 text-lg text-slate-500 shadow-sm transition hover:text-rose-600 disabled:opacity-50">{resource.favorited ? '♥' : '♡'}</button>
                   </div>

@@ -292,6 +292,7 @@ export class BorrowRequestsService {
       [BorrowStatus.APPROVED, BorrowStatus.ACTIVE],
       BorrowStatus.RETURNED,
       LoanEventType.RETURNED,
+      'Return confirmed by resource owner; physical handover was not independently verified.',
     );
   }
 
@@ -394,12 +395,13 @@ export class BorrowRequestsService {
   }
 
   private async ownerTransition(
-    requestId: string,
-    ownerId: string,
-    allowedFrom: BorrowStatus[],
-    to: BorrowStatus,
-    eventType: LoanEventType,
-  ) {
+  requestId: string,
+  ownerId: string,
+  allowedFrom: BorrowStatus[],
+  to: BorrowStatus,
+  eventType: LoanEventType,
+  note?: string,
+  )  {
     const resourceId = await this.peekResourceId(requestId);
     return this.dataSource.transaction(async (manager) => {
       const { request } = await this.lockAndLoad(manager, resourceId, requestId, ownerId);
@@ -415,6 +417,7 @@ export class BorrowRequestsService {
         eventType,
         fromStatus: from,
         toStatus: to,
+        note,
       });
       request.status = to;
       return request;

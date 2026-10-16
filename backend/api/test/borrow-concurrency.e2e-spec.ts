@@ -231,6 +231,9 @@ describe('loan event history', () => {
       ['approved', 'returned'],
     ]);
     expect(history.items[1].actor?.id).toBe(owner.id);
+    expect(history.items[2].eventType).toBe(LoanEventType.RETURNED);
+expect(history.items[2].actor?.id).toBe(owner.id);
+expect(history.items[2].note).toContain('not independently verified');
   });
 
   it('records a cancelled event when the borrower withdraws an approved request', async () => {
@@ -277,4 +280,31 @@ describe('loan event history', () => {
     expect(rows.every((r) => r.status === BorrowStatus.CANCELLED)).toBe(true);
     expect(requests).toHaveLength(3);
   });
+  it('rejects a non-owner attempting to mark a loan returned', async () => {
+  const { owner, resource } = await seedResource();
+  const borrower = await seedUser('borrower');
+  const stranger = await seedUser('stranger');
+
+  const req = await service.create(borrower.id, {
+    resourceId: resource.id,
+    dueDate: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+  });
+
+  await service.approve(req.id, owner.id);
+
+  await expect(
+    service.markReturned(req.id, stranger.id),
+  ).rejects.toBeInstanceOf(ForbiddenException);
+
+  const stored = await ds.getRepository(BorrowRequest).findOneByOrFail({
+    id: req.id,
+  });
+  expect(stored.status).toBe(BorrowStatus.APPROVED);
+
+  const history = await service.history(req.id, borrower.id);
+  expect(history.items.map((event) => event.eventType)).toEqual([
+    'requested',
+    'approved',
+  ]);
+});
 });
