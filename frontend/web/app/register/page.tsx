@@ -3,10 +3,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
-  const router = useRouter();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -14,7 +12,7 @@ export default function RegisterPage() {
   const [campus, setCampus] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [sent, setSent] = useState(false);
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>,
   ) {
@@ -41,7 +39,7 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push('/login');
+      setSent(true);
     } catch {
       setError('Unable to connect. Please try again.');
     } finally {
@@ -136,4 +134,15 @@ export default function RegisterPage() {
       </p>
     </main>
   );
+  if (sent) {
+  return (
+    <main className="mx-auto max-w-md p-8">
+      <h1 className="mb-2 text-3xl font-bold">Check your inbox</h1>
+      <p className="text-gray-600">
+        If <strong>{email}</strong> can be registered, we sent a verification link there. It expires in 24 hours.
+      </p>
+      <Link href="/login" className="mt-6 inline-block underline">Go to log in</Link>
+    </main>
+  );
+  }
 }

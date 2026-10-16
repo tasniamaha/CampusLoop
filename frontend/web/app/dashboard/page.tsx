@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '../../lib/auth';
 import LogoutButton from '../../components/logout-button';
+import VerifyBanner from '../../components/verify-banner';
 import Link from 'next/link';
 // export const dynamic = 'force-dynamic';
 export const instant = false
@@ -21,7 +22,9 @@ export default async function DashboardPage() {
 
         <p className="mt-3 text-gray-600">
           Welcome, {user.name}.
+          {!user.emailVerifiedAt && <VerifyBanner email={user.email} />}
         </p>
+
         <header className="mt-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold">Your campus, connected</h2>
