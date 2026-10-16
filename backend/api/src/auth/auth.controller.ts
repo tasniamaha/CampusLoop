@@ -15,6 +15,8 @@ import { LoginThrottle } from '../common/login-throttle.js';
 import { HttpCode } from '@nestjs/common';        // add to the existing @nestjs/common import
 import { Throttle } from '@nestjs/throttler';
 import { VerifyEmailDto } from './dto/verify-email.dto.js';
+import { ForgotPasswordDto } from './dto/forgot-password.dto.js';
+import { ResetPasswordDto } from './dto/reset-password.dto.js';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -51,5 +53,20 @@ export class AuthController {
   @Post('resend-verification')
   resendVerification(@Req() req: AuthenticatedRequest) {
     return this.authService.resendVerification(req.user.sub);
+  }
+  @Public()
+  @Throttle({ 'mail-ip': { limit: 10, ttl: 3_600_000 } })
+  @HttpCode(202)
+  @Post('forgot-password')
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @Public()
+  @Throttle({ 'mail-ip': { limit: 30, ttl: 3_600_000 } })
+  @HttpCode(200)
+  @Post('reset-password')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.token, dto.password);
   }
 }
