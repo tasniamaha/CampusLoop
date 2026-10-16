@@ -692,7 +692,7 @@
     },
     "/api/borrow-requests/{id}/return": {
       "patch": {
-        "operationId": "BorrowRequestsController_markReturned",
+        "operationId": "BorrowRequestsController_confirmReturn",
         "parameters": [
           {
             "name": "id",
@@ -703,6 +703,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QrTokenDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "",
@@ -743,6 +753,92 @@
                 }
               }
             }
+          }
+        },
+        "tags": [
+          "BorrowRequests"
+        ]
+      }
+    },
+    "/api/borrow-requests/{id}/pickup-qr": {
+      "post": {
+        "operationId": "BorrowRequestsController_createPickupQr",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BorrowRequests"
+        ]
+      }
+    },
+    "/api/borrow-requests/{id}/confirm-pickup": {
+      "post": {
+        "operationId": "BorrowRequestsController_confirmPickup",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QrTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BorrowRequest"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "BorrowRequests"
+        ]
+      }
+    },
+    "/api/borrow-requests/{id}/return-qr": {
+      "post": {
+        "operationId": "BorrowRequestsController_createReturnQr",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
           }
         },
         "tags": [
@@ -1044,6 +1140,19 @@
           "message",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "QrTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "required": [
+          "token"
         ]
       }
     }

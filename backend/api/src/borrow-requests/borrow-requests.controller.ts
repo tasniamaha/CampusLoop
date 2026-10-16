@@ -14,7 +14,7 @@ import { BorrowRequestsService } from './borrow-requests.service.js';
 import { CreateBorrowRequestDto } from './dto/create-borrow-request.dto.js';
 import { ListBorrowRequestsQueryDto } from './dto/list-borrow-requests-query.dto.js';
 import { RequireVerifiedEmail } from '../auth/require-verified-email.decorator.js'; // CHANGED
-
+import { QrTokenDto } from './dto/qr-token.dto.js';
 interface AuthenticatedRequest extends Request {
   user: { sub: string; role: string };
 }
@@ -51,15 +51,46 @@ export class BorrowRequestsController {
     return this.service.reject(id, req.user.sub);
   }
 
-  @RequireVerifiedEmail() // CHANGED
-  @Patch(':id/return')
-  markReturned(@Req() req: AuthenticatedRequest, @Param('id', new ParseUUIDPipe()) id: string) {
-    return this.service.markReturned(id, req.user.sub);
-  }
+  @RequireVerifiedEmail()
+@Patch(':id/return')
+confirmReturn(
+  @Req() req: AuthenticatedRequest,
+  @Param('id', new ParseUUIDPipe()) id: string,
+  @Body() dto: QrTokenDto,
+) {
+  return this.service.confirmReturnWithQr(id, req.user.sub, dto.token);
+}
 
   // Deliberately open: anyone can always back out of their own request.
   @Patch(':id/cancel')
   cancel(@Req() req: AuthenticatedRequest, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.service.cancel(id, req.user.sub);
   }
+  @Post(':id/pickup-qr')
+@RequireVerifiedEmail()
+createPickupQr(
+  @Req() req: AuthenticatedRequest,
+  @Param('id', new ParseUUIDPipe()) id: string,
+) {
+  return this.service.createPickupQr(id, req.user.sub);
+}
+
+@Post(':id/confirm-pickup')
+@RequireVerifiedEmail()
+confirmPickup(
+  @Req() req: AuthenticatedRequest,
+  @Param('id', new ParseUUIDPipe()) id: string,
+  @Body() dto: QrTokenDto,
+) {
+  return this.service.confirmPickup(id, req.user.sub, dto.token);
+}
+
+@Post(':id/return-qr')
+@RequireVerifiedEmail()
+createReturnQr(
+  @Req() req: AuthenticatedRequest,
+  @Param('id', new ParseUUIDPipe()) id: string,
+) {
+  return this.service.createReturnQr(id, req.user.sub);
+}
 }

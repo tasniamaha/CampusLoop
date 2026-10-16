@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-
+import QrLoanVerification from '../../components/QrLoanVerification';
 type Status = 'pending' | 'approved' | 'active' | 'returned' | 'rejected' | 'cancelled' | 'expired';
 type Role = 'incoming' | 'outgoing';
 type Action = 'approve' | 'reject' | 'return' | 'cancel';
@@ -74,13 +74,12 @@ async function readError(response: Response) {
     return 'Request failed. Please try again.';
   }
 }
-
 function actionsFor(role: Role, status: Status): Action[] {
   if (role === 'incoming') {
     if (status === 'pending') return ['approve', 'reject'];
-    if (status === 'approved' || status === 'active') return ['return'];
     return [];
   }
+
   if (status === 'pending' || status === 'approved') return ['cancel'];
   return [];
 }
@@ -193,12 +192,15 @@ export default function BorrowingsPage() {
     }
   }
 
+  
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Borrowings</h1>
-          <p className="text-sm text-slate-600">Manage requests for your resources and track what you have asked to borrow.</p>
+          <p className="text-sm text-slate-600">
+            Manage requests for your resources and track what you have asked to borrow.
+          </p>
         </div>
         <Link href="/resources" className={secondaryButton}>
           Browse resources
@@ -213,10 +215,14 @@ export default function BorrowingsPage() {
               type="button"
               onClick={() => setRole(r)}
               className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${
-                role === r ? 'bg-emerald-700 text-white' : 'text-slate-600 hover:bg-slate-50'
+                role === r
+                  ? 'bg-emerald-700 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
               }`}
             >
-              {r === 'incoming' ? 'Incoming (my resources)' : 'Outgoing (my requests)'}
+              {r === 'incoming'
+                ? 'Incoming (my resources)'
+                : 'Outgoing (my requests)'}
             </button>
           ))}
         </div>
@@ -227,7 +233,17 @@ export default function BorrowingsPage() {
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
         >
           <option value="">All statuses</option>
-          {(['pending', 'approved', 'active', 'returned', 'rejected', 'cancelled', 'expired'] as Status[]).map((s) => (
+          {(
+            [
+              'pending',
+              'approved',
+              'active',
+              'returned',
+              'rejected',
+              'cancelled',
+              'expired',
+            ] as Status[]
+          ).map((s) => (
             <option key={s} value={s}>
               {s.charAt(0).toUpperCase() + s.slice(1)}
             </option>
@@ -236,18 +252,27 @@ export default function BorrowingsPage() {
       </div>
 
       {error && (
-        <p role="alert" className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        <p
+          role="alert"
+          className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"
+        >
           {error}
         </p>
       )}
+
       {notice && (
-        <p role="status" className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <p
+          role="status"
+          className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+        >
           {notice}
         </p>
       )}
 
       {loading ? (
-        <p className="py-10 text-center text-sm text-slate-500">Loading...</p>
+        <p className="py-10 text-center text-sm text-slate-500">
+          Loading...
+        </p>
       ) : items.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center text-sm text-slate-500">
           {role === 'incoming'
@@ -258,21 +283,41 @@ export default function BorrowingsPage() {
         <ul className="space-y-4">
           {items.map((item) => {
             const actions = actionsFor(role, item.status);
-            const counterparty = role === 'incoming' ? item.borrower.name : item.owner.name;
+            const counterparty =
+              role === 'incoming'
+                ? item.borrower.name
+                : item.owner.name;
             const events = history[item.id];
+
             return (
-              <li key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <li
+                key={item.id}
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+              >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-base font-semibold text-slate-900"><Link href={`/resources/${item.resource.id}`} className="hover:underline">{item.resource.title}</Link></h2>
+                    <h2 className="text-base font-semibold text-slate-900">
+                      <Link
+                        href={`/resources/${item.resource.id}`}
+                        className="hover:underline"
+                      >
+                        {item.resource.title}
+                      </Link>
+                    </h2>
+
                     <p className="text-sm text-slate-600">
-                      {role === 'incoming' ? 'Requested by' : 'Owner'}: <span className="font-medium">{counterparty}</span>
+                      {role === 'incoming' ? 'Requested by' : 'Owner'}:{' '}
+                      <span className="font-medium">{counterparty}</span>
                     </p>
                   </div>
+
                   <div className="flex items-center gap-2">
                     {item.isOverdue && (
-                      <span className="rounded-full bg-rose-600 px-2.5 py-1 text-xs font-semibold text-white">Overdue</span>
+                      <span className="rounded-full bg-rose-600 px-2.5 py-1 text-xs font-semibold text-white">
+                        Overdue
+                      </span>
                     )}
+
                     <span
                       className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ring-1 ring-inset ${STATUS_STYLES[item.status]}`}
                     >
@@ -283,26 +328,34 @@ export default function BorrowingsPage() {
 
                 <dl className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
                   <div>
-                    <dt className="inline font-medium text-slate-700">Due: </dt>
-                    <dd className="inline">{formatDate(item.dueDate)}</dd>
+                    <dt className="inline font-medium text-slate-700">
+                      Due:{' '}
+                    </dt>
+                    <dd className="inline">
+                      {formatDate(item.dueDate)}
+                    </dd>
                   </div>
+
                   <div>
-                    <dt className="inline font-medium text-slate-700">Requested: </dt>
-                    <dd className="inline">{formatDate(item.createdAt)}</dd>
+                    <dt className="inline font-medium text-slate-700">
+                      Requested:{' '}
+                    </dt>
+                    <dd className="inline">
+                      {formatDate(item.createdAt)}
+                    </dd>
                   </div>
+
                   {item.message && (
                     <div className="sm:col-span-2">
-                      <dt className="inline font-medium text-slate-700">Message: </dt>
+                      <dt className="inline font-medium text-slate-700">
+                        Message:{' '}
+                      </dt>
                       <dd className="inline">{item.message}</dd>
                     </div>
                   )}
                 </dl>
-                  {item.status === 'returned' && (
-                    <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
-                      Return recorded by the resource owner. Physical handover has not been
-                        independently verified.
-                    </p>
-                  )}
+
+                {/* Existing request actions and history toggle */}
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   {actions.map((action) => (
                     <button
@@ -310,44 +363,99 @@ export default function BorrowingsPage() {
                       type="button"
                       disabled={busyId === item.id}
                       onClick={() => void runAction(item, action)}
-                      className={action === 'approve' || action === 'return' ? primaryButton : dangerButton}
+                      className={
+                        action === 'approve' || action === 'return'
+                          ? primaryButton
+                          : dangerButton
+                      }
                     >
-                      {busyId === item.id ? 'Working...' : ACTION_LABELS[action]}
+                      {busyId === item.id
+                        ? 'Working...'
+                        : ACTION_LABELS[action]}
                     </button>
                   ))}
-                  <button type="button" onClick={() => void toggleHistory(item.id)} className={secondaryButton}>
+
+                  <button
+                    type="button"
+                    onClick={() => void toggleHistory(item.id)}
+                    className={secondaryButton}
+                  >
                     {openHistory === item.id ? 'Hide history' : 'History'}
                   </button>
                 </div>
 
+                {/* QR pickup and return verification */}
+                <QrLoanVerification
+                  requestId={item.id}
+                  role={role}
+                  status={item.status}
+                  onComplete={() => {
+                    void load();
+
+                    if (openHistory === item.id) {
+                      void loadHistory(item.id);
+                    }
+                  }}
+                />
+
+                {/* Explicit return status disclaimer */}
+                {item.status === 'returned' && (
+                  <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                    Return recorded by the resource owner. Physical handover
+                    has not been independently verified.
+                  </p>
+                )}
+
+                {/* Existing loan-event history */}
                 {openHistory === item.id && (
                   <div className="mt-4 border-t border-slate-100 pt-4">
                     {historyLoading === item.id && !events ? (
-                      <p className="text-sm text-slate-500">Loading history...</p>
+                      <p className="text-sm text-slate-500">
+                        Loading history...
+                      </p>
                     ) : events && events.length > 0 ? (
                       <ol className="space-y-3">
                         {events.map((event) => (
-                          <li key={event.id} className="flex gap-3 text-sm">
+                          <li
+                            key={event.id}
+                            className="flex gap-3 text-sm"
+                          >
                             <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-600" />
+
                             <div>
                               <p className="font-medium text-slate-800">
-                                {EVENT_LABELS[event.eventType] ?? event.eventType}
+                                {EVENT_LABELS[event.eventType] ??
+                                  event.eventType}
+
                                 <span className="font-normal text-slate-500">
                                   {' '}
-                                  by {event.actor ? event.actor.name : 'the system'}
+                                  by{' '}
+                                  {event.actor
+                                    ? event.actor.name
+                                    : 'the system'}
                                 </span>
                               </p>
+
                               <p className="text-xs text-slate-500">
                                 {formatDate(event.createdAt)}
-                                {event.fromStatus ? ` - ${event.fromStatus} to ${event.toStatus}` : ` - ${event.toStatus}`}
+                                {event.fromStatus
+                                  ? ` - ${event.fromStatus} to ${event.toStatus}`
+                                  : ` - ${event.toStatus}`}
                               </p>
-                              {event.note && <p className="text-xs text-slate-500">{event.note}</p>}
+
+                              {event.note && (
+                                <p className="text-xs text-slate-500">
+                                  {event.note}
+                                </p>
+                              )}
                             </div>
                           </li>
                         ))}
                       </ol>
                     ) : (
-                      <p className="text-sm text-slate-500">No history recorded.</p>
+                      <p className="text-sm text-slate-500">
+                        No history recorded.
+                      </p>
                     )}
                   </div>
                 )}
@@ -358,4 +466,5 @@ export default function BorrowingsPage() {
       )}
     </main>
   );
+
 }

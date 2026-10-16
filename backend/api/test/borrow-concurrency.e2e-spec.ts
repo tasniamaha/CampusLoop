@@ -17,6 +17,7 @@ import { LoanEvent, LoanEventType } from '../src/borrow-requests/entities/loan-e
 import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
 import { ResourcesService } from '../src/resources/resources.service.js';
 import { ImageStorageService } from '../src/resources/storage/image-storage.service.js';
+import { JwtService } from '@nestjs/jwt';
 let ds: DataSource;
 let service: BorrowRequestsService;
 
@@ -87,7 +88,12 @@ beforeAll(async () => {
   });
   await ds.initialize();
   await ds.runMigrations(); // runs the REAL migrations, including the generated column
-  service = new BorrowRequestsService(ds);
+  service = new BorrowRequestsService(
+  ds,
+  new JwtService({
+    secret: process.env.JWT_SECRET ?? 'qr-test-secret',
+  }),
+);
 }, 60_000);
 
 afterAll(async () => {

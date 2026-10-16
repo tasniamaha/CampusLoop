@@ -18,7 +18,7 @@ import { CreateBorrowRequestDto } from './dto/create-borrow-request.dto.js';
 import { ListBorrowRequestsQueryDto } from './dto/list-borrow-requests-query.dto.js';
 import { isDuplicateEntry } from '../common/db-errors.js';
 import { recordLoanEvent } from './loan-events.js';
-
+import { JwtService } from '@nestjs/jwt';
 interface RawListRow {
   id: string;
   status: BorrowStatus;
@@ -44,11 +44,22 @@ interface RawEventRow {
   actorId: string | null;
   actorName: string | null;
 }
+type QrPurpose = 'pickup' | 'return';
 
+interface QrTokenPayload {
+  purpose: QrPurpose;
+  requestId: string;
+  ownerId?: string;
+  borrowerId?: string;
+  iat?: number;
+  exp?: number;
+}
 @Injectable()
 export class BorrowRequestsService {
-  constructor(private readonly dataSource: DataSource) {}
-
+constructor(
+  private readonly dataSource: DataSource,
+  private readonly jwtService: JwtService,
+) {}
   // ---------------- create ----------------
 
   async create(borrowerId: string, dto: CreateBorrowRequestDto) {
@@ -271,7 +282,184 @@ export class BorrowRequestsService {
     }
     return outcome.approved;
   }
+  // ---------------- QR pickup and return verification ----------------
 
+private async verifyQrToken(
+  token: string,
+  purpose: QrPurpose,
+  requestId: string,
+): Promise<QrTokenPayload> {
+  try {
+    const payload = await this.jwtService.verifyAsync<QrTokenPayload>(token);
+
+    if (payload.purpose !== purpose || payload.requestId !== requestId) {
+      throw new BadRequestException('QR token is for a different action or request');
+    }
+
+    return payload;
+  } catch (error) {
+    if (error instanceof BadRequestException) throw error;
+    throw new BadRequestException('QR token is invalid or has expired');
+  }
+}
+
+/** Resource owner generates a short-lived pickup QR for an approved request. */
+async createPickupQr(requestId: string, ownerId: string) {
+  const request = await this.dataSource.getRepository(BorrowRequest).findOne({
+    where: { id: requestId },
+  });
+  if (!request) throw new NotFoundException('Borrow request not found');
+
+  const resource = await this.dataSource.getRepository(Resource).findOne({
+    where: { id: request.resourceId },
+  });
+  if (!resource) throw new NotFoundException('Resource not found');
+  if (resource.ownerId !== ownerId) {
+    throw new ForbiddenException('Only the resource owner can issue a pickup QR');
+  }
+  if (request.status !== BorrowStatus.APPROVED) {
+    throw new ConflictException('Pickup QR can only be issued for an approved request');
+  }
+
+  const token = await this.jwtService.signAsync(
+    { purpose: 'pickup', requestId, ownerId },
+    { expiresIn: '5m' },
+  );
+
+  return {
+    token,
+    expiresInSeconds: 300,
+    purpose: 'pickup',
+  };
+}
+
+/** Borrower scans the owner's pickup QR to confirm pickup. */
+async confirmPickup(requestId: string, borrowerId: string, token: string) {
+  const payload = await this.verifyQrToken(token, 'pickup', requestId);
+  if (!payload.ownerId) throw new BadRequestException('Invalid pickup QR');
+
+  const resourceId = await this.peekResourceId(requestId);
+
+  return this.dataSource.transaction(async (manager) => {
+    const resource = await manager.findOne(Resource, {
+      where: { id: resourceId },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!resource) throw new NotFoundException('Resource not found');
+
+    const request = await manager.findOne(BorrowRequest, {
+      where: { id: requestId },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!request) throw new NotFoundException('Borrow request not found');
+
+    if (resource.ownerId !== payload.ownerId) {
+      throw new ForbiddenException('QR does not match this resource owner');
+    }
+    if (request.borrowerId !== borrowerId) {
+      throw new ForbiddenException('Only the borrower can confirm pickup');
+    }
+    if (request.status !== BorrowStatus.APPROVED) {
+      throw new ConflictException('Request is not awaiting pickup');
+    }
+
+    await manager.update(
+      BorrowRequest,
+      { id: requestId },
+      { status: BorrowStatus.ACTIVE },
+    );
+
+    await recordLoanEvent(manager, {
+      borrowRequestId: requestId,
+      resourceId,
+      actorId: borrowerId,
+      eventType: LoanEventType.HANDED_OVER,
+      fromStatus: BorrowStatus.APPROVED,
+      toStatus: BorrowStatus.ACTIVE,
+      note: 'Pickup confirmed by borrower using owner-issued QR; physical handover was not independently verified.',
+    });
+
+    request.status = BorrowStatus.ACTIVE;
+    return request;
+  });
+}
+
+/** Borrower generates a short-lived return QR for the owner to scan. */
+async createReturnQr(requestId: string, borrowerId: string) {
+  const request = await this.dataSource.getRepository(BorrowRequest).findOne({
+    where: { id: requestId },
+  });
+  if (!request) throw new NotFoundException('Borrow request not found');
+
+  if (request.borrowerId !== borrowerId) {
+    throw new ForbiddenException('Only the borrower can issue a return QR');
+  }
+  if (request.status !== BorrowStatus.ACTIVE) {
+    throw new ConflictException('Return QR can only be issued for an active loan');
+  }
+
+  const token = await this.jwtService.signAsync(
+    { purpose: 'return', requestId, borrowerId },
+    { expiresIn: '5m' },
+  );
+
+  return {
+    token,
+    expiresInSeconds: 300,
+    purpose: 'return',
+  };
+}
+
+/** Owner scans the borrower's return QR to record return confirmation. */
+async confirmReturnWithQr(requestId: string, ownerId: string, token: string) {
+  const payload = await this.verifyQrToken(token, 'return', requestId);
+  if (!payload.borrowerId) throw new BadRequestException('Invalid return QR');
+
+  const resourceId = await this.peekResourceId(requestId);
+
+  return this.dataSource.transaction(async (manager) => {
+    const resource = await manager.findOne(Resource, {
+      where: { id: resourceId },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!resource) throw new NotFoundException('Resource not found');
+
+    const request = await manager.findOne(BorrowRequest, {
+      where: { id: requestId },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!request) throw new NotFoundException('Borrow request not found');
+
+    if (resource.ownerId !== ownerId) {
+      throw new ForbiddenException('Only the resource owner can confirm return');
+    }
+    if (request.borrowerId !== payload.borrowerId) {
+      throw new ForbiddenException('QR does not match this borrower');
+    }
+    if (request.status !== BorrowStatus.ACTIVE) {
+      throw new ConflictException('Request is not awaiting return');
+    }
+
+    await manager.update(
+      BorrowRequest,
+      { id: requestId },
+      { status: BorrowStatus.RETURNED },
+    );
+
+    await recordLoanEvent(manager, {
+      borrowRequestId: requestId,
+      resourceId,
+      actorId: ownerId,
+      eventType: LoanEventType.RETURNED,
+      fromStatus: BorrowStatus.ACTIVE,
+      toStatus: BorrowStatus.RETURNED,
+      note: 'Return confirmed by resource owner after scanning borrower-issued QR; physical handover was not independently verified.',
+    });
+
+    request.status = BorrowStatus.RETURNED;
+    return request;
+  });
+}
   // ---------------- reject / return (owner) ----------------
 
   reject(requestId: string, ownerId: string) {

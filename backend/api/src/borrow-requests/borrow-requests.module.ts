@@ -5,8 +5,9 @@ import { Resource } from '../resources/entities/resource.entity.js';
 import { BorrowRequestsService } from './borrow-requests.service.js';
 import { BorrowRequestsController } from './borrow-requests.controller.js';
 import { LoanEvent } from './entities/loan-event.entity.js';
+import { AuthModule } from '../auth/auth.module.js';
 @Module({
-  imports: [TypeOrmModule.forFeature([BorrowRequest, Resource, LoanEvent])],
+  imports: [AuthModule,TypeOrmModule.forFeature([BorrowRequest, Resource, LoanEvent])],
   controllers: [BorrowRequestsController],
   providers: [BorrowRequestsService],
 })
