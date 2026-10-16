@@ -1,6 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-
+import { forwardedForHeader } from '../../../../lib/client-ip';
 export async function POST(request: NextRequest) {
   let body: unknown;
 
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       `${process.env.API_URL}/users/register`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...forwardedForHeader(request) },
         body: JSON.stringify(body),
         cache: 'no-store',
       },

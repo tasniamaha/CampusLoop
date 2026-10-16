@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getClientIp } from '../../../../lib/client-ip';
 
 const API_URL = process.env.API_URL;
 
@@ -16,6 +17,8 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   const target = `${API_URL.replace(/\/$/, '')}/${path.map(encodeURIComponent).join('/')}${request.nextUrl.search}`;
   const headers = new Headers();
   headers.set('Authorization', `Bearer ${token}`);
+  const clientIp = getClientIp(request);
+  if (clientIp) headers.set('X-Forwarded-For', clientIp);
   const contentType = request.headers.get('content-type');
   if (contentType) headers.set('Content-Type', contentType);
 
