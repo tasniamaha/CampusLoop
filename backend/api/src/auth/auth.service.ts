@@ -4,12 +4,14 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service.js';
 import { LoginDto } from './dto/login.dto.js';
+import { EmailVerificationService } from '../verification/email-verification.service.js';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly verification: EmailVerificationService,
   ) {}
 
   async login(dto: LoginDto) {
@@ -51,21 +53,32 @@ export class AuthService {
       },
     };
   }
-    async getProfile(userId: string) {
-        const user = await this.usersService.findById(userId);
+  async getProfile(userId: string) {
+      const user = await this.usersService.findById(userId);
 
-        if (!user) {
-            throw new UnauthorizedException('User no longer exists');
-        }
+      if (!user) {
+          throw new UnauthorizedException('User no longer exists');
+      }
 
-        return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            campus: user.campus,
-            role: user.role,
-            emailVerifiedAt: user.emailVerifiedAt,
-            createdAt: user.createdAt,
-        };
-    }
+      return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          campus: user.campus,
+          role: user.role,
+          emailVerifiedAt: user.emailVerifiedAt,
+          createdAt: user.createdAt,
+      };
+  }
+async verifyEmail(token: string) {
+  await this.verification.consume(token);
+  return { verified: true };
+}
+
+async resendVerification(userId: string) {
+  const user = await this.usersService.findById(userId);
+  if (user && !user.emailVerifiedAt) await this.verification.sendFor(user);
+  // Same answer whether or not a mail was sent (already verified, or hourly cap reached).
+  return { message: 'If your email is not verified yet, a new link is on its way.' };
+}
 }

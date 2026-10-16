@@ -7,7 +7,9 @@ import { ResourceCategory } from '../resources/entities/resource-category.entity
 import { ResourceImage } from '../resources/entities/resource-image.entity.js';
 import { ResourceFavorite } from '../resources/entities/resource-favorite.entity.js';
 import { LoanEvent } from '../borrow-requests/entities/loan-event.entity.js';
-// entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent],
+import { VerificationToken } from '../verification/entities/verification-token.entity.js';
+
+// entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent, VerificationToken],
 export default new DataSource({
   type: 'mariadb',
   host: process.env.DB_HOST ?? 'localhost',
@@ -15,7 +17,7 @@ export default new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
- entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent],
+ entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,
 });

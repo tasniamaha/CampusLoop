@@ -16,7 +16,10 @@ import {
   loginAccountTracker,
   loginIpTracker,
 } from './common/login-throttle.js';
-
+import { ExecutionContext} from '@nestjs/common';
+import { VerifiedEmailGuard } from './auth/guards/verified-email.guard.js';
+const optIn = (name: string) => (ctx: ExecutionContext) =>
+  !Reflect.getMetadata(`THROTTLER:LIMIT${name}`, ctx.getHandler());
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -43,6 +46,8 @@ import {
           getTracker: loginIpTracker,
           skipIf: (ctx) => !isLoginHandler(ctx),
         },
+        { name: 'mail-ip', ttl: 3_600_000, limit: 20, getTracker: loginIpTracker, skipIf: optIn('mail-ip') },
+        { name: 'mail-user', ttl: 3_600_000, limit: 3, skipIf: optIn('mail-user') },
       ],
     }),    
     TypeOrmModule.forRootAsync({
@@ -67,6 +72,7 @@ import {
     AppService,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: VerifiedEmailGuard },
   ],
 })
 export class AppModule {}

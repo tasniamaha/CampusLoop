@@ -1,81 +1,75 @@
-import {
-  ConflictException,
-  Injectable,
-  BadRequestException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from './entities/user.entity.js';
 import { RegisterUserDto } from './dto/register-user.dto.js';
+import { isDuplicateEntry } from '../common/db-errors.js';
+import { EmailVerificationService } from '../verification/email-verification.service.js';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly verification: EmailVerificationService,
   ) {}
 
   async register(dto: RegisterUserDto) {
     const name = dto.name.trim();
     const email = dto.email.trim().toLowerCase();
     const campus = dto.campus.trim();
-    const passwordBytes = Buffer.byteLength(dto.password, 'utf8');
 
     if (!name || !campus) {
       throw new BadRequestException('Name and campus cannot be blank');
     }
-
-    if (passwordBytes > 72) {
-      throw new BadRequestException(
-        'Password must not exceed 72 bytes when encoded as UTF-8',
-      );
+    if (Buffer.byteLength(dto.password, 'utf8') > 72) {
+      throw new BadRequestException('Password must not exceed 72 bytes when encoded as UTF-8');
     }
 
-    const existingUser = await this.usersRepository.findOne({
-      where: { email },
-    });
-
-    if (existingUser) {
-      throw new ConflictException('An account with this email already exists');
-    }
-
+    // Hash first so "new address" and "already registered" take similar time.
     const passwordHash = await bcrypt.hash(dto.password, 12);
 
-    const user = this.usersRepository.create({
-      name,
-      email,
-      campus,
-      passwordHash,
-      role: UserRole.STUDENT,
-      emailVerifiedAt: null,
-    });
+    let target: { id: string; email: string; name: string } | null = null;
+    try {
+      const saved = await this.usersRepository.save(
+        this.usersRepository.create({
+          name,
+          email,
+          campus,
+          passwordHash,
+          role: UserRole.STUDENT,
+          emailVerifiedAt: null,
+        }),
+      );
+      target = { id: saved.id, email: saved.email, name: saved.name };
+    } catch (err) {
+      if (!isDuplicateEntry(err)) throw err;
+      const existing = await this.usersRepository.findOne({ where: { email } });
+      if (existing && !existing.emailVerifiedAt) target = existing;
+    }
 
-    const savedUser = await this.usersRepository.save(user);
+    if (target) {
+      void this.verification
+        .sendFor(target)
+        .catch((err: Error) => this.logger.error(`Could not queue verification mail: ${err.message}`));
+    }
 
-    // Never return the password or password hash.
-    return {
-      id: savedUser.id,
-      name: savedUser.name,
-      email: savedUser.email,
-      campus: savedUser.campus,
-      role: savedUser.role,
-      emailVerifiedAt: savedUser.emailVerifiedAt,
-      createdAt: savedUser.createdAt,
-    };
+    // Identical for new, unverified-existing and verified-existing addresses.
+    return { message: 'If this email can be registered, a verification link is on its way. Check your inbox.' };
   }
+
   async findByEmailWithPassword(email: string) {
     return this.usersRepository
-        .createQueryBuilder('user')
-        .addSelect('user.passwordHash')
-        .where('user.email = :email', {
-        email: email.trim().toLowerCase(),
-        })
-        .getOne();
-    }
-    async findById(id: string) {
-        return this.usersRepository.findOne({
-            where: { id },
-        });
-    }
+      .createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('user.email = :email', { email: email.trim().toLowerCase() })
+      .getOne();
+  }
+
+  async findById(id: string) {
+    return this.usersRepository.findOne({ where: { id } });
+  }
 }
