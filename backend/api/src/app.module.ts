@@ -63,12 +63,10 @@ import {
     AuthModule,ResourcesModule, BorrowRequestsModule
   ],
   controllers: [AppController],
-  providers: [AppService,
+    providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    }
   ],
 })
 export class AppModule {}

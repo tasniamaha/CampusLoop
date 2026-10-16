@@ -105,3 +105,57 @@ describe('Login throttling (e2e)', () => {
     }
   });
 });
+describe('Default throttle bucket (e2e)', () => {
+  let app: INestApplication;
+  const uniq = () => Math.random().toString(36).slice(2, 10);
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    app = moduleRef.createNestApplication();
+    app.getHttpAdapter().getInstance().set('trust proxy', true); // mirror main.ts
+    await app.init();
+  }, 60_000);
+  afterAll(async () => {
+    await app?.close();
+  });
+
+  async function signUp(loginIp: string) {
+    const email = `bucket-${uniq()}@example.com`;
+    const password = 'correct-horse-battery';
+    await request(app.getHttpServer())
+      .post('/users/register')
+      .send({ name: 'Bucket Test', email, password, campus: 'test' })
+      .expect(201);
+    const res = await request(app.getHttpServer())
+      .post('/auth/login')
+      .set('X-Forwarded-For', loginIp)
+      .send({ email, password })
+      .expect(201);
+    return res.body.accessToken as string;
+  }
+
+  const hit = (token: string, ip: string) =>
+    request(app.getHttpServer())
+      .get('/resource-categories')
+      .set('X-Forwarded-For', ip)
+      .set('Authorization', `Bearer ${token}`);
+
+  it('two users behind the same IP do not share a bucket', async () => {
+    const a = await signUp('198.51.100.50');
+    const b = await signUp('198.51.100.51');
+    const statuses: number[] = [];
+    for (let i = 0; i < 70; i++) {
+      statuses.push((await hit(a, '203.0.113.50')).status);
+      statuses.push((await hit(b, '203.0.113.50')).status);
+    }
+    expect(statuses.filter((s) => s === 429)).toHaveLength(0);
+  }, 60_000);
+
+  it('a single user is still capped at 120 requests per minute', async () => {
+    const token = await signUp('198.51.100.52');
+    const statuses: number[] = [];
+    for (let i = 0; i < 125; i++) statuses.push((await hit(token, '203.0.113.51')).status);
+    expect(statuses.slice(0, 120).every((s) => s === 200)).toBe(true);
+    expect(statuses.slice(120).every((s) => s === 429)).toBe(true);
+  }, 60_000);
+});
