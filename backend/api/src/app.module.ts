@@ -19,6 +19,7 @@ import {
 import { ExecutionContext} from '@nestjs/common';
 import { VerifiedEmailGuard } from './auth/guards/verified-email.guard.js';
 import { AuditModule } from './audit/audit.module.js';
+import { RolesGuard } from './auth/guards/roles.guard.js';
 const optIn = (name: string) => (ctx: ExecutionContext) =>
   !Reflect.getMetadata(`THROTTLER:LIMIT${name}`, ctx.getHandler());
 @Module({
@@ -72,6 +73,7 @@ const optIn = (name: string) => (ctx: ExecutionContext) =>
     providers: [
     AppService,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: VerifiedEmailGuard },
   ],
