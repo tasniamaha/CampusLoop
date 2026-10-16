@@ -8,6 +8,7 @@ import { ResourceImage } from '../resources/entities/resource-image.entity.js';
 import { ResourceFavorite } from '../resources/entities/resource-favorite.entity.js';
 import { LoanEvent } from '../borrow-requests/entities/loan-event.entity.js';
 import { VerificationToken } from '../verification/entities/verification-token.entity.js';
+import { AuditLog } from '../audit/entities/audit-log.entity.js';
 
 // entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent, VerificationToken],
 export default new DataSource({
@@ -17,7 +18,7 @@ export default new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
- entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken],
+ entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken,AuditLog],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,
 });

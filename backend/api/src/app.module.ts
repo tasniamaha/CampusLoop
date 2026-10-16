@@ -18,6 +18,7 @@ import {
 } from './common/login-throttle.js';
 import { ExecutionContext} from '@nestjs/common';
 import { VerifiedEmailGuard } from './auth/guards/verified-email.guard.js';
+import { AuditModule } from './audit/audit.module.js';
 const optIn = (name: string) => (ctx: ExecutionContext) =>
   !Reflect.getMetadata(`THROTTLER:LIMIT${name}`, ctx.getHandler());
 @Module({
@@ -65,7 +66,7 @@ const optIn = (name: string) => (ctx: ExecutionContext) =>
       }),
     }),
     UsersModule,
-    AuthModule,ResourcesModule, BorrowRequestsModule
+    AuthModule,ResourcesModule, BorrowRequestsModule,AuditModule
   ],
   controllers: [AppController],
     providers: [
