@@ -106,7 +106,7 @@ export default function LoginPage() {
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
-
+        <Link href="/forgot-password" className="text-sm underline">Forgot password?</Link>
         <p className="mt-6 text-center text-sm text-gray-600">
           New to CampusLoop?{' '}
           <Link href="/register" className="font-semibold text-indigo-600 hover:underline">
