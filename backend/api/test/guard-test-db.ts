@@ -10,3 +10,7 @@ for (const [key, value] of Object.entries(names)) {
     );
   }
 }
+const host = process.env.TEST_DB_HOST ?? '127.0.0.1';
+if (!['127.0.0.1', 'localhost', '::1'].includes(host)) {
+  throw new Error(`Refusing to run e2e tests against non-local DB host "${host}"`);
+}

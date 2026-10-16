@@ -30,6 +30,7 @@ import { UpdateResourceDto } from './dto/update-resource.dto.js';
 import { ListResourcesQueryDto } from './dto/list-resources-query.dto.js';
 import { ImageStorageService, MIME_BY_EXT } from './storage/image-storage.service.js';
 import { Public } from '../auth/public.decorator.js';
+import { RequireVerifiedEmail } from '../auth/require-verified-email.decorator.js'; // CHANGED
 import type { UploadedImageFile } from './storage/uploaded-file.js';
 interface AuthenticatedRequest extends Request {
   user: { sub: string; role: string };
@@ -66,6 +67,7 @@ export class ResourcesController {
     return this.service.list(req.user.sub, query);
   }
 
+  @RequireVerifiedEmail() // CHANGED
   @Post()
   create(@Req() req: AuthenticatedRequest, @Body() dto: CreateResourceDto) {
     return this.service.create(req.user.sub, dto);
@@ -76,6 +78,7 @@ export class ResourcesController {
     return this.service.get(id, req.user.sub);
   }
 
+  @RequireVerifiedEmail() // CHANGED
   @Patch(':id')
   update(
     @Req() req: AuthenticatedRequest,
@@ -85,11 +88,13 @@ export class ResourcesController {
     return this.service.update(id, req.user.sub, dto);
   }
 
+  @RequireVerifiedEmail() // CHANGED
   @Delete(':id')
   remove(@Req() req: AuthenticatedRequest, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.service.remove(id, req.user.sub);
   }
 
+  @RequireVerifiedEmail() // CHANGED
   @Post(':id/images')
   @UseInterceptors(
     FilesInterceptor('files', MAX_IMAGES_PER_RESOURCE, {
@@ -104,6 +109,7 @@ export class ResourcesController {
     return this.service.addImages(id, req.user.sub, files);
   }
 
+  @RequireVerifiedEmail() // CHANGED
   @Delete(':id/images/:imageId')
   removeImage(
     @Req() req: AuthenticatedRequest,

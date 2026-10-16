@@ -70,7 +70,7 @@ beforeAll(async () => {
   ds = new DataSource({
     type: 'mysql',
     host: process.env.TEST_DB_HOST ?? '127.0.0.1',
-    port: Number(process.env.TEST_DB_PORT ?? 3307),
+    port: Number(process.env.TEST_DB_PORT ?? 3317),
     username: process.env.TEST_DB_USER ?? 'root',
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
