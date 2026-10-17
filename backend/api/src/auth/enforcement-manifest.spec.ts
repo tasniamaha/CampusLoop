@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { RequestMethod } from '@nestjs/common';
 import { ResourcesController } from '../resources/resources.controller.js';
 import { BorrowRequestsController } from '../borrow-requests/borrow-requests.controller.js';
+import { LostFoundController } from '../lost-found/lost-found.controller.js';
 import { REQUIRE_VERIFIED_EMAIL_KEY } from './require-verified-email.decorator.js';
 
 // Write routes that are intentionally open to unverified users.
@@ -25,7 +26,7 @@ function writeHandlers(controller: { name: string; prototype: object }) {
 }
 
 describe('verified-email enforcement manifest', () => {
-  for (const controller of [ResourcesController, BorrowRequestsController]) {
+  for (const controller of [ResourcesController, BorrowRequestsController, LostFoundController]) {
     for (const { id, fn } of writeHandlers(controller)) {
       it(`${id} is gated or explicitly allowlisted`, () => {
         const gated = Reflect.getMetadata(REQUIRE_VERIFIED_EMAIL_KEY, fn) === true;
