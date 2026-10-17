@@ -61,6 +61,8 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/password-reset-http.e2e-spec.ts
       - name: Audit log tests (real MySQL)
         run: npx vitest run --config vitest.config.e2e.ts test/audit-logs.e2e-spec.ts
+      - name: Email verification HTTP tests
+        run: npx vitest run --config vitest.config.e2e.ts test/email-verification-http.e2e-spec.ts
   frontend:
     runs-on: ubuntu-latest
     defaults:

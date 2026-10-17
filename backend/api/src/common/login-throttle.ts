@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { ExecutionContext, SetMetadata } from '@nestjs/common';
+import { canonicalEmail } from './email.js';
 
 export const LOGIN_THROTTLE_KEY = 'campusloop:login-throttle';
 
@@ -24,8 +25,7 @@ export const defaultTracker = (req: Req): string =>
 /** Per (client IP + target email): an attacker can only lock out their OWN pair, not the victim's. */
 export const loginAccountTracker = (req: Req): string => {
   const raw = req.body?.email;
-  const email = typeof raw === 'string' && raw.length <= 254 ? raw.trim().toLowerCase() : '-';
-  return `ip:${ipOf(req)}|e:${email}`;
+  const email = typeof raw === 'string' && raw.length <= 254 ? canonicalEmail(raw) : '-';  return `ip:${ipOf(req)}|e:${email}`;
 };
 
 /** Per client IP across all emails: stops one machine from spraying many accounts. */

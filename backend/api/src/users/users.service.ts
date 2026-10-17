@@ -6,7 +6,7 @@ import { User, UserRole } from './entities/user.entity.js';
 import { RegisterUserDto } from './dto/register-user.dto.js';
 import { isDuplicateEntry } from '../common/db-errors.js';
 import { EmailVerificationService } from '../verification/email-verification.service.js';
-
+import { canonicalEmail } from '../common/email.js';
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -21,6 +21,7 @@ export class UsersService {
     const name = dto.name.trim();
     const email = dto.email.trim().toLowerCase();
     const campus = dto.campus.trim();
+    const emailCanonical = canonicalEmail(email);
 
     if (!name || !campus) {
       throw new BadRequestException('Name and campus cannot be blank');
@@ -42,12 +43,13 @@ export class UsersService {
           passwordHash,
           role: UserRole.STUDENT,
           emailVerifiedAt: null,
+           emailCanonical,
         }),
       );
       target = { id: saved.id, email: saved.email, name: saved.name };
     } catch (err) {
       if (!isDuplicateEntry(err)) throw err;
-      const existing = await this.usersRepository.findOne({ where: { email } });
+      const existing = await this.usersRepository.findOne({ where: { emailCanonical } });
       if (existing && !existing.emailVerifiedAt) target = existing;
     }
 
@@ -65,7 +67,7 @@ export class UsersService {
     return this.usersRepository
       .createQueryBuilder('user')
       .addSelect('user.passwordHash')
-      .where('user.email = :email', { email: email.trim().toLowerCase() })
+      .where('user.emailCanonical = :c', { c: canonicalEmail(email) })
       .getOne();
   }
 

@@ -23,9 +23,7 @@ async function bootstrap() {
       .set('trust proxy', /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
   }
   app.setGlobalPrefix('api')
-  app.enableCors({
-    origin: 'http://localhost:3000',
-  });
+  app.enableCors({ origin: process.env.WEB_URL ?? 'http://localhost:3000' });
     const isProd = process.env.NODE_ENV === 'production';
 
   app.use(

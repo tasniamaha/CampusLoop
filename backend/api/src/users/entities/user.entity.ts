@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  BeforeInsert,
 } from 'typeorm';
+import { canonicalEmail } from '../../common/email.js';
 
 export enum UserRole {
   STUDENT = 'student',
@@ -27,6 +29,10 @@ export class User {
   @Column({ type: 'varchar', length: 254, unique: true })
   email!: string;
 
+  // Dedup key: strips Gmail dots and +tags. `email` keeps what the user typed.
+  @Column({ type: 'varchar', length: 254, unique: true })
+  emailCanonical!: string;
+
   // select:false hides it from normal reads. It does NOT hide it on the object
   // you pass to save(); never return that object from a controller.
   @Column({ type: 'varchar', length: 255, select: false })
@@ -48,4 +54,9 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @BeforeInsert()
+  setCanonicalEmail() {
+    this.emailCanonical ??= canonicalEmail(this.email);
+  }
 }

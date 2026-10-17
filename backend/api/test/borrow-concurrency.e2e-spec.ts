@@ -15,6 +15,7 @@ import { ResourceFavorite } from '../src/resources/entities/resource-favorite.en
 import { ResourceMarketplace1792000000000 } from '../src/database/migrations/1792000000000-ResourceMarketplace.js';
 import { LoanEvent, LoanEventType } from '../src/borrow-requests/entities/loan-event.entity.js';
 import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
+import { AddEmailCanonical1792700000000 } from '../src/database/migrations/1792700000000-AddEmailCanonical.js';
 import { ResourcesService } from '../src/resources/resources.service.js';
 import { ImageStorageService } from '../src/resources/storage/image-storage.service.js';
 import { JwtService } from '@nestjs/jwt';
@@ -76,7 +77,7 @@ beforeAll(async () => {
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
     entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent],
-    migrations: [
+    migrations: [AddEmailCanonical1792700000000, 
       CreateUsers1791838335819,
       CreateResourcesAndBorrowRequests1791900000000,
       ResourceMarketplace1792000000000,

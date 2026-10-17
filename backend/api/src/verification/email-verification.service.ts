@@ -65,7 +65,7 @@ export class EmailVerificationService {
     });
     if (!allowed) return false;
 
-    const link = `${this.webUrl}/verify-email?token=${raw}`;
+        const link = `${this.webUrl}/verify-email?token=${raw}`;
     try {
       await this.mail.send({
         to: user.email,
@@ -79,8 +79,15 @@ export class EmailVerificationService {
           `<p>This link expires in 24 hours. If you did not sign up, ignore this email.</p>`,
       });
     } catch (err) {
-      // Registration must not fail because SMTP hiccuped; the user can request a resend.
       this.logger.error(`Verification email for user ${user.id} failed: ${(err as Error).message}`);
+      // Roll back: drop the undelivered token and revive the link we retired a moment ago.
+      const repo = this.dataSource.getRepository(VerificationToken);
+      await repo.delete({ tokenHash: sha256(raw) });
+      await repo.update(
+        { userId: user.id, type: VerificationType.EMAIL_VERIFY, usedAt: now },
+        { usedAt: null },
+      );
+      return false;
     }
     return true;
   }

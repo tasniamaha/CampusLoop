@@ -9,6 +9,7 @@ import { CreateLoanEvents1792100000000 } from '../../src/database/migrations/179
 import { CreateVerificationTokens1792200000000 } from '../../src/database/migrations/1792200000000-CreateVerificationTokens.js';
 import { AuditLog } from '../../src/audit/entities/audit-log.entity.js';
 import { CreateAuditLogs1792300000000 } from '../../src/database/migrations/1792300000000-CreateAuditLogs.js';
+import { AddEmailCanonical1792700000000 } from '../../src/database/migrations/1792700000000-AddEmailCanonical.js';
 const createdUserIds: string[] = [];
 export const rand = () => Math.random().toString(36).slice(2, 10);
 
@@ -21,7 +22,7 @@ export async function createTestDataSource(): Promise<DataSource> {
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
     entities: [User, VerificationToken, AuditLog],
-    migrations: [
+    migrations: [AddEmailCanonical1792700000000, 
       CreateUsers1791838335819,
       CreateResourcesAndBorrowRequests1791900000000,
       ResourceMarketplace1792000000000,

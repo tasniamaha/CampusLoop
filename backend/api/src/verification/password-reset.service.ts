@@ -6,6 +6,7 @@ import { MailService } from '../mail/mail.service.js';
 import { User } from '../users/entities/user.entity.js';
 import { VerificationToken, VerificationType } from './entities/verification-token.entity.js';
 import { newOpaqueToken, sha256 } from './token.util.js';
+import { canonicalEmail } from '../common/email.js';
 
 const TOKEN_TTL_MS = 60 * 60 * 1000;
 const WINDOW_MS = 60 * 60 * 1000;
@@ -28,9 +29,8 @@ export class PasswordResetService {
 
   /** Never reveals whether the email exists. Silently does nothing for unknown emails or over the hourly cap. */
   async requestReset(rawEmail: string): Promise<void> {
-    const email = rawEmail.trim().toLowerCase();
-    const user = await this.dataSource.getRepository(User).findOne({ where: { email } });
-    if (!user) return;
+    //const email = rawEmail.trim().toLowerCase();
+    const user = await this.dataSource.getRepository(User).findOne({ where: { emailCanonical: canonicalEmail(rawEmail) } });    if (!user) return;
 
     const raw = newOpaqueToken();
     const now = new Date();

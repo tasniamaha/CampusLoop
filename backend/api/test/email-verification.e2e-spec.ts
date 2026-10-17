@@ -11,6 +11,7 @@ import { CreateResourcesAndBorrowRequests1791900000000 } from '../src/database/m
 import { ResourceMarketplace1792000000000 } from '../src/database/migrations/1792000000000-ResourceMarketplace.js';
 import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
 import { CreateVerificationTokens1792200000000 } from '../src/database/migrations/1792200000000-CreateVerificationTokens.js';
+import { AddEmailCanonical1792700000000 } from '../src/database/migrations/1792700000000-AddEmailCanonical.js';
 
 let ds: DataSource;
 let sent: MailMessage[] = [];
@@ -45,7 +46,7 @@ beforeAll(async () => {
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
     entities: [User, VerificationToken],
-    migrations: [
+    migrations: [AddEmailCanonical1792700000000, 
       CreateUsers1791838335819,
       CreateResourcesAndBorrowRequests1791900000000,
       ResourceMarketplace1792000000000,
@@ -121,5 +122,19 @@ describe('email verification', () => {
     const raw = tokenFrom(sent[0]);
     const results = await Promise.allSettled([service.consume(raw), service.consume(raw)]);
     expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+  });
+    it('a failed send neither burns quota nor kills the previous link', async () => {
+    const failing = new EmailVerificationService(
+      ds,
+      { send: async () => { throw new Error('smtp down'); } } as unknown as MailService,
+      new ConfigService({ WEB_URL: 'http://web.test' }),
+    );
+    sent = [];
+    const u = await newUser();
+    expect(await service.sendFor(u)).toBe(true);
+    const good = tokenFrom(sent[0]);
+    for (let i = 0; i < 5; i++) expect(await failing.sendFor(u)).toBe(false);
+    expect(await ds.getRepository(VerificationToken).count({ where: { userId: u.id } })).toBe(1);
+    await expect(service.consume(good)).resolves.toBeUndefined();
   });
 });
