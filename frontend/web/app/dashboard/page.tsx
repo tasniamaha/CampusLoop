@@ -56,12 +56,10 @@ export default async function DashboardPage() {
             </p>
           </Link>
 
-          <section className="rounded-xl border bg-white p-5">
-            <h2 className="font-semibold">Study Collaboration</h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Connect with other students.
-            </p>
-          </section>
+          <Link href="/study-groups" className="rounded-xl border bg-white p-5 transition hover:border-emerald-300 hover:shadow-sm">
+            <h2 className="font-semibold text-emerald-800">Study Groups ↗</h2>
+            <p className="mt-2 text-sm text-gray-600">Find course-based study groups, create one, and manage membership requests.</p>
+          </Link>
         </div>
       </div>
     </main>

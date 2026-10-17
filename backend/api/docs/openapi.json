@@ -1056,6 +1056,267 @@
           "LostFound"
         ]
       }
+    },
+    "/api/study-groups": {
+      "get": {
+        "operationId": "StudyGroupsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ]
+            }
+          },
+          {
+            "name": "courseCode",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 40,
+              "type": "string"
+            }
+          },
+          {
+            "name": "topic",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StudyGroups"
+        ]
+      },
+      "post": {
+        "operationId": "StudyGroupsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStudyGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StudyGroups"
+        ]
+      }
+    },
+    "/api/study-groups/{id}/join": {
+      "post": {
+        "operationId": "StudyGroupsController_join",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyGroupMember"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "StudyGroups"
+        ]
+      }
+    },
+    "/api/study-groups/{id}/members": {
+      "get": {
+        "operationId": "StudyGroupsController_members",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StudyGroups"
+        ]
+      }
+    },
+    "/api/study-groups/{id}/requests": {
+      "get": {
+        "operationId": "StudyGroupsController_requests",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StudyGroups"
+        ]
+      }
+    },
+    "/api/study-groups/{id}/members/{memberId}": {
+      "patch": {
+        "operationId": "StudyGroupsController_review",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewStudyGroupMemberDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyGroupMember"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "StudyGroups"
+        ]
+      }
+    },
+    "/api/study-groups/{id}/membership": {
+      "delete": {
+        "operationId": "StudyGroupsController_leave",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StudyGroups"
+        ]
+      }
+    },
+    "/api/study-groups/{id}/archive": {
+      "patch": {
+        "operationId": "StudyGroupsController_archive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyGroup"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "StudyGroups"
+        ]
+      }
     }
   },
   "info": {
@@ -1448,6 +1709,188 @@
         },
         "required": [
           "status"
+        ]
+      },
+      "CreateStudyGroupDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          },
+          "courseCode": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 40
+          },
+          "topic": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 3000
+          },
+          "schedule": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 500
+          },
+          "participantLimit": {
+            "type": "number",
+            "minimum": 2,
+            "maximum": 100
+          },
+          "approvalRequired": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "courseCode",
+          "topic",
+          "description",
+          "schedule",
+          "participantLimit"
+        ]
+      },
+      "StudyGroupMember": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "groupId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "campus": {
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "owner",
+              "member"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "active",
+              "rejected"
+            ],
+            "type": "string"
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "groupId",
+          "userId",
+          "campus",
+          "role",
+          "status",
+          "reviewedAt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ReviewStudyGroupMemberDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "rejected"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "StudyGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "creatorId": {
+            "type": "string"
+          },
+          "campus": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "courseCode": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "schedule": {
+            "type": "string"
+          },
+          "participantLimit": {
+            "type": "number"
+          },
+          "approvalRequired": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "archived"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "creatorId",
+          "campus",
+          "title",
+          "courseCode",
+          "topic",
+          "description",
+          "schedule",
+          "participantLimit",
+          "approvalRequired",
+          "status",
+          "createdAt",
+          "updatedAt"
         ]
       }
     }

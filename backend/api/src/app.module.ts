@@ -20,6 +20,7 @@ import { ExecutionContext} from '@nestjs/common';
 import { VerifiedEmailGuard } from './auth/guards/verified-email.guard.js';
 import { AuditModule } from './audit/audit.module.js';
 import { LostFoundModule } from './lost-found/lost-found.module.js';
+import { StudyGroupsModule } from './study-groups/study-groups.module.js';
 const optIn = (name: string) => (ctx: ExecutionContext) =>
   !Reflect.getMetadata(`THROTTLER:LIMIT${name}`, ctx.getHandler());
 @Module({
@@ -67,7 +68,7 @@ const optIn = (name: string) => (ctx: ExecutionContext) =>
       }),
     }),
     UsersModule,
-    AuthModule,ResourcesModule, BorrowRequestsModule,AuditModule,LostFoundModule
+    AuthModule,ResourcesModule, BorrowRequestsModule,AuditModule,LostFoundModule,StudyGroupsModule
   ],
   controllers: [AppController],
     providers: [
