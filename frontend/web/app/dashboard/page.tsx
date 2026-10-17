@@ -49,12 +49,12 @@ export default async function DashboardPage() {
             </p>
           </Link>
 
-          <section className="rounded-xl border bg-white p-5">
-            <h2 className="font-semibold">Lost and Found</h2>
+          <Link href="/lost-found" className="rounded-xl border bg-white p-5 transition hover:border-emerald-300 hover:shadow-sm">
+            <h2 className="font-semibold text-emerald-800">Lost and Found ↗</h2>
             <p className="mt-2 text-sm text-gray-600">
-              Find or report missing items.
+              Report missing belongings and discover possible matches within your campus.
             </p>
-          </section>
+          </Link>
 
           <section className="rounded-xl border bg-white p-5">
             <h2 className="font-semibold">Study Collaboration</h2>
