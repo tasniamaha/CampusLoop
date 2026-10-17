@@ -17,6 +17,7 @@ type Report = {
 };
 
 type Match = { report: Report; score: number; reasons: string[] };
+type Claim = { id: string; reportId: string; claimantId: string; status: 'pending' | 'approved' | 'rejected'; proofDetails: string; reviewerNote: string | null; createdAt: string; reviewedAt: string | null };
 type ListResponse = { data: Report[]; pagination: { page: number; limit: number; total: number; pages: number } };
 
 const getToday = () => {
@@ -42,15 +43,22 @@ export default function LostFoundPage() {
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
   const [itemDate, setItemDate] = useState('');
+  const [todayDate, setTodayDate] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [matches, setMatches] = useState<Record<string, Match[]>>({});
   const [busy, setBusy] = useState(false);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [claims, setClaims] = useState<Record<string, Claim[]>>({});
+  const [claimBusy, setClaimBusy] = useState<string | null>(null);
+
   useEffect(() => {
-    setItemDate(getToday());
+    const currentDate = getToday();
+    setTodayDate(currentDate);
+    setItemDate(currentDate);
   }, []);
+
   const loadReports = useCallback(async (requestedPage: number) => {
     setError('');
     const params = new URLSearchParams({ page: String(requestedPage), limit: '20' });
@@ -85,12 +93,7 @@ export default function LostFoundPage() {
         }),
       });
       if (!response.ok) throw new Error(await readError(response));
-      setTitle('');
-      setDescription('');
-      setCategory('');
-      setLocation('');
-      setItemDate(getToday());
-      setImageUrl('');
+      setTitle(''); setDescription(''); setCategory(''); setLocation(''); setItemDate(getToday()); setImageUrl('');
       setFilter('');
       setNotice('Your report has been submitted.');
       await loadReports(1);
@@ -112,6 +115,69 @@ export default function LostFoundPage() {
       setError(err instanceof Error ? err.message : 'Could not find matches');
     } finally {
       setBusyAction(null);
+    }
+  }
+
+  async function submitClaim(report: Report) {
+    const proofDetails = window.prompt(
+      'Describe private details that prove this item belongs to you (at least 20 characters). Do not enter passwords or full ID numbers.',
+    );
+    if (proofDetails === null) return;
+    if (proofDetails.trim().length < 20) {
+      setError('Please provide at least 20 characters of ownership evidence.');
+      return;
+    }
+    setClaimBusy(report.id); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/backend/lost-found/${report.id}/claims`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proofDetails: proofDetails.trim() }),
+      });
+      if (!response.ok) throw new Error(await readError(response));
+      setNotice('Claim submitted. The person who reported the found item can review your ownership evidence.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not submit claim');
+    } finally {
+      setClaimBusy(null);
+    }
+  }
+
+  async function loadClaims(reportId: string) {
+    setClaimBusy(`list:${reportId}`); setError('');
+    try {
+      const response = await fetch(`/api/backend/lost-found/${reportId}/claims`, { cache: 'no-store' });
+      if (!response.ok) throw new Error(await readError(response));
+      const result = await response.json() as Claim[];
+      setClaims((previous) => ({ ...previous, [reportId]: result }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not load claims');
+    } finally {
+      setClaimBusy(null);
+    }
+  }
+
+  async function reviewClaim(reportId: string, claimId: string, status: 'approved' | 'rejected') {
+    const reviewerNote = window.prompt(
+      status === 'approved' ? 'Optional note for the claimant:' : 'Optional reason for rejecting this claim:',
+      '',
+    );
+    if (reviewerNote === null) return;
+    setClaimBusy(claimId); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/backend/lost-found/claims/${claimId}/review`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, reviewerNote: reviewerNote.trim() }),
+      });
+      if (!response.ok) throw new Error(await readError(response));
+      setNotice(status === 'approved' ? 'Claim approved and item marked resolved.' : 'Claim rejected.');
+      await loadClaims(reportId);
+      await loadReports(page);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not review claim');
+    } finally {
+      setClaimBusy(null);
     }
   }
 
@@ -158,7 +224,7 @@ export default function LostFoundPage() {
           <input required minLength={2} maxLength={180} placeholder="General campus location; avoid private details" value={location} onChange={(e) => setLocation(e.target.value)} className="mt-1 block w-full rounded-lg border p-2" />
         </label>
         <label className="text-sm font-medium">Date lost or found
-          <input required type="date" max={itemDate || undefined} value={itemDate} onChange={(e) => setItemDate(e.target.value)} className="mt-1 block w-full rounded-lg border p-2" />
+          <input required type="date" max={todayDate || undefined} value={itemDate} onChange={(e) => setItemDate(e.target.value)} className="mt-1 block w-full rounded-lg border p-2" />
         </label>
         <label className="text-sm font-medium">Image URL (optional)
           <input type="url" maxLength={500} value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." className="mt-1 block w-full rounded-lg border p-2" />
@@ -187,8 +253,13 @@ export default function LostFoundPage() {
                 {report.imageUrl && <a href={report.imageUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm text-emerald-800 underline">View item image</a>}
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button type="button" disabled={busyAction !== null} onClick={() => void findMatches(report.id)} className="rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-50">{busyAction === `matches:${report.id}` ? 'Searching...' : 'Find possible matches'}</button>
+                  {report.type === 'found' && !report.isMine && <button type="button" disabled={claimBusy !== null} onClick={() => void submitClaim(report)} className="rounded-lg border border-emerald-700 px-3 py-2 text-sm font-medium text-emerald-800 disabled:opacity-50">{claimBusy === report.id ? 'Submitting claim...' : 'Claim this item'}</button>}
+                  {report.type === 'found' && report.isMine && <button type="button" disabled={claimBusy !== null} onClick={() => void loadClaims(report.id)} className="rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-50">{claimBusy === `list:${report.id}` ? 'Loading claims...' : 'Review ownership claims'}</button>}
                   {report.isMine && <button type="button" disabled={busyAction !== null} onClick={() => void resolveReport(report.id)} className="rounded-lg bg-emerald-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-50">{busyAction === `resolve:${report.id}` ? 'Saving...' : 'Mark resolved'}</button>}
                 </div>
+                {claims[report.id] && <div className="mt-4 border-t pt-4"><h4 className="font-medium">Ownership claims</h4>
+                  {claims[report.id].length === 0 ? <p className="mt-2 text-sm text-slate-500">No claims have been submitted.</p> : <ul className="mt-2 space-y-3">{claims[report.id].map((claim) => <li key={claim.id} className="rounded-lg bg-slate-50 p-3"><p className="text-sm font-medium">Status: {claim.status}</p><p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">Private ownership evidence: {claim.proofDetails}</p>{claim.reviewerNote && <p className="mt-1 text-sm text-slate-600">Note: {claim.reviewerNote}</p>}{claim.status === 'pending' && <div className="mt-3 flex gap-2"><button type="button" disabled={claimBusy !== null} onClick={() => void reviewClaim(report.id, claim.id, 'approved')} className="rounded-lg bg-emerald-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-50">Approve ownership</button><button type="button" disabled={claimBusy !== null} onClick={() => void reviewClaim(report.id, claim.id, 'rejected')} className="rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-50">Reject claim</button></div>}</li>)}</ul>}
+                </div>}
                 {matches[report.id] && <div className="mt-4 border-t pt-4"><h4 className="font-medium">Possible matches</h4>
                   {matches[report.id].length === 0 ? <p className="mt-2 text-sm text-slate-500">No likely matches found yet.</p> : <ul className="mt-2 space-y-3">{matches[report.id].map((match) => <li key={match.report.id} className="rounded-lg bg-slate-50 p-3"><p className="font-medium">{match.report.title}<span className="ml-2 text-xs text-slate-500">Match score: {match.score}/100</span></p><p className="text-sm text-slate-600">{match.report.category} · {match.report.location} · {String(match.report.itemDate).slice(0, 10)}</p><p className="mt-1 text-xs text-slate-500">{match.reasons.join(' · ')}</p></li>)}</ul>}
                 </div>}

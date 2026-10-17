@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { LostFoundService } from './lost-found.service.js';
 import { LostFoundStatus, LostFoundType, type LostFoundReport } from './entities/lost-found-report.entity.js';
+import { LostFoundClaimStatus, type LostFoundClaim } from './entities/lost-found-claim.entity.js';
 
 const user = { id: 'user-1', campus: 'North Campus' };
 const report = (overrides: Partial<LostFoundReport> = {}): LostFoundReport => ({
@@ -18,8 +19,9 @@ function setup() {
     findAndCount: vi.fn(), find: vi.fn(), findOne: vi.fn(), create: vi.fn((value: Partial<LostFoundReport>) => value), save: vi.fn(async (value: Partial<LostFoundReport>) => value),
   };
   const users = { findOne: vi.fn().mockResolvedValue(user) };
-  const service = new LostFoundService(reports as never, users as never);
-  return { service, reports, users };
+  const claims = { find: vi.fn(), findOne: vi.fn(), create: vi.fn((value: Partial<LostFoundClaim>) => value), save: vi.fn(async (value: Partial<LostFoundClaim> | Partial<LostFoundClaim>[]) => value) };
+  const service = new LostFoundService(reports as never, users as never, claims as never);
+  return { service, reports, users, claims };
 }
 
 describe('LostFoundService', () => {
@@ -70,6 +72,59 @@ describe('LostFoundService', () => {
     const { service, reports } = setup();
     reports.findOne.mockResolvedValue(null);
     await expect(service.resolve('report-1', 'user-1')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+
+
+  it('submits private ownership evidence for an open found item in the same campus', async () => {
+    const { service, reports, claims } = setup();
+    reports.findOne.mockResolvedValue(report({ reporterId: 'user-2', type: LostFoundType.FOUND }));
+    claims.findOne.mockResolvedValue(null);
+    claims.save.mockImplementation(async (value) => Array.isArray(value) ? value : ({ ...value, id: 'claim-1' }));
+    const result = await service.submitClaim('report-1', 'user-1', {
+      proofDetails: 'It has a small scratch near the bottom and a blue sticker inside.',
+    });
+    expect(claims.create).toHaveBeenCalledWith(expect.objectContaining({
+      reportId: 'report-1', claimantId: 'user-1', campus: 'North Campus', status: LostFoundClaimStatus.PENDING,
+    }));
+    expect(result).toMatchObject({ id: 'claim-1', status: LostFoundClaimStatus.PENDING });
+    expect(result).toHaveProperty('proofDetails');
+  });
+
+  it('does not allow a report creator to claim their own found item', async () => {
+    const { service, reports, claims } = setup();
+    reports.findOne.mockResolvedValue(report({ reporterId: 'user-1', type: LostFoundType.FOUND }));
+    await expect(service.submitClaim('report-1', 'user-1', {
+      proofDetails: 'This is enough detail to prove that the item is mine.',
+    })).rejects.toThrow('You cannot claim your own report');
+    expect(claims.save).not.toHaveBeenCalled();
+  });
+
+  it('allows only the report creator to list claims', async () => {
+    const { service, reports } = setup();
+    reports.findOne.mockResolvedValue(report({ reporterId: 'different-user' }));
+    await expect(service.listClaims('report-1', 'user-1')).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+
+  it('approves a pending claim only for the report creator and resolves the item', async () => {
+    const { service, reports, claims } = setup();
+    const pendingClaim: LostFoundClaim = {
+      id: 'claim-1', reportId: 'report-1', claimantId: 'user-3', campus: 'North Campus',
+      proofDetails: 'Distinctive scratch and blue sticker inside the bottle.',
+      status: LostFoundClaimStatus.PENDING, reviewerNote: null, reviewedAt: null,
+      createdAt: new Date('2026-10-15T10:00:00Z'), updatedAt: new Date('2026-10-15T10:00:00Z'),
+    };
+    claims.findOne.mockResolvedValue(pendingClaim);
+    claims.find.mockResolvedValue([]);
+    claims.save.mockImplementation(async (value) => Array.isArray(value) ? value : value);
+    reports.findOne.mockResolvedValue(report({ reporterId: 'user-1', status: LostFoundStatus.OPEN }));
+    const result = await service.reviewClaim('claim-1', 'user-1', {
+      status: LostFoundClaimStatus.APPROVED,
+      reviewerNote: 'Ownership details matched.',
+    });
+    expect(result).toMatchObject({ status: LostFoundClaimStatus.APPROVED, reviewerNote: 'Ownership details matched.' });
+    expect(reports.save).toHaveBeenCalledWith(expect.objectContaining({ status: LostFoundStatus.RESOLVED }));
   });
 
   it('suggests opposite-type reports with a positive score and no reporter identifiers', async () => {

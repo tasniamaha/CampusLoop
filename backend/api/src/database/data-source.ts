@@ -10,6 +10,7 @@ import { LoanEvent } from '../borrow-requests/entities/loan-event.entity.js';
 import { VerificationToken } from '../verification/entities/verification-token.entity.js';
 import { AuditLog } from '../audit/entities/audit-log.entity.js';
 import { LostFoundReport } from '../lost-found/entities/lost-found-report.entity.js';
+import { LostFoundClaim } from '../lost-found/entities/lost-found-claim.entity.js';
 
 // entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent, VerificationToken],
 export default new DataSource({
@@ -19,7 +20,7 @@ export default new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
- entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken,AuditLog,LostFoundReport],
+ entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken,AuditLog,LostFoundReport,LostFoundClaim],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,
 });

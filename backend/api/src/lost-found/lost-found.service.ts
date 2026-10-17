@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -8,6 +9,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity.js';
 import { CreateLostFoundReportDto } from './dto/create-lost-found-report.dto.js';
+import { CreateLostFoundClaimDto } from './dto/create-lost-found-claim.dto.js';
+import { ReviewLostFoundClaimDto } from './dto/review-lost-found-claim.dto.js';
+import { LostFoundClaim, LostFoundClaimStatus } from './entities/lost-found-claim.entity.js';
 import { ListLostFoundQueryDto } from './dto/list-lost-found-query.dto.js';
 import {
   LostFoundReport,
@@ -37,6 +41,8 @@ export class LostFoundService {
     private readonly reports: Repository<LostFoundReport>,
     @InjectRepository(User)
     private readonly users: Repository<User>,
+    @InjectRepository(LostFoundClaim)
+    private readonly claims: Repository<LostFoundClaim>,
   ) {}
 
   private async getCampus(userId: string): Promise<string> {
@@ -143,6 +149,106 @@ export class LostFoundService {
       })
       .filter((match) => match.score > 0)
       .sort((a, b) => b.score - a.score || new Date(b.report.createdAt).getTime() - new Date(a.report.createdAt).getTime());
+  }
+
+  async submitClaim(reportId: string, userId: string, dto: CreateLostFoundClaimDto) {
+    const campus = await this.getCampus(userId);
+    const report = await this.reports.findOne({
+      where: { id: reportId, campus, status: LostFoundStatus.OPEN },
+    });
+    if (!report) throw new NotFoundException('Open campus lost-and-found report not found');
+    if (report.type !== LostFoundType.FOUND) {
+      throw new BadRequestException('Claims can only be submitted for found items');
+    }
+    if (report.reporterId === userId) {
+      throw new BadRequestException('You cannot claim your own report');
+    }
+    const existing = await this.claims.findOne({ where: { reportId, claimantId: userId } });
+    if (existing) throw new ConflictException('You have already submitted a claim for this item');
+
+    const claim = this.claims.create({
+      reportId,
+      claimantId: userId,
+      campus,
+      proofDetails: dto.proofDetails.trim(),
+      status: LostFoundClaimStatus.PENDING,
+      reviewerNote: null,
+      reviewedAt: null,
+    });
+    const saved = await this.claims.save(claim);
+    return this.claimResponse(saved, true);
+  }
+
+  async listClaims(reportId: string, userId: string) {
+    const campus = await this.getCampus(userId);
+    const report = await this.reports.findOne({ where: { id: reportId, campus } });
+    if (!report) throw new NotFoundException('Lost-and-found report not found');
+    if (report.reporterId !== userId) {
+      throw new ForbiddenException('Only the report creator can review claims');
+    }
+    const claims = await this.claims.find({
+      where: { reportId, campus },
+      order: { createdAt: 'DESC' },
+    });
+    return claims.map((claim) => this.claimResponse(claim, true));
+  }
+
+  async reviewClaim(claimId: string, userId: string, dto: ReviewLostFoundClaimDto) {
+    const campus = await this.getCampus(userId);
+    const claim = await this.claims.findOne({ where: { id: claimId, campus } });
+    if (!claim) throw new NotFoundException('Claim not found');
+
+    const report = await this.reports.findOne({ where: { id: claim.reportId, campus } });
+    if (!report) throw new NotFoundException('Lost-and-found report not found');
+    if (report.reporterId !== userId) {
+      throw new ForbiddenException('Only the report creator can review claims');
+    }
+    if (claim.status !== LostFoundClaimStatus.PENDING) {
+      throw new ConflictException('This claim has already been reviewed');
+    }
+    if (report.status !== LostFoundStatus.OPEN) {
+      throw new ConflictException('This item is no longer open for claims');
+    }
+
+    claim.status = dto.status;
+    claim.reviewerNote = dto.reviewerNote?.trim() || null;
+    claim.reviewedAt = new Date();
+    await this.claims.save(claim);
+
+    if (dto.status === LostFoundClaimStatus.APPROVED) {
+      report.status = LostFoundStatus.RESOLVED;
+      report.resolvedAt = new Date();
+      await this.reports.save(report);
+      // Once ownership is verified, close any competing pending claims.
+      const pendingClaims = await this.claims.find({
+        where: { reportId: report.id, campus, status: LostFoundClaimStatus.PENDING },
+      });
+      if (pendingClaims.length) {
+        const reviewedAt = new Date();
+        await this.claims.save(pendingClaims.map((pending) => ({
+          ...pending,
+          status: LostFoundClaimStatus.REJECTED,
+          reviewerNote: 'Another claim was approved for this item.',
+          reviewedAt,
+        })));
+      }
+    }
+    return this.claimResponse(claim, true);
+  }
+
+  private claimResponse(claim: LostFoundClaim, includePrivateDetails = false) {
+    return {
+      id: claim.id,
+      reportId: claim.reportId,
+      status: claim.status,
+      createdAt: claim.createdAt,
+      reviewedAt: claim.reviewedAt,
+      reviewerNote: claim.reviewerNote,
+      ...(includePrivateDetails ? {
+        claimantId: claim.claimantId,
+        proofDetails: claim.proofDetails,
+      } : {}),
+    };
   }
 
   async resolve(id: string, userId: string) {

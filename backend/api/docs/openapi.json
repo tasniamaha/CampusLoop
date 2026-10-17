@@ -924,6 +924,93 @@
         ]
       }
     },
+    "/api/lost-found/{id}/claims": {
+      "post": {
+        "operationId": "LostFoundController_submitClaim",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLostFoundClaimDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "LostFound"
+        ]
+      },
+      "get": {
+        "operationId": "LostFoundController_listClaims",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "LostFound"
+        ]
+      }
+    },
+    "/api/lost-found/claims/{claimId}/review": {
+      "patch": {
+        "operationId": "LostFoundController_reviewClaim",
+        "parameters": [
+          {
+            "name": "claimId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewLostFoundClaimDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "LostFound"
+        ]
+      }
+    },
     "/api/lost-found/{id}/matches": {
       "get": {
         "operationId": "LostFoundController_matches",
@@ -1329,6 +1416,38 @@
           "category",
           "location",
           "itemDate"
+        ]
+      },
+      "CreateLostFoundClaimDto": {
+        "type": "object",
+        "properties": {
+          "proofDetails": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "proofDetails"
+        ]
+      },
+      "ReviewLostFoundClaimDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected"
+            ]
+          },
+          "reviewerNote": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "status"
         ]
       }
     }
