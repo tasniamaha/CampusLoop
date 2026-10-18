@@ -11,6 +11,7 @@ import { IS_PUBLIC_KEY } from '../public.decorator.js';
 interface JwtPayload {
   sub: string;
   role: string;
+  purpose?: string;
 }
 
 interface AuthenticatedRequest {
@@ -49,8 +50,12 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const payload =
-        await this.jwtService.verifyAsync<JwtPayload>(token);
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
+
+      // Only real session tokens may authenticate. QR tokens share the signing key and must never act as logins.
+      if (typeof payload.sub !== 'string' || payload.sub.length === 0 || payload.purpose !== undefined) {
+        throw new UnauthorizedException('Invalid or expired access token');
+      }
 
       request.user = payload;
       return true;

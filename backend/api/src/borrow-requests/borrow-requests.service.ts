@@ -46,6 +46,9 @@ interface RawEventRow {
 }
 type QrPurpose = 'pickup' | 'return';
 
+// QR tokens use a key derived from JWT_SECRET so they can never be accepted as login tokens.
+const qrSecret = () => `${process.env.JWT_SECRET ?? ""}:qr-v1`;
+
 interface QrTokenPayload {
   purpose: QrPurpose;
   requestId: string;
@@ -290,7 +293,7 @@ private async verifyQrToken(
   requestId: string,
 ): Promise<QrTokenPayload> {
   try {
-    const payload = await this.jwtService.verifyAsync<QrTokenPayload>(token);
+    const payload = await this.jwtService.verifyAsync<QrTokenPayload>(token, { secret: qrSecret() });
 
     if (payload.purpose !== purpose || payload.requestId !== requestId) {
       throw new BadRequestException('QR token is for a different action or request');
@@ -323,7 +326,7 @@ async createPickupQr(requestId: string, ownerId: string) {
 
   const token = await this.jwtService.signAsync(
     { purpose: 'pickup', requestId, ownerId },
-    { expiresIn: '5m' },
+    { expiresIn: '5m', secret: qrSecret() },
   );
 
   return {
@@ -400,7 +403,7 @@ async createReturnQr(requestId: string, borrowerId: string) {
 
   const token = await this.jwtService.signAsync(
     { purpose: 'return', requestId, borrowerId },
-    { expiresIn: '5m' },
+    { expiresIn: '5m', secret: qrSecret() },
   );
 
   return {

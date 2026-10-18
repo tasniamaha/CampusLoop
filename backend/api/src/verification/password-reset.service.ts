@@ -30,7 +30,8 @@ export class PasswordResetService {
   /** Never reveals whether the email exists. Silently does nothing for unknown emails or over the hourly cap. */
   async requestReset(rawEmail: string): Promise<void> {
     //const email = rawEmail.trim().toLowerCase();
-    const user = await this.dataSource.getRepository(User).findOne({ where: { emailCanonical: canonicalEmail(rawEmail) } });    if (!user) return;
+    const user = await this.dataSource.getRepository(User).findOne({ where: { emailCanonical: canonicalEmail(rawEmail) } });    
+    if (!user) { this.logger.warn('Password reset: no user found for requested email'); return; }
 
     const raw = newOpaqueToken();
     const now = new Date();
@@ -74,7 +75,8 @@ export class PasswordResetService {
         text:
           `Hi ${user.name},\n\nUse this link to choose a new password:\n${link}\n\n` +
           `It expires in 1 hour. If you did not ask for this, ignore this email.`,
-      });
+      })
+      this.logger.log(`Password reset email sent for user ${user.id}`);
     } catch (err) {
       this.logger.error(`Reset email for user ${user.id} failed: ${(err as Error).message}`);
     }
