@@ -38,6 +38,7 @@ export default async function DashboardPage() {
             >
               My borrowings
             </Link>
+            <Link href="/notifications" className="text-sm font-semibold text-emerald-700 hover:underline">Notifications</Link>
             <LogoutButton />
           </div>
         </header>

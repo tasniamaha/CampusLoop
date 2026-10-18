@@ -4,6 +4,8 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { DataSource, EntityManager, In } from 'typeorm';
 import { Resource } from '../resources/entities/resource.entity.js';
@@ -19,6 +21,7 @@ import { ListBorrowRequestsQueryDto } from './dto/list-borrow-requests-query.dto
 import { isDuplicateEntry } from '../common/db-errors.js';
 import { recordLoanEvent } from './loan-events.js';
 import { JwtService } from '@nestjs/jwt';
+import { NotificationsService } from '../notifications/notifications.service.js';
 interface RawListRow {
   id: string;
   status: BorrowStatus;
@@ -62,6 +65,7 @@ export class BorrowRequestsService {
 constructor(
   private readonly dataSource: DataSource,
   private readonly jwtService: JwtService,
+  @Inject(forwardRef(() => NotificationsService)) private readonly notifications: NotificationsService,
 ) {}
   // ---------------- create ----------------
 
@@ -100,7 +104,7 @@ constructor(
       throw new ConflictException('You already have a pending request for this resource');
     }
 
-    return this.dataSource.transaction(async (m) => {
+    const saved = await this.dataSource.transaction(async (m) => {
       const saved = await m.save(
         m.create(BorrowRequest, {
           resourceId: dto.resourceId,
@@ -120,6 +124,8 @@ constructor(
       });
       return saved;
     });
+    void this.notifications.notifyBorrowEvent(saved.id, 'requested').catch(() => undefined);
+    return saved;
   }
 
   // ---------------- list ----------------
@@ -283,6 +289,7 @@ constructor(
         'This request expired because its due date has passed. Ask the borrower to submit a new one.',
       );
     }
+    void this.notifications.notifyBorrowEvent(outcome.approved.id, 'approved').catch(() => undefined);
     return outcome.approved;
   }
   // ---------------- QR pickup and return verification ----------------
@@ -343,7 +350,7 @@ async confirmPickup(requestId: string, borrowerId: string, token: string) {
 
   const resourceId = await this.peekResourceId(requestId);
 
-  return this.dataSource.transaction(async (manager) => {
+  const result = await this.dataSource.transaction(async (manager) => {
     const resource = await manager.findOne(Resource, {
       where: { id: resourceId },
       lock: { mode: 'pessimistic_write' },
@@ -385,6 +392,8 @@ async confirmPickup(requestId: string, borrowerId: string, token: string) {
     request.status = BorrowStatus.ACTIVE;
     return request;
   });
+  void this.notifications.notifyBorrowEvent(result.id, 'picked-up').catch(() => undefined);
+  return result;
 }
 
 /** Borrower generates a short-lived return QR for the owner to scan. */
@@ -420,7 +429,7 @@ async confirmReturnWithQr(requestId: string, ownerId: string, token: string) {
 
   const resourceId = await this.peekResourceId(requestId);
 
-  return this.dataSource.transaction(async (manager) => {
+  const result = await this.dataSource.transaction(async (manager) => {
     const resource = await manager.findOne(Resource, {
       where: { id: resourceId },
       lock: { mode: 'pessimistic_write' },
@@ -462,22 +471,26 @@ async confirmReturnWithQr(requestId: string, ownerId: string, token: string) {
     request.status = BorrowStatus.RETURNED;
     return request;
   });
+  void this.notifications.notifyBorrowEvent(result.id, 'returned').catch(() => undefined);
+  return result;
 }
   // ---------------- reject / return (owner) ----------------
 
-  reject(requestId: string, ownerId: string) {
-    return this.ownerTransition(
+  async reject(requestId: string, ownerId: string) {
+    const result = await this.ownerTransition(
       requestId,
       ownerId,
       [BorrowStatus.PENDING],
       BorrowStatus.REJECTED,
       LoanEventType.REJECTED,
     );
+    void this.notifications.notifyBorrowEvent(result.id, 'rejected').catch(() => undefined);
+    return result;
   }
 
   /** Owner confirms the item came back; releases the resource. */
-  markReturned(requestId: string, ownerId: string) {
-    return this.ownerTransition(
+  async markReturned(requestId: string, ownerId: string) {
+    const result = await this.ownerTransition(
       requestId,
       ownerId,
       [BorrowStatus.APPROVED, BorrowStatus.ACTIVE],
@@ -485,6 +498,8 @@ async confirmReturnWithQr(requestId: string, ownerId: string, token: string) {
       LoanEventType.RETURNED,
       'Return confirmed by resource owner; physical handover was not independently verified.',
     );
+    void this.notifications.notifyBorrowEvent(result.id, 'returned').catch(() => undefined);
+    return result;
   }
 
   // ---------------- cancel (borrower) ----------------
@@ -496,7 +511,7 @@ async confirmReturnWithQr(requestId: string, ownerId: string, token: string) {
   async cancel(requestId: string, borrowerId: string) {
     const resourceId = await this.peekResourceId(requestId);
 
-    return this.dataSource.transaction(async (manager) => {
+    const result = await this.dataSource.transaction(async (manager) => {
       // Same lock order as every other writer: resource first, then request.
       const resource = await manager.findOne(Resource, {
         where: { id: resourceId },
@@ -530,6 +545,8 @@ async confirmReturnWithQr(requestId: string, ownerId: string, token: string) {
       request.status = BorrowStatus.CANCELLED;
       return request;
     });
+    void this.notifications.notifyBorrowEvent(result.id, 'cancelled').catch(() => undefined);
+    return result;
   }
 
   // ---------------- helpers ----------------

@@ -12,6 +12,7 @@ import { AuditLog } from '../audit/entities/audit-log.entity.js';
 import { LostFoundReport } from '../lost-found/entities/lost-found-report.entity.js';
 import { StudyGroup } from '../study-groups/entities/study-group.entity.js';
 import { StudyGroupMember } from '../study-groups/entities/study-group-member.entity.js';
+import { Notification } from '../notifications/entities/notification.entity.js';
 
 // entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent, VerificationToken],
 export default new DataSource({
@@ -21,7 +22,7 @@ export default new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
- entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken,AuditLog,LostFoundReport,StudyGroup,StudyGroupMember],
+ entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken,AuditLog,LostFoundReport,StudyGroup,StudyGroupMember,Notification],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,
 });
