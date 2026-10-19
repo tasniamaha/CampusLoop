@@ -7,6 +7,7 @@ on:
 
 jobs:
   backend:
+    timeout-minutes: 15  
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -24,6 +25,15 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=10
     env:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
@@ -36,6 +46,7 @@ jobs:
       TEST_DB_USER: root
       TEST_DB_PASSWORD: root
       TEST_DB_NAME: campusloop_test
+      TEST_REDIS_URL: redis://127.0.0.1:6379
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -63,6 +74,8 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/audit-logs.e2e-spec.ts
       - name: Email verification HTTP tests
         run: npx vitest run --config vitest.config.e2e.ts test/email-verification-http.e2e-spec.ts
+      - name: Notification & reminder tests (real MySQL + Redis)
+        run: npx vitest run --config vitest.config.e2e.ts test/notifications-queue.e2e-spec.ts
   frontend:
     runs-on: ubuntu-latest
     defaults:

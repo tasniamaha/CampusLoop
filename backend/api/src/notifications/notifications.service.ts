@@ -29,27 +29,52 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
     @InjectRepository(BorrowRequest) private readonly requestsRepo: Repository<BorrowRequest>,
     @InjectRepository(Resource) private readonly resourcesRepo: Repository<Resource>,
     @InjectRepository(User) private readonly usersRepo: Repository<User>) {}
-
-  async onModuleInit() {
+  private closing = false;
+    async onModuleInit() {
+    if (this.config.get<string>('NOTIFICATIONS_QUEUE_ENABLED', 'true') === 'false') {
+      this.logger.warn('Notification queue disabled: in-app notifications work; emails and reminders do not.');
+      return;
+    }
     const url = this.config.get<string>('REDIS_URL', 'redis://127.0.0.1:6379');
-    const options = { maxRetriesPerRequest: null, enableReadyCheck: true, connectTimeout: 10_000 };
-    this.redis = new Redis(url, options); this.workerRedis = new Redis(url, options);
+    const prefix = this.config.get<string>('BULLMQ_PREFIX');
+    const base = { enableReadyCheck: true, connectTimeout: 10_000 };
+    // Producer fails fast instead of buffering commands forever while Redis is down.
+    this.redis = new Redis(url, { ...base, maxRetriesPerRequest: 2 });
+    // BullMQ requires null on the worker's blocking connection.
+    this.workerRedis = new Redis(url, { ...base, maxRetriesPerRequest: null });
     this.redis.on('error', e => this.logger.error(`Redis queue connection error: ${e.message}`));
     this.workerRedis.on('error', e => this.logger.error(`Redis worker connection error: ${e.message}`));
-    this.queue = new Queue<JobData>(QUEUE_NAME, { connection: this.redis, defaultJobOptions: {
+    const prefixOpt = prefix ? { prefix } : {};
+    this.queue = new Queue<JobData>(QUEUE_NAME, { connection: this.redis, ...prefixOpt, defaultJobOptions: {
       attempts: 5, backoff: { type: 'exponential', delay: 2_000 },
       removeOnComplete: { age: 604_800, count: 5_000 }, removeOnFail: { age: 2_592_000, count: 10_000 },
     }});
-    this.worker = new Worker<JobData>(QUEUE_NAME, job => this.processJob(job), { connection: this.workerRedis, concurrency: 5 });
+    this.worker = new Worker<JobData>(QUEUE_NAME, job => this.processJob(job), { connection: this.workerRedis, concurrency: 5, ...prefixOpt });
     this.worker.on('failed', (job, err) => this.logger.error(`BullMQ job ${job?.id ?? 'unknown'} failed: ${err.message}`));
     this.worker.on('error', err => this.logger.error(`BullMQ worker error: ${err.message}`));
     this.queue.on('error', err => this.logger.error(`BullMQ queue error: ${err.message}`));
-    await this.queue.add('reconcile-reminders', { kind: 'reconcile-reminders' }, { jobId: 'reconcile-reminders-startup' }).catch(e => this.logger.error(`Could not queue reminder reconciliation: ${errorMessage(e)}`));
-    // Reconcile periodically so loans approved before deployment and after brief outages are recovered.
-    await this.queue.upsertJobScheduler('reconcile-reminders-every-15-minutes', { every: 15 * 60_000 }, { name: 'reconcile-reminders', data: { kind: 'reconcile-reminders' } });
+    // Never block application bootstrap on Redis.
+    void this.scheduleStartupJobs();
     this.logger.log(`BullMQ queue ready: ${QUEUE_NAME}`);
   }
-  async onModuleDestroy() { await this.worker?.close(); await this.queue?.close(); await Promise.allSettled([this.workerRedis?.quit(), this.redis?.quit()]); }
+  private async scheduleStartupJobs() {
+    for (let attempt = 1; attempt <= 5 && !this.closing && this.queue; attempt++) {
+      try {
+        await this.queue.add('reconcile-reminders', { kind: 'reconcile-reminders' }, { jobId: 'reconcile-reminders-startup' });
+        await this.queue.upsertJobScheduler('reconcile-reminders-every-15-minutes', { every: 15 * 60_000 }, { name: 'reconcile-reminders', data: { kind: 'reconcile-reminders' } });
+        return;
+      } catch (e) {
+        this.logger.error(`Reminder scheduling attempt ${attempt}/5 failed: ${errorMessage(e)}`);
+        await new Promise(r => setTimeout(r, 5_000 * attempt));
+      }
+    }
+  }
+
+  async onModuleDestroy() {
+    this.closing = true;
+    await this.worker?.close(); await this.queue?.close();
+    await Promise.allSettled([this.workerRedis?.quit(), this.redis?.quit()]);
+  }
 
   async list(userId: string, query: ListNotificationsQueryDto) {
     const page = query.page ?? 1, limit = query.limit ?? 20;
@@ -154,17 +179,33 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
     const user = await this.usersRepo.findOne({ where: { id: notification.userId } }); if (!user) return;
     await this.mail.send({ to: user.email, subject: notification.title, text: `${notification.body}\n\nCampusLoop` , html: `<h2>${escapeHtml(notification.title)}</h2><p>${escapeHtml(notification.body)}</p><p>CampusLoop</p>` });
   }
+    /** "Due soon" is noise if the loan was approved less than 24h before its due date. */
+  private async approvedWithLeadTime(request: BorrowRequest, due: number): Promise<boolean> {
+    const approved = await this.notificationsRepo.findOne({
+      where: { dedupeKey: `borrow-${request.id}-approved-${request.borrowerId}` },
+    });
+    return !approved || due - new Date(approved.createdAt).getTime() >= DAY_MS;
+  }
   private async processReminder(requestId: string, reminderKind: ReminderKind) {
     const request = await this.requestsRepo.findOne({ where: { id: requestId } });
     if (!request || !ACTIVE_STATUSES.includes(request.status)) { this.logger.log(`Skip stale reminder ${requestId}/${reminderKind}: loan is no longer active`); return; }
     const resource = await this.resourcesRepo.findOne({ where: { id: request.resourceId }, withDeleted: true }); if (!resource) return;
     const borrower = await this.usersRepo.findOne({ where: { id: request.borrowerId } }); if (!borrower) return;
-    const due = new Date(request.dueDate).getTime(), now = Date.now();
-    if (reminderKind === 'due-soon' && (due - now > DAY_MS || now >= due)) return;
+    
+const due = new Date(request.dueDate).getTime();
+const now = Date.now();
+
+// Send due-soon only when the due date is within the next 24 hours,
+// and the loan was approved at least 24 hours before its due date.
+if (reminderKind === 'due-soon') {
+  if (due <= now || due - now > DAY_MS) return;
+  if (!(await this.approvedWithLeadTime(request, due))) return;
+}
+
     if (reminderKind === 'due-now' && (now < due || now >= due + 60 * 60_000)) return;
     if (reminderKind === 'overdue' && now < due + 60 * 60_000) return;
     const messages: Record<ReminderKind, [string, string, string]> = {
-      'due-soon': ['loan.reminder.due-soon', 'Loan due tomorrow', `“${resource.title}” is due on ${dateLabel(request.dueDate)}.`],
+      'due-soon': ['loan.reminder.due-soon', 'Loan due soon', `“${resource.title}” is due on ${dateLabel(request.dueDate)}.`],
       'due-now': ['loan.reminder.due-now', 'Loan due now', `Your loan for “${resource.title}” is due now (${dateLabel(request.dueDate)}). Please coordinate the return.`],
       overdue: ['loan.reminder.overdue', 'Loan overdue', `Your loan for “${resource.title}” was due ${dateLabel(request.dueDate)}. Please arrange its return.`],
     };

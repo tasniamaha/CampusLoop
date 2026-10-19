@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { DataSource } from 'typeorm';
 import { ConflictException, ForbiddenException } from '@nestjs/common';
 import { User, UserRole } from '../src/users/entities/user.entity.js';
@@ -16,9 +16,12 @@ import { ResourceMarketplace1792000000000 } from '../src/database/migrations/179
 import { LoanEvent, LoanEventType } from '../src/borrow-requests/entities/loan-event.entity.js';
 import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
 import { AddEmailCanonical1792700000000 } from '../src/database/migrations/1792700000000-AddEmailCanonical.js';
+import { CreateNotifications1792800000000 } from '../src/database/migrations/1792800000000-CreateNotifications.js';
+import { Notification } from '../src/notifications/entities/notification.entity.js';
 import { ResourcesService } from '../src/resources/resources.service.js';
 import { ImageStorageService } from '../src/resources/storage/image-storage.service.js';
 import { JwtService } from '@nestjs/jwt';
+import { NotificationsService } from '../src/notifications/notifications.service.js';
 let ds: DataSource;
 let service: BorrowRequestsService;
 
@@ -76,29 +79,43 @@ beforeAll(async () => {
     username: process.env.TEST_DB_USER ?? 'root',
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
-    entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent],
-    migrations: [AddEmailCanonical1792700000000, 
+    entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent, Notification],
+    migrations: [AddEmailCanonical1792700000000,
       CreateUsers1791838335819,
       CreateResourcesAndBorrowRequests1791900000000,
       ResourceMarketplace1792000000000,
       CreateLoanEvents1792100000000,
+      CreateNotifications1792800000000,
     ],
-    dropSchema: true,
+    dropSchema: false,
     synchronize: false,
     extra: { connectionLimit: 30 },
   });
   await ds.initialize();
   await ds.runMigrations(); // runs the REAL migrations, including the generated column
-  service = new BorrowRequestsService(
+const notificationsMock = {
+  notifyBorrowEvent: vi.fn().mockResolvedValue(undefined),
+} as unknown as NotificationsService;
+
+service = new BorrowRequestsService(
   ds,
   new JwtService({
     secret: process.env.JWT_SECRET ?? 'qr-test-secret',
   }),
+  notificationsMock,
 );
 }, 60_000);
 
 afterAll(async () => {
-  if (ds?.isInitialized) await ds.destroy();
+  if (!ds?.isInitialized) return;
+  try {
+    await ds.query(`DELETE le FROM loan_events le JOIN resources r ON r.id = le.resourceId JOIN users u ON u.id = r.ownerId WHERE u.email LIKE '%@test.local'`);
+    await ds.query(`DELETE br FROM borrow_requests br JOIN resources r ON r.id = br.resourceId JOIN users u ON u.id = r.ownerId WHERE u.email LIKE '%@test.local'`);
+    await ds.query(`DELETE FROM resources WHERE ownerId IN (SELECT id FROM users WHERE email LIKE '%@test.local')`);
+    await ds.query(`DELETE FROM users WHERE email LIKE '%@test.local'`);
+  } finally {
+    await ds.destroy();
+  }
 });
 
 describe('double-booking protection', () => {

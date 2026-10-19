@@ -13,7 +13,8 @@ import {
 import type { Request } from 'express';
 import { ListNotificationsQueryDto } from './dto/list-notifications-query.dto.js';
 import { NotificationsService } from './notifications.service.js';
-
+import { Roles } from '../auth/roles.decorator.js';
+import { UserRole } from '../users/entities/user.entity.js';
 interface AuthenticatedRequest extends Request {
   user: { sub: string; role: string };
 }
@@ -21,12 +22,12 @@ interface AuthenticatedRequest extends Request {
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notifications: NotificationsService) {}
-
+  @Roles(UserRole.ADMIN)
   @Get('health')
   health() {
     return this.notifications.queueHealth();
   }
-
+  @Roles(UserRole.ADMIN)
   @Post('test')
   test(@Req() req: AuthenticatedRequest) {
     return this.notifications.sendTestNotification(req.user.sub);

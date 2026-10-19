@@ -19,3 +19,4 @@ if (!['127.0.0.1', 'localhost', '::1'].includes(host)) {
 process.env.SMTP_HOST = '';
 process.env.SMTP_USER = '';
 process.env.SMTP_PASS = '';
+process.env.NOTIFICATIONS_QUEUE_ENABLED ??= 'false';

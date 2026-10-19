@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 export class CreateStudyGroups1792600000000 implements MigrationInterface {
   name = 'CreateStudyGroups1792600000000';
   async up(q: QueryRunner): Promise<void> {

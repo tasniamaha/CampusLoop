@@ -12,6 +12,8 @@ import { ResourceMarketplace1792000000000 } from '../src/database/migrations/179
 import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
 import { CreateVerificationTokens1792200000000 } from '../src/database/migrations/1792200000000-CreateVerificationTokens.js';
 import { AddEmailCanonical1792700000000 } from '../src/database/migrations/1792700000000-AddEmailCanonical.js';
+import { CreateNotifications1792800000000 } from '../src/database/migrations/1792800000000-CreateNotifications.js';
+import { Notification } from '../src/notifications/entities/notification.entity.js';
 
 let ds: DataSource;
 let sent: MailMessage[] = [];
@@ -45,13 +47,14 @@ beforeAll(async () => {
     username: process.env.TEST_DB_USER ?? 'root',
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
-    entities: [User, VerificationToken],
-    migrations: [AddEmailCanonical1792700000000, 
+    entities: [User, VerificationToken, Notification],
+    migrations: [AddEmailCanonical1792700000000,
       CreateUsers1791838335819,
       CreateResourcesAndBorrowRequests1791900000000,
       ResourceMarketplace1792000000000,
       CreateLoanEvents1792100000000,
       CreateVerificationTokens1792200000000,
+      CreateNotifications1792800000000,
     ],
   });
   await ds.initialize();

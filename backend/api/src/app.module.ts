@@ -22,6 +22,7 @@ import { AuditModule } from './audit/audit.module.js';
 import { LostFoundModule } from './lost-found/lost-found.module.js';
 import { StudyGroupsModule } from './study-groups/study-groups.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
+import { RolesGuard } from './auth/guards/roles.guard.js';
 const optIn = (name: string) => (ctx: ExecutionContext) =>
   !Reflect.getMetadata(`THROTTLER:LIMIT${name}`, ctx.getHandler());
 @Module({
@@ -65,6 +66,8 @@ const optIn = (name: string) => (ctx: ExecutionContext) =>
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         autoLoadEntities: true,
+        migrations: ['src/database/migrations/*.ts'],
+        migrationsRun: true,
         synchronize: false,
       }),
     }),
@@ -77,6 +80,7 @@ const optIn = (name: string) => (ctx: ExecutionContext) =>
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: VerifiedEmailGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateVerificationTokens1792200000000 implements MigrationInterface {
   name = 'CreateVerificationTokens1792200000000';

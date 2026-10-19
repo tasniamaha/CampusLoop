@@ -2,45 +2,97 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-type UnreadResponse = {
-  unreadCount: number;
-};
+const PUBLIC_PATHS = [
+  '/',
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+];
 
 export default function NotificationBell() {
+  const pathname = usePathname();
+  const isPublic = PUBLIC_PATHS.includes(pathname);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const loadUnreadCount = useCallback(async () => {
-    try {
-      const response = await fetch(
-        '/api/backend/notifications/unread-count',
-        { cache: 'no-store' },
-      );
-
-      if (!response.ok) return;
-
-      const data: UnreadResponse = await response.json();
-      setUnreadCount(data.unreadCount ?? 0);
-    } catch {
-      // Keep the bell visible if the count cannot be loaded.
-    }
-  }, []);
-
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    if (isPublic) {
+      return;
+    }
+
+    let stopped = false;
+    const loadUnreadCount = async () => {
+      if (stopped || document.hidden) return;
+
+      try {
+        const response = await fetch(
+          '/api/backend/notifications/unread-count',
+          { cache: 'no-store' },
+        );
+
+        if (response.status === 401) {
+          stopped = true;
+
+          window.clearInterval(interval);
+
+          setUnreadCount(0);
+          return;
+        }
+
+        if (!response.ok) return;
+
+        const data: { unreadCount?: number; count?: number } =
+          await response.json();
+
+        if (!stopped) {
+          setUnreadCount(data.unreadCount ?? data.count ?? 0);
+        }
+      } catch {
+        // Keep the last known count if the request fails.
+      }
+    };
+
+    // Fetch immediately after the effect starts.
+    const first = window.setTimeout(() => {
       void loadUnreadCount();
     }, 0);
 
+    // Poll every 30 seconds.
     const interval = window.setInterval(() => {
       void loadUnreadCount();
-    }, 30000);
+    }, 30_000);
+
+    // Refresh when the user returns to this browser tab.
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        void loadUnreadCount();
+      }
+    };
+
+    document.addEventListener(
+      'visibilitychange',
+      handleVisibilityChange,
+    );
 
     return () => {
-      window.clearTimeout(timer);
+      stopped = true;
+      window.clearTimeout(first);
+
       window.clearInterval(interval);
+
+      document.removeEventListener(
+        'visibilitychange',
+        handleVisibilityChange,
+      );
     };
-  }, [loadUnreadCount]);
+  }, [isPublic]);
+
+  // Don't display the bell or poll on public pages.
+  if (isPublic) return null;
 
   return (
     <Link
@@ -50,8 +102,7 @@ export default function NotificationBell() {
           ? `Notifications, ${unreadCount} unread`
           : 'Notifications'
       }
-      title="Notifications"
-      className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+      className="relative inline-flex items-center justify-center rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +121,7 @@ export default function NotificationBell() {
       </svg>
 
       {unreadCount > 0 && (
-        <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold leading-none text-white">
+        <span className="absolute -right-0.5 -top-0.5 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-semibold leading-none text-white">
           {unreadCount > 99 ? '99+' : unreadCount}
         </span>
       )}
