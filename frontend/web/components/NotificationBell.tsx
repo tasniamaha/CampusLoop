@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 
 const PUBLIC_PATHS = [
   '/',
@@ -14,7 +14,7 @@ const PUBLIC_PATHS = [
   '/verify-email',
 ];
 
-export default function NotificationBell() {
+function NotificationBellContent() {
   const pathname = usePathname();
   const isPublic = PUBLIC_PATHS.includes(pathname);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -126,5 +126,12 @@ export default function NotificationBell() {
         </span>
       )}
     </Link>
+  );
+}
+export default function NotificationBell() {
+  return (
+    <Suspense fallback={null}>
+      <NotificationBellContent />
+    </Suspense>
   );
 }
