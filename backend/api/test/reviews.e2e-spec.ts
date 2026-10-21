@@ -305,9 +305,9 @@ describe('moderation', () => {
     expect((await service.getReputation(s.owner.id)).reviewCount).toBe(1);
 
     await expect(
-      service.setHidden(s.stranger.id, UserRole.ADMIN, review.id, true),
+    service.setHidden({ id: s.stranger.id, role: 'admin' }, review.id, true) 
     ).rejects.toBeInstanceOf(BadRequestException);
-    await service.setHidden(s.stranger.id, UserRole.ADMIN, review.id, true, 'abusive');
+    await service.setHidden({ id: s.stranger.id, role: 'admin' }, review.id, true, 'abusive')
     expect((await service.listForResource(s.resource.id, s.owner.id)).reviewCount).toBe(0);
     expect((await service.getReputation(s.owner.id)).reviewCount).toBe(0);
     expect(
@@ -316,7 +316,7 @@ describe('moderation', () => {
       ),
     ).toBe(true);
 
-    await service.setHidden(s.stranger.id, UserRole.ADMIN, review.id, false);
+    await service.setHidden({ id: s.stranger.id, role: 'admin' }, review.id, false)
     expect((await service.getReputation(s.owner.id)).reviewCount).toBe(1);
   });
 

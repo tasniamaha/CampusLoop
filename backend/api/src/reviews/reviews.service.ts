@@ -340,25 +340,29 @@ export class ReviewsService {
   }
 
   async setHidden(
-    moderatorId: string,
-    reviewId: string,
-    hidden: boolean,
-    reason?: string,
-  ) {
+  actor: { id: string; role: string },
+  reviewId: string,
+  hidden: boolean,
+  reason?: string,
+) {
     const trimmed = reason?.trim() || null;
     if (hidden && !trimmed) {
-      throw new BadRequestException('A reason is required to hide a review');
+        throw new BadRequestException('A reason is required to hide a review');
     }
 
     return this.dataSource.transaction(async (manager) => {
-      const review = await manager.findOne(Review, {
-        where: { id: reviewId },
-        lock: { mode: 'pessimistic_write' },
-      });
-      if (!review) throw new NotFoundException('Review not found');
-      if (review.reviewerId === moderatorId || review.revieweeId === moderatorId) {
-        throw new ForbiddenException('You cannot moderate a review involving your account');
-      }
+    const review = await manager.findOne(Review, {
+      where: { id: reviewId },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!review) throw new NotFoundException('Review not found');
+
+    // campus first, so another campus gets a 404 and never learns the review exists
+    await this.reports.assertInCampus(manager, actor.id, actor.role, ReportTarget.REVIEW, reviewId);
+
+    if (review.reviewerId === actor.id || review.revieweeId === actor.id) {
+      throw new ForbiddenException('You cannot moderate a review involving your account');
+    }
 
       await manager.update(
         Review,
@@ -366,7 +370,8 @@ export class ReviewsService {
         {
           isHidden: hidden,
           hiddenAt: hidden ? new Date() : null,
-          hiddenById: hidden ? moderatorId : null,
+          hiddenById: hidden ? actor.id : null,
+
           hiddenReason: hidden ? trimmed : null,
         },
       );
@@ -376,13 +381,13 @@ export class ReviewsService {
           manager,
           ReportTarget.REVIEW,
           reviewId,
-          moderatorId,
+          actor.id,
           trimmed,
         );
       }
 
       await this.audit.record(manager, {
-        actorId: moderatorId,
+        actorId: actor.id,
         action: hidden ? 'review.hidden' : 'review.unhidden',
         targetType: 'review',
         targetId: reviewId,

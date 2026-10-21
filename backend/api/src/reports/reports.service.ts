@@ -283,6 +283,7 @@ export class ReportsService {
     type: ReportTarget,
     id: string,
   ) {
+    if (actorRole === UserRole.ADMIN) return;
     if (actorRole !== UserRole.MODERATOR) return;
 
     const actor = await manager.findOne(User, {

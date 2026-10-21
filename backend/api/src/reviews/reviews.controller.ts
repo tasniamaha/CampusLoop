@@ -80,7 +80,8 @@ export class ReviewsController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: ModerateReviewDto,
   ) {
-    return this.service.setHidden(req.user.sub, req.user.role, id, true, dto.reason);
+    return this.service.setHidden({ id: req.user.sub, role: req.user.role }, id, true, dto.reason);
+
   }
 
   @Roles(UserRole.MODERATOR, UserRole.ADMIN)
@@ -90,6 +91,6 @@ export class ReviewsController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: ModerateReviewDto,
   ) {
-    return this.service.setHidden(req.user.sub, req.user.role, id, false, dto.reason);
+    return this.service.setHidden({ id: req.user.sub, role: req.user.role }, id, false, dto.reason);
   }
 }
