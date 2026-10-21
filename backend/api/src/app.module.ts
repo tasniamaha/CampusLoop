@@ -10,6 +10,8 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 import { ResourcesModule } from './resources/resources.module.js';
 import { BorrowRequestsModule } from './borrow-requests/borrow-requests.module.js';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ReviewsModule } from './reviews/reviews.module.js';
+import { ReportsModule } from './reports/reports.module.js';
 import {
   defaultTracker,
   isLoginHandler,
@@ -65,6 +67,7 @@ const optIn = (name: string) => (ctx: ExecutionContext) =>
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
+        timezone: 'Z',
         autoLoadEntities: true,
         migrations: ['src/database/migrations/*.ts'],
         migrationsRun: true,
@@ -72,7 +75,7 @@ const optIn = (name: string) => (ctx: ExecutionContext) =>
       }),
     }),
     UsersModule,
-    AuthModule,ResourcesModule, BorrowRequestsModule,AuditModule,LostFoundModule,StudyGroupsModule,NotificationsModule
+    AuthModule,ResourcesModule, BorrowRequestsModule,AuditModule,LostFoundModule,StudyGroupsModule,NotificationsModule,ReviewsModule,ReportsModule,
   ],
   controllers: [AppController],
     providers: [

@@ -74,6 +74,7 @@ async function seedScenario(borrowerCount: number) {
 beforeAll(async () => {
   ds = new DataSource({
     type: 'mysql',
+    timezone: 'Z',
     host: process.env.TEST_DB_HOST ?? '127.0.0.1',
     port: Number(process.env.TEST_DB_PORT ?? 3317),
     username: process.env.TEST_DB_USER ?? 'root',

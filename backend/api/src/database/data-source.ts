@@ -13,7 +13,8 @@ import { LostFoundReport } from '../lost-found/entities/lost-found-report.entity
 import { StudyGroup } from '../study-groups/entities/study-group.entity.js';
 import { StudyGroupMember } from '../study-groups/entities/study-group-member.entity.js';
 import { Notification } from '../notifications/entities/notification.entity.js';
-
+import { Review } from '../reviews/entities/review.entity.js';
+import { Report } from '../reports/entities/report.entity.js';
 // entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent, VerificationToken],
 export default new DataSource({
   type: 'mariadb',
@@ -22,7 +23,8 @@ export default new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
- entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken,AuditLog,LostFoundReport,StudyGroup,StudyGroupMember,Notification],
+  timezone: 'Z',
+  entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken,AuditLog,LostFoundReport,StudyGroup,StudyGroupMember,Notification,Review,Report],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,
 });
