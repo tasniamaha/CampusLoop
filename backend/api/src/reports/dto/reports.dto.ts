@@ -7,6 +7,7 @@ import {
   IsString,
   Max,
   MaxLength,
+  MinLength,
   Min,
 } from 'class-validator';
 import { ReportStatus } from '../entities/report.entity.js';
@@ -38,4 +39,11 @@ export class ResolveReportDto {
   @IsString()
   @MaxLength(255)
   note?: string;
+}
+
+export class ReportContentDto {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(255)
+  reason!: string;
 }

@@ -20,7 +20,13 @@ function setup() {
   };
   const users = { findOne: vi.fn().mockResolvedValue(user) };
   const claims = { find: vi.fn(), findOne: vi.fn(), create: vi.fn((value: Partial<LostFoundClaim>) => value), save: vi.fn(async (value: Partial<LostFoundClaim> | Partial<LostFoundClaim>[]) => value) };
-  const service = new LostFoundService(reports as never, users as never, claims as never);
+  const service = new LostFoundService(
+    reports as never,
+    users as never,
+    claims as never,
+    { transaction: vi.fn() } as never,
+    { create: vi.fn() } as never,
+  );
   return { service, reports, users, claims };
 }
 

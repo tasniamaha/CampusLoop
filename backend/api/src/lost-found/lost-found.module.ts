@@ -5,9 +5,10 @@ import { LostFoundReport } from './entities/lost-found-report.entity.js';
 import { LostFoundClaim } from './entities/lost-found-claim.entity.js';
 import { LostFoundController } from './lost-found.controller.js';
 import { LostFoundService } from './lost-found.service.js';
+import { ReportsModule } from '../reports/reports.module.js';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LostFoundReport, LostFoundClaim, User])],
+  imports: [TypeOrmModule.forFeature([LostFoundReport, LostFoundClaim, User]), ReportsModule],
   controllers: [LostFoundController],
   providers: [LostFoundService],
   exports: [LostFoundService],

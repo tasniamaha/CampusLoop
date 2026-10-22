@@ -29,6 +29,11 @@ export class ReportsService {
     targetId: string,
     reason: string,
   ) {
+    const trimmed = reason.trim();
+    if (trimmed.length < 3) {
+      throw new BadRequestException('Report reason must be at least 3 characters');
+    }
+
     try {
       if (!(await this.targetExists(manager, targetType, targetId))) {
         throw new NotFoundException('Report target not found');
@@ -40,7 +45,7 @@ export class ReportsService {
           reporterId,
           targetType,
           targetId,
-          reason: reason.trim(),
+          reason: trimmed,
           status: ReportStatus.OPEN,
           resolvedById: null,
           resolvedAt: null,
@@ -52,7 +57,7 @@ export class ReportsService {
         action: `${targetType}.reported`,
         targetType,
         targetId,
-        metadata: { reportId: saved.id, reason: reason.trim() },
+        metadata: { reportId: saved.id, reason: trimmed },
       });
       return saved;
     } catch (error) {

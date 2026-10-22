@@ -17,6 +17,7 @@ import { CreateLostFoundClaimDto } from './dto/create-lost-found-claim.dto.js';
 import { ReviewLostFoundClaimDto } from './dto/review-lost-found-claim.dto.js';
 import { ListLostFoundQueryDto } from './dto/list-lost-found-query.dto.js';
 import { LostFoundService } from './lost-found.service.js';
+import { ReportContentDto } from '../reports/dto/reports.dto.js';
 
 interface AuthenticatedRequest extends Request {
   user: { sub: string; role: string };
@@ -36,6 +37,17 @@ export class LostFoundController {
   @Post()
   create(@Req() req: AuthenticatedRequest, @Body() dto: CreateLostFoundReportDto) {
     return this.service.create(req.user.sub, dto);
+  }
+
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @RequireVerifiedEmail()
+  @Post(':id/report')
+  report(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: ReportContentDto,
+  ) {
+    return this.service.report(req.user.sub, id, dto.reason);
   }
 
   @Throttle({ default: { ttl: 60_000, limit: 5 } })

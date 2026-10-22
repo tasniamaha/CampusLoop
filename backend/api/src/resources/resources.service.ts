@@ -24,6 +24,8 @@ import { detectImageType } from './storage/image-type.js';
 import type { UploadedImageFile } from './storage/uploaded-file.js';
 import { LoanEventType } from '../borrow-requests/entities/loan-event.entity.js';
 import { recordLoanEvent } from '../borrow-requests/loan-events.js';
+import { ReportsService } from '../reports/reports.service.js';
+import { ReportTarget } from '../reports/entities/report.entity.js';
 export const MAX_IMAGES_PER_RESOURCE = 5;
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -58,7 +60,23 @@ export class ResourcesService {
   constructor(
     private readonly dataSource: DataSource,
     private readonly storage: ImageStorageService,
+    private readonly moderation: ReportsService,
   ) {}
+
+  async report(userId: string, id: string, reason: string) {
+    const resource = await this.dataSource.getRepository(Resource).findOne({ where: { id } });
+    if (!resource || (!resource.isListed && resource.ownerId !== userId)) {
+      throw new NotFoundException('Resource not found');
+    }
+    if (resource.ownerId === userId) {
+      throw new BadRequestException('You cannot report your own listing');
+    }
+
+    await this.dataSource.transaction((manager) =>
+      this.moderation.create(manager, userId, ReportTarget.RESOURCE, id, reason),
+    );
+    return { reported: true };
+  }
 
   // ---------------- categories ----------------
 

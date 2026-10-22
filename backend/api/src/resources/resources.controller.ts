@@ -31,6 +31,8 @@ import { ListResourcesQueryDto } from './dto/list-resources-query.dto.js';
 import { ImageStorageService, MIME_BY_EXT } from './storage/image-storage.service.js';
 import { Public } from '../auth/public.decorator.js';
 import { RequireVerifiedEmail } from '../auth/require-verified-email.decorator.js'; // CHANGED
+import { Throttle } from '@nestjs/throttler';
+import { ReportContentDto } from '../reports/dto/reports.dto.js';
 import type { UploadedImageFile } from './storage/uploaded-file.js';
 interface AuthenticatedRequest extends Request {
   user: { sub: string; role: string };
@@ -76,6 +78,17 @@ export class ResourcesController {
   @Get(':id')
   get(@Req() req: AuthenticatedRequest, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.service.get(id, req.user.sub);
+  }
+
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @RequireVerifiedEmail()
+  @Post(':id/report')
+  report(
+    @Req() req: AuthenticatedRequest,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: ReportContentDto,
+  ) {
+    return this.service.report(req.user.sub, id, dto.reason);
   }
 
   @RequireVerifiedEmail() // CHANGED

@@ -292,7 +292,7 @@ expect(history.items[2].note).toContain('not independently verified');
 
   it('removing a resource cancels pending requests and records one event for each', async () => {
     const { owner, resource, requests } = await seedScenario(3);
-    const resources = new ResourcesService(ds, new ImageStorageService());
+    const resources = new ResourcesService(ds, new ImageStorageService(), {} as never);
 
     const result = await resources.remove(resource.id, owner.id);
     expect(result.cancelledPendingRequests).toBe(3);

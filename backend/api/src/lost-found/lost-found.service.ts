@@ -6,8 +6,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity.js';
+import { ReportsService } from '../reports/reports.service.js';
+import { ReportTarget } from '../reports/entities/report.entity.js';
 import { CreateLostFoundReportDto } from './dto/create-lost-found-report.dto.js';
 import { CreateLostFoundClaimDto } from './dto/create-lost-found-claim.dto.js';
 import { ReviewLostFoundClaimDto } from './dto/review-lost-found-claim.dto.js';
@@ -43,6 +45,8 @@ export class LostFoundService {
     private readonly users: Repository<User>,
     @InjectRepository(LostFoundClaim)
     private readonly claims: Repository<LostFoundClaim>,
+    private readonly dataSource: DataSource,
+    private readonly moderation: ReportsService,
   ) {}
 
   private async getCampus(userId: string): Promise<string> {
@@ -100,6 +104,22 @@ export class LostFoundService {
       resolvedAt: null,
     });
     return publicReport(await this.reports.save(report));
+  }
+
+  async report(userId: string, id: string, reason: string) {
+    const campus = await this.getCampus(userId);
+    const notice = await this.reports.findOne({
+      where: { id, campus, status: LostFoundStatus.OPEN },
+    });
+    if (!notice) throw new NotFoundException('Open lost-and-found report not found');
+    if (notice.reporterId === userId) {
+      throw new BadRequestException('You cannot report your own notice');
+    }
+
+    await this.dataSource.transaction((manager) =>
+      this.moderation.create(manager, userId, ReportTarget.LOST_FOUND, id, reason),
+    );
+    return { reported: true };
   }
 
   async matches(id: string, userId: string) {

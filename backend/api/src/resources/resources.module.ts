@@ -10,9 +10,11 @@ import { ResourcesService } from './resources.service.js';
 import { ResourcesController } from './resources.controller.js';
 import { ResourceCategoriesController } from './resource-categories.controller.js';
 import { ImageStorageService } from './storage/image-storage.service.js';
+import { ReportsModule } from '../reports/reports.module.js';
 
 @Module({
   imports: [
+    ReportsModule,
     TypeOrmModule.forFeature([
       Resource,
       ResourceCategory,
