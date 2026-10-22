@@ -76,6 +76,14 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/email-verification-http.e2e-spec.ts
       - name: Notification & reminder tests (real MySQL + Redis)
         run: npx vitest run --config vitest.config.e2e.ts test/notifications-queue.e2e-spec.ts
+      - name: Review service tests (real MySQL)
+        run: npx vitest run --config vitest.config.e2e.ts test/reviews.e2e-spec.ts
+      - name: Review HTTP tests (auth, validation, moderation)
+        run: npx vitest run --config vitest.config.e2e.ts test/reviews-http.e2e-spec.ts
+      - name: Review flow HTTP tests (borrow to return to review)
+        run: npx vitest run --config vitest.config.e2e.ts test/reviews-flow-http.e2e-spec.ts
+      - name: Review migration tests (runs last, restores schema)
+        run: npx vitest run --config vitest.config.e2e.ts test/review-migrations.e2e-spec.ts
   frontend:
     runs-on: ubuntu-latest
     defaults:
