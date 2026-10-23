@@ -84,6 +84,8 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/reviews-flow-http.e2e-spec.ts
       - name: Review migration tests (runs last, restores schema)
         run: npx vitest run --config vitest.config.e2e.ts test/review-migrations.e2e-spec.ts
+      - name: Review migration tests (runs last, restores schema)
+        run: npx vitest run --config vitest.config.e2e.ts test/review-migrations.e2e-spec.ts
   frontend:
     runs-on: ubuntu-latest
     defaults:
