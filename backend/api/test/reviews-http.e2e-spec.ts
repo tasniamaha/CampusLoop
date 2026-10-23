@@ -31,6 +31,8 @@ const IP = {
   demoted: '203.0.113.47',
   anon: '203.0.113.48',
   throttled: '203.0.113.49',
+  halfStarOwner: '203.0.113.50',
+  halfStarBorrower: '203.0.113.51',
 };
 const MISSING_UUID = '00000000-0000-4000-8000-000000000000';
 
@@ -128,6 +130,8 @@ let moderator: Actor;
 let admin: Actor;
 let demoted: Actor;
 let throttled: Actor;
+let halfStarOwner: Actor;
+let halfStarBorrower: Actor;
 let resource: Resource;
 let loan: BorrowRequest;
 let unlistedResource: Resource;
@@ -152,6 +156,8 @@ beforeAll(async () => {
   admin = await makeUser('admin', { role: UserRole.ADMIN });
   demoted = await makeUser('demoted', { role: UserRole.MODERATOR });
   throttled = await makeUser('throttled');
+  halfStarOwner = await makeUser('halfStarOwner');
+  halfStarBorrower = await makeUser('halfStarBorrower');
 
   ({ resource, loan } = await seedReturnedLoan(owner.id, borrower.id));
   ({ resource: unlistedResource } = await seedReturnedLoan(owner.id, borrower.id, false));
@@ -228,6 +234,8 @@ describe('POST /reviews', () => {
     const post = (body: object) => api('post', '/reviews', borrower.token, IP.borrower).send(body);
     await post({ borrowRequestId: loan.id, rating: 9 }).expect(400);
     await post({ borrowRequestId: loan.id, rating: 0 }).expect(400);
+    await post({ borrowRequestId: loan.id, rating: 1.2 }).expect(400);
+    await post({ borrowRequestId: loan.id, rating: 1.25 }).expect(400);
     await post({ borrowRequestId: 'nope', rating: 5 }).expect(400);
     await post({ borrowRequestId: loan.id, rating: 5, reviewerId: owner.id }).expect(400); // cannot forge the reviewer
     await post({ borrowRequestId: loan.id, rating: 5, comment: 'x'.repeat(1001) }).expect(400);
@@ -262,6 +270,29 @@ describe('POST /reviews', () => {
       .send({ borrowRequestId: loan.id, rating: 1 })
       .expect(409);
   });
+
+  it('accepts half-star ratings and returns exactly what was submitted', async () => {
+  const { resource: halfStarResource, loan: halfStarLoan } =
+    await seedReturnedLoan(halfStarOwner.id, halfStarBorrower.id);
+
+  const borrowerReview = await api('post', '/reviews', halfStarBorrower.token, IP.halfStarBorrower)
+    .send({ borrowRequestId: halfStarLoan.id, rating: 1.5 })
+    .expect(201);
+  expect(borrowerReview.body.rating).toBe(1.5);
+
+  const ownerReview = await api('post', '/reviews', halfStarOwner.token, IP.halfStarOwner)
+    .send({ borrowRequestId: halfStarLoan.id, rating: 0.5 })
+    .expect(201);
+  expect(ownerReview.body.rating).toBe(0.5);
+
+  // Read-back from the database: the borrower's review about the resource...
+  const list = await api('get', `/reviews/resource/${halfStarResource.id}`, stranger.token, IP.stranger).expect(200);
+  expect(list.body.items[0].rating).toBe(1.5);
+
+  // ...and the owner's review about the borrower, via reputation.
+  const reputation = await api('get', `/reviews/reputation/${halfStarBorrower.id}`, stranger.token, IP.stranger).expect(200);
+  expect(reputation.body.rawAverage).toBe(0.5);
+});
 });
 
 describe('POST /reviews/:id/report (blind reviews are not reportable until revealed)', () => {

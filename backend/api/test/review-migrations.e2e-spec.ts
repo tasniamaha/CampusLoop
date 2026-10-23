@@ -19,6 +19,7 @@ import { CreateReviews1792900000000 } from '../src/database/migrations/179290000
 import { ReviewsBothSides1793000000000 } from '../src/database/migrations/1793000000000-ReviewsBothSides.js';
 import { ReviewBlindAndModeration1793100000000 } from '../src/database/migrations/1793100000000-ReviewBlindAndModeration.js';
 import { CreateReports1793200000000 } from '../src/database/migrations/1793200000000-CreateReports.js';
+import { ReviewHalfStarRatings1793300000000 } from '../src/database/migrations/1793300000000-ReviewHalfStarRatings.js';
 
 // Proves the two review migrations on a database that ALREADY holds reviews written by the
 // original schema (one review per loan, no reviewee). Uses the existing campusloop_test database:
@@ -27,6 +28,7 @@ import { CreateReports1793200000000 } from '../src/database/migrations/179320000
 // It deletes every row in `reviews` first (test data only; guard-test-db.ts enforces a *_test DB),
 // so it relies on fileParallelism: false in vitest.config.e2e.ts, which is already set.
 const SCHEMA = process.env.TEST_DB_NAME ?? 'campusloop_test';
+const PROBE_ID = '00000000-0000-4000-8000-00000000a5a5';
 const conn = {
   host: process.env.TEST_DB_HOST ?? '127.0.0.1',
   port: Number(process.env.TEST_DB_PORT ?? 3317),
@@ -79,6 +81,7 @@ beforeAll(async () => {
       ReviewsBothSides1793000000000,
       ReviewBlindAndModeration1793100000000,
       CreateReports1793200000000,
+      ReviewHalfStarRatings1793300000000,
     ] as never,
     synchronize: false,
     dropSchema: false,
@@ -88,6 +91,7 @@ beforeAll(async () => {
   // 1) Make sure we start fully migrated, clear leftover review rows, then step back to the legacy shape.
   await ds.runMigrations();
   await ds.query('DELETE FROM reviews');
+  await ds.undoLastMigration(); // ReviewHalfStarRatings
   await ds.undoLastMigration(); // CreateReports
   await ds.undoLastMigration(); // ReviewBlindAndModeration
   await ds.undoLastMigration(); // ReviewsBothSides
@@ -186,6 +190,14 @@ describe('review migrations on a database that already holds reviews', () => {
 
     const cols = await columns();
     for (const c of NEW_COLUMNS) expect(cols).toContain(c);
+    const [ratingColumn] = await ds.query(
+      `SELECT DATA_TYPE AS dataType, NUMERIC_SCALE AS scale
+         FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'reviews' AND COLUMN_NAME = 'rating'`,
+      [SCHEMA],
+    );
+    expect(ratingColumn.dataType).toBe('decimal');
+    expect(Number(ratingColumn.scale)).toBe(1);
     const [nullable] = await ds.query(
       `SELECT IS_NULLABLE AS n FROM information_schema.COLUMNS
         WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'reviews' AND COLUMN_NAME = 'windowClosesAt'`,
@@ -215,9 +227,42 @@ describe('review migrations on a database that already holds reviews', () => {
         [row.borrowRequestId, row.resourceId, row.revieweeId, row.reviewerId],
       ),
     ).rejects.toThrow(/CHK_reviews_rating|check constraint/i);
+    const insertOwnerReview = (rating: number) =>
+      ds.query(
+        `INSERT INTO reviews (id, borrowRequestId, resourceId, reviewerId, reviewerRole, revieweeId, rating, windowClosesAt)
+         VALUES (?, ?, ?, ?, 'owner', ?, ?, UTC_TIMESTAMP(6))`,
+        [PROBE_ID, row.borrowRequestId, row.resourceId, row.revieweeId, row.reviewerId, rating],
+      );
+    await expect(insertOwnerReview(1.2)).rejects.toThrow(/CHK_reviews_rating|check constraint/i);
+    try {
+      await insertOwnerReview(0.5);
+      const [probe] = await ds.query('SELECT rating FROM reviews WHERE id = ?', [PROBE_ID]);
+      expect(Number(probe.rating)).toBe(0.5);
+    } finally {
+      await ds.query('DELETE FROM reviews WHERE id = ?', [PROBE_ID]);
+    }
   });
-
+    it('down refuses to run while half-star reviews exist (it would silently change them)', async () => {
+    const [row] = await ds.query('SELECT borrowRequestId, resourceId, reviewerId, revieweeId FROM reviews LIMIT 1');
+    await ds.query(
+      `INSERT INTO reviews (id, borrowRequestId, resourceId, reviewerId, reviewerRole, revieweeId, rating, windowClosesAt)
+       VALUES (?, ?, ?, ?, 'owner', ?, 1.5, UTC_TIMESTAMP(6))`,
+      [PROBE_ID, row.borrowRequestId, row.resourceId, row.revieweeId, row.reviewerId],
+    );
+    try {
+      await expect(ds.undoLastMigration()).rejects.toThrow(/half-star/i);
+    } finally {
+      await ds.query('DELETE FROM reviews WHERE id = ?', [PROBE_ID]);
+    }
+    const [col] = await ds.query(
+      `SELECT DATA_TYPE AS dataType FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'reviews' AND COLUMN_NAME = 'rating'`,
+      [SCHEMA],
+    );
+    expect(col.dataType).toBe('decimal'); // still migrated
+  });
   it('down (review and reports migrations): removes new columns and returns to the legacy review shape without losing rows', async () => {
+    await ds.undoLastMigration(); // ReviewHalfStarRatings
     await ds.undoLastMigration(); // CreateReports
     await ds.undoLastMigration(); // ReviewBlindAndModeration
     await ds.undoLastMigration(); // ReviewsBothSides
@@ -231,6 +276,13 @@ describe('review migrations on a database that already holds reviews', () => {
     const rows = await ds.query('SELECT rating, comment FROM reviews ORDER BY rating DESC');
     expect(rows.map((r: { rating: number }) => Number(r.rating))).toEqual([5, 3, 1]);
     expect(rows[0].comment).toBe('legacy comment');
+    const [ratingColumn] = await ds.query(
+      `SELECT DATA_TYPE AS dataType
+         FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'reviews' AND COLUMN_NAME = 'rating'`,
+      [SCHEMA],
+    );
+    expect(ratingColumn.dataType).toBe('tinyint');
   });
 
   it('up again after a revert: the backfill works a second time', async () => {

@@ -34,7 +34,15 @@ export class Review {
   @Column({ type: 'varchar', length: 36 })
   revieweeId!: string;
 
-  @Column({ type: 'tinyint', unsigned: true })
+  @Column({
+    type: 'decimal',
+    precision: 2,
+    scale: 1,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string | number) => Number(value),
+    },
+  })
   rating!: number;
 
   @Column({ type: 'varchar', length: 1000, nullable: true })

@@ -1,7 +1,7 @@
 
 import { Type } from 'class-transformer';
 import {
-  IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -15,8 +15,8 @@ export class CreateReviewDto {
   borrowRequestId!: string;
 
   @Type(() => Number)
-  @IsInt()
-  @Min(1)
+  @IsNumber({ maxDecimalPlaces: 1 })
+  @Min(0.5)
   @Max(5)
   rating!: number;
 

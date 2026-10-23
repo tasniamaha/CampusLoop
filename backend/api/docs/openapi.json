@@ -393,6 +393,39 @@
         ]
       }
     },
+    "/api/resources/{id}/report": {
+      "post": {
+        "operationId": "ResourcesController_report",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportContentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Resources"
+        ]
+      }
+    },
     "/api/resources/{id}/images": {
       "post": {
         "operationId": "ResourcesController_addImages",
@@ -512,6 +545,86 @@
         },
         "tags": [
           "ResourceCategories"
+        ]
+      }
+    },
+    "/api/moderation/reports": {
+      "get": {
+        "operationId": "ReportsController_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "resolved",
+                "dismissed"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Reports"
+        ]
+      }
+    },
+    "/api/moderation/reports/{id}/resolve": {
+      "patch": {
+        "operationId": "ReportsController_resolve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Reports"
         ]
       }
     },
@@ -1064,6 +1177,39 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateLostFoundReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "LostFound"
+        ]
+      }
+    },
+    "/api/lost-found/{id}/report": {
+      "post": {
+        "operationId": "LostFoundController_report",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportContentDto"
               }
             }
           }
@@ -1693,86 +1839,6 @@
           "Reviews"
         ]
       }
-    },
-    "/api/moderation/reports": {
-      "get": {
-        "operationId": "ReportsController_list",
-        "parameters": [
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "open",
-                "resolved",
-                "dismissed"
-              ]
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 50,
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Reports"
-        ]
-      }
-    },
-    "/api/moderation/reports/{id}/resolve": {
-      "patch": {
-        "operationId": "ReportsController_resolve",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResolveReportDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Reports"
-        ]
-      }
     }
   },
   "info": {
@@ -1931,6 +1997,19 @@
           "categoryId"
         ]
       },
+      "ReportContentDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
       "UpdateResourceDto": {
         "type": "object",
         "properties": {
@@ -1996,6 +2075,25 @@
           "name",
           "slug",
           "createdAt"
+        ]
+      },
+      "ResolveReportDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "resolved",
+              "dismissed"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "status"
         ]
       },
       "CreateBorrowRequestDto": {
@@ -2358,7 +2456,7 @@
           },
           "rating": {
             "type": "number",
-            "minimum": 1,
+            "minimum": 0.5,
             "maximum": 5
           },
           "comment": {
@@ -2477,25 +2575,6 @@
             "maxLength": 255
           }
         }
-      },
-      "ResolveReportDto": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": [
-              "resolved",
-              "dismissed"
-            ]
-          },
-          "note": {
-            "type": "string",
-            "maxLength": 255
-          }
-        },
-        "required": [
-          "status"
-        ]
       }
     }
   },

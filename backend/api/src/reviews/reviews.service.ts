@@ -42,6 +42,17 @@ export class ReviewsService {
   ) {}
 
   async create(reviewerId: string, dto: CreateReviewDto) {
+    if (
+      !Number.isFinite(dto.rating) ||
+      dto.rating < 0.5 ||
+      dto.rating > 5 ||
+      !Number.isInteger(dto.rating * 2)
+    ) {
+      throw new BadRequestException(
+        'Rating must be between 0.5 and 5 in half-star increments',
+      );
+    }
+
     try {
       const resourceId = await this.peekResourceId(dto.borrowRequestId);
 

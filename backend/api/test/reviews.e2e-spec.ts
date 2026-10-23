@@ -25,6 +25,7 @@ import { CreateReviews1792900000000 } from '../src/database/migrations/179290000
 import { ReviewsBothSides1793000000000 } from '../src/database/migrations/1793000000000-ReviewsBothSides.js';
 import { ReviewBlindAndModeration1793100000000 } from '../src/database/migrations/1793100000000-ReviewBlindAndModeration.js';
 import { CreateReports1793200000000 } from '../src/database/migrations/1793200000000-CreateReports.js';
+import { ReviewHalfStarRatings1793300000000 } from '../src/database/migrations/1793300000000-ReviewHalfStarRatings.js';
 
 let ds: DataSource;
 let service: ReviewsService;
@@ -118,6 +119,7 @@ beforeAll(async () => {
       CreateLoanEvents1792100000000, CreateNotifications1792800000000,
       CreateReviews1792900000000, ReviewsBothSides1793000000000,
       ReviewBlindAndModeration1793100000000, CreateReports1793200000000,
+      ReviewHalfStarRatings1793300000000,
     ],
     synchronize: false, dropSchema: false, extra: { connectionLimit: 30 },
   });
