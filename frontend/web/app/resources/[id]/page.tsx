@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ChangeEvent, Suspense, useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import ResourceReviews from '../../../components/ResourceReviews';
 
 type Category = { id: string; name: string; slug: string };
 type ImageItem = { id: string; url: string; sortOrder: number };
@@ -380,6 +381,8 @@ function ResourceDetailContent() {
           </div>
         </section>
       </div>
+
+      <ResourceReviews resourceId={resource.id} ownerId={resource.owner.id} />
     </main>
   );
 }

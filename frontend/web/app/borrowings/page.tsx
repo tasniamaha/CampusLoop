@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import QrLoanVerification from '../../components/QrLoanVerification';
+import LoanReviewForm from '../../components/LoanReviewForm';
 type Status = 'pending' | 'approved' | 'active' | 'returned' | 'rejected' | 'cancelled' | 'expired';
 type Role = 'incoming' | 'outgoing';
 type Action = 'approve' | 'reject' | 'return' | 'cancel';
@@ -405,6 +406,9 @@ export default function BorrowingsPage() {
                     has not been independently verified.
                   </p>
                 )}
+
+                {/* Review is available only after the loan has been returned. The API remains authoritative. */}
+                {item.status === 'returned' && <LoanReviewForm borrowRequestId={item.id} />}
 
                 {/* Existing loan-event history */}
                 {openHistory === item.id && (
