@@ -382,7 +382,7 @@ function ResourceDetailContent() {
         </section>
       </div>
 
-      <ResourceReviews resourceId={resource.id} ownerId={resource.owner.id} />
+      <ResourceReviews resourceId={resource.id} ownerId={resource.owner.id} currentUserId={meId} />
     </main>
   );
 }

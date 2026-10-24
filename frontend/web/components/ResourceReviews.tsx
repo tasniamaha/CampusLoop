@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import StarRating from './StarRating';
 
@@ -28,6 +28,8 @@ type Reputation = {
   reputationScore: number;
 };
 
+const REASON_MIN = 3;
+const REASON_MAX = 255;
 const buttonClass = 'rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50';
 
 async function responseError(response: Response) {
@@ -44,14 +46,28 @@ function dateLabel(value: string) {
   return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-export default function ResourceReviews({ resourceId, ownerId }: { resourceId: string; ownerId: string }) {
+export default function ResourceReviews({
+  resourceId,
+  ownerId,
+  currentUserId = '',
+}: {
+  resourceId: string;
+  ownerId: string;
+  currentUserId?: string;
+}) {
   const router = useRouter();
   const [data, setData] = useState<ReviewList | null>(null);
   const [reputation, setReputation] = useState<Reputation | null>(null);
   const [loading, setLoading] = useState(true);
-  const [busyId, setBusyId] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+
+  // Report form state: only one review's form is open at a time.
+  const [openId, setOpenId] = useState('');
+  const [reason, setReason] = useState('');
+  const [reportError, setReportError] = useState('');
+  const [busyId, setBusyId] = useState('');
+  const [reportedIds, setReportedIds] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -80,30 +96,44 @@ export default function ResourceReviews({ resourceId, ownerId }: { resourceId: s
     return () => window.clearTimeout(timeout);
   }, [load]);
 
-  async function report(review: ReviewItem) {
-    const reason = window.prompt('Why are you reporting this review? (At least 3 characters)');
-    if (reason === null) return;
-    if (reason.trim().length < 3) {
-      setError('Report reason must contain at least 3 characters.');
+  function openReport(reviewId: string) {
+    setOpenId(reviewId);
+    setReason('');
+    setReportError('');
+    setNotice('');
+  }
+
+  function closeReport() {
+    setOpenId('');
+    setReason('');
+    setReportError('');
+  }
+
+  async function submitReport(event: FormEvent<HTMLFormElement>, review: ReviewItem) {
+    event.preventDefault();
+    const trimmed = reason.trim();
+    if (trimmed.length < REASON_MIN) {
+      setReportError(`Please give a reason of at least ${REASON_MIN} characters.`);
       return;
     }
     setBusyId(review.id);
-    setError('');
-    setNotice('');
+    setReportError('');
     try {
       const response = await fetch(`/api/backend/reviews/${encodeURIComponent(review.id)}/report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: reason.trim() }),
+        body: JSON.stringify({ reason: trimmed }),
       });
       if (response.status === 401) {
         router.replace('/login');
         return;
       }
       if (!response.ok) throw new Error(await responseError(response));
-      setNotice('Review report submitted for moderation.');
+      setReportedIds((ids) => [...ids, review.id]);
+      closeReport();
+      setNotice('Report submitted. A moderator will review it.');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Unable to report this review.');
+      setReportError(e instanceof Error ? e.message : 'Unable to report this review.');
     } finally {
       setBusyId('');
     }
@@ -149,21 +179,68 @@ export default function ResourceReviews({ resourceId, ownerId }: { resourceId: s
             <p className="mt-4 rounded-xl border border-dashed border-slate-300 p-5 text-sm text-slate-500">No public reviews for this resource yet. Blind reviews appear after both parties submit or the review window closes.</p>
           ) : (
             <ul className="mt-4 divide-y divide-slate-100">
-              {data.items.map((review) => (
-                <li key={review.id} className="py-4 first:pt-0 last:pb-0">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <p className="font-semibold text-slate-800">{review.reviewer.name}</p>
-                      <p className="text-xs text-slate-500">{dateLabel(review.createdAt)}</p>
+              {data.items.map((review) => {
+                // Hide Report until we know who is viewing, and on the viewer's own review.
+                const canReport = currentUserId !== '' && review.reviewer.id !== currentUserId;
+                const reported = reportedIds.includes(review.id);
+                const formOpen = openId === review.id;
+                const busy = busyId === review.id;
+                return (
+                  <li key={review.id} className="py-4 first:pt-0 last:pb-0">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <p className="font-semibold text-slate-800">{review.reviewer.name}</p>
+                        <p className="text-xs text-slate-500">{dateLabel(review.createdAt)}</p>
+                      </div>
+                      <StarRating value={review.rating} size="sm" label={`Review by ${review.reviewer.name}`} />
                     </div>
-                    <StarRating value={review.rating} size="sm" label={`Review by ${review.reviewer.name}`} />
-                  </div>
-                  {review.comment ? <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-700">{review.comment}</p> : <p className="mt-2 text-sm italic text-slate-500">No written comment.</p>}
-                  <button type="button" disabled={busyId === review.id} onClick={() => void report(review)} className={`${buttonClass} mt-3`}>
-                    {busyId === review.id ? 'Submitting…' : 'Report review'}
-                  </button>
-                </li>
-              ))}
+                    {review.comment ? <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-700">{review.comment}</p> : <p className="mt-2 text-sm italic text-slate-500">No written comment.</p>}
+
+                    {canReport && reported && (
+                      <p className="mt-3 text-xs font-medium text-slate-500">Reported. A moderator will review it.</p>
+                    )}
+                    {canReport && !reported && !formOpen && (
+                      <button type="button" onClick={() => openReport(review.id)} className={`${buttonClass} mt-3`}>
+                        Report review
+                      </button>
+                    )}
+                    {canReport && !reported && formOpen && (
+                      <form onSubmit={(event) => void submitReport(event, review)} className="mt-3 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                        <label htmlFor={`report-reason-${review.id}`} className="block text-sm font-medium text-slate-700">
+                          Why are you reporting this review?
+                        </label>
+                        <textarea
+                          id={`report-reason-${review.id}`}
+                          value={reason}
+                          onChange={(event) => setReason(event.target.value)}
+                          onKeyDown={(event) => { if (event.key === 'Escape') closeReport(); }}
+                          maxLength={REASON_MAX}
+                          rows={3}
+                          autoFocus
+                          aria-describedby={`report-help-${review.id}`}
+                          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                        />
+                        <p id={`report-help-${review.id}`} className="text-xs text-slate-500">
+                          {reason.length}/{REASON_MAX} characters · at least {REASON_MIN} required
+                        </p>
+                        {reportError && <p role="alert" className="text-sm text-rose-700">{reportError}</p>}
+                        <div className="flex gap-2">
+                          <button
+                            type="submit"
+                            disabled={busy || reason.trim().length < REASON_MIN}
+                            className="rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {busy ? 'Submitting…' : 'Submit report'}
+                          </button>
+                          <button type="button" onClick={closeReport} disabled={busy} className={buttonClass}>
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
           {data.totalPages > 1 && <p className="mt-4 text-xs text-slate-500">Showing page 1 of {data.totalPages}. Additional review pagination is not yet exposed in this interface.</p>}
