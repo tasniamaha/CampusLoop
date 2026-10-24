@@ -49,6 +49,7 @@ export class UsersService {
       target = { id: saved.id, email: saved.email, name: saved.name };
     } catch (err) {
       if (!isDuplicateEntry(err)) throw err;
+      this.logger.warn('register: address already registered; submitted password ignored');
       const existing = await this.usersRepository.findOne({ where: { emailCanonical } });
       if (existing && !existing.emailVerifiedAt) target = existing;
     }

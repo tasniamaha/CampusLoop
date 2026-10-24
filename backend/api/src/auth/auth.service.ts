@@ -24,7 +24,9 @@ export class AuthService {
     );
 
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+          this.logger.warn('login failed: no user for that email');
+           throw new UnauthorizedException('Invalid email or password');
+
     }
 
     const passwordMatches = await bcrypt.compare(
@@ -33,6 +35,7 @@ export class AuthService {
     );
 
     if (!passwordMatches) {
+      this.logger.warn(`login failed: wrong password for user ${user.id}`);
       throw new UnauthorizedException('Invalid email or password');
     }
 

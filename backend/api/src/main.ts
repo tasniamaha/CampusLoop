@@ -4,6 +4,8 @@ import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { Logger} from '@nestjs/common';
+import { DataSource } from 'typeorm';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
@@ -52,5 +54,7 @@ async function bootstrap() {
     writeFileSync('docs/openapi.json', JSON.stringify(document, null, 2));
   }
   await app.listen(process.env.PORT ?? 3001);
+  const o = app.get(DataSource).options as { host?: string; port?: number; database?: string };
+  new Logger('Database').log(`Connected to "${o.database}" on ${o.host}:${o.port}`);
 }
 await bootstrap();
