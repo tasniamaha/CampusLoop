@@ -59,11 +59,11 @@ export default function StarRating({
     <div
       role="radiogroup"
       aria-label={label}
-      className="inline-flex items-center"
+       className="inline-flex flex-wrap items-center"
       onMouseLeave={() => setHover(null)}
     >
       {[1, 2, 3, 4, 5].map((star) => (
-        <span key={star} className="relative inline-block px-1.5">
+        <span key={star} className="relative inline-block px-2.5">
           <StarGlyph fillPercent={fillFor(star)} className={text} />
           {[star - 0.5, star].map((step, index) => (
             <span
