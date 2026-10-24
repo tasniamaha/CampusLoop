@@ -119,8 +119,17 @@ export default function ResourceReviews({ resourceId, ownerId }: { resourceId: s
         {reputation && (
           <div className="rounded-xl bg-emerald-50 px-3 py-2 text-right ring-1 ring-inset ring-emerald-100">
             <p className="text-xs font-medium text-emerald-800">Owner reputation</p>
-            <p className="text-lg font-bold text-emerald-900">{reputation.reputationScore.toFixed(2)} / 5</p>
-            <p className="text-xs text-emerald-800">{reputation.reviewCount} distinct reviewer{reputation.reviewCount === 1 ? '' : 's'}</p>
+            {reputation.reviewCount === 0 ? (
+              <p className="text-sm font-semibold text-emerald-900">New member · no reviews yet</p>
+            ) : (
+              <>
+                <p className="text-lg font-bold text-emerald-900">{reputation.reputationScore.toFixed(2)} / 5</p>
+                <p className="text-xs text-emerald-800">
+                  {reputation.reviewCount} reviewer{reputation.reviewCount === 1 ? '' : 's'}
+                  {reputation.rawAverage !== null ? ` · average given ${reputation.rawAverage.toFixed(1)}` : ''}
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>
