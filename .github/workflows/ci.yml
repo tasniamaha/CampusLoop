@@ -51,7 +51,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: backend/api/package-lock.json
       - run: npm ci
@@ -82,8 +82,12 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/reviews-http.e2e-spec.ts
       - name: Review flow HTTP tests (borrow to return to review)
         run: npx vitest run --config vitest.config.e2e.ts test/reviews-flow-http.e2e-spec.ts
-      - name: Review migration tests (runs last, restores schema)
-        run: npx vitest run --config vitest.config.e2e.ts test/review-migrations.e2e-spec.ts
+      - name: Refresh token rotation tests (real MySQL)
+        run: npx vitest run --config vitest.config.e2e.ts test/refresh-tokens-http.e2e-spec.ts
+      - name: Moderation report tests (queue, roles, campus scoping)
+        run: npx vitest run --config vitest.config.e2e.ts test/moderation-reports.e2e-spec.ts
+      - name: Moderation report target tests (resources, lost-found)
+        run: npx vitest run --config vitest.config.e2e.ts test/moderation-report-targets.e2e-spec.ts
       - name: Review migration tests (runs last, restores schema)
         run: npx vitest run --config vitest.config.e2e.ts test/review-migrations.e2e-spec.ts
   frontend:
@@ -98,7 +102,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: frontend/web/package-lock.json
       - run: npm ci
