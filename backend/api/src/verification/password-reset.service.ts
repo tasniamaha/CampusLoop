@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity.js';
 import { VerificationToken, VerificationType } from './entities/verification-token.entity.js';
 import { newOpaqueToken, sha256 } from './token.util.js';
 import { canonicalEmail } from '../common/email.js';
+import { RefreshRevokeReason, RefreshToken } from '../auth/entities/refresh-token.entity.js';
 
 const TOKEN_TTL_MS = 60 * 60 * 1000;
 const WINDOW_MS = 60 * 60 * 1000;
@@ -98,6 +99,12 @@ export class PasswordResetService {
 
       await m.update(VerificationToken, { id: token.id }, { usedAt: now });
       await m.update(User, { id: token.userId }, { passwordHash });
+      // A reset must end every existing session, including one held by whoever knew the old password.
+      await m.update(
+        RefreshToken,
+        { userId: token.userId, revokedAt: IsNull() },
+        { revokedAt: now, revokeReason: RefreshRevokeReason.PASSWORD_RESET },
+      );
       // Clicking the emailed link proves inbox ownership.
       await m.update(User, { id: token.userId, emailVerifiedAt: IsNull() }, { emailVerifiedAt: now });
       return true;

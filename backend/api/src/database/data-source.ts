@@ -15,6 +15,7 @@ import { StudyGroupMember } from '../study-groups/entities/study-group-member.en
 import { Notification } from '../notifications/entities/notification.entity.js';
 import { Review } from '../reviews/entities/review.entity.js';
 import { Report } from '../reports/entities/report.entity.js';
+import { RefreshToken } from '../auth/entities/refresh-token.entity.js';
 // entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent, VerificationToken],
 export default new DataSource({
   type: 'mariadb',
@@ -24,7 +25,7 @@ export default new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   timezone: 'Z',
-  entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken,AuditLog,LostFoundReport,StudyGroup,StudyGroupMember,Notification,Review,Report],
+  entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken,AuditLog,LostFoundReport,StudyGroup,StudyGroupMember,Notification,Review,Report,RefreshToken],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,
 });

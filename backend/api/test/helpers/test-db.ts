@@ -12,6 +12,8 @@ import { CreateAuditLogs1792300000000 } from '../../src/database/migrations/1792
 import { AddEmailCanonical1792700000000 } from '../../src/database/migrations/1792700000000-AddEmailCanonical.js';
 import { CreateNotifications1792800000000 } from '../../src/database/migrations/1792800000000-CreateNotifications.js';
 import { Notification } from '../../src/notifications/entities/notification.entity.js';
+import { RefreshToken } from '../../src/auth/entities/refresh-token.entity.js';
+import { CreateRefreshTokens1793400000000 } from '../../src/database/migrations/1793400000000-CreateRefreshTokens.js';
 const createdUserIds: string[] = [];
 export const rand = () => Math.random().toString(36).slice(2, 10);
 
@@ -23,7 +25,7 @@ export async function createTestDataSource(): Promise<DataSource> {
     username: process.env.TEST_DB_USER ?? 'root',
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
-    entities: [User, VerificationToken, AuditLog, Notification],
+    entities: [User, VerificationToken, AuditLog, Notification, RefreshToken],
     migrations: [AddEmailCanonical1792700000000,
       CreateUsers1791838335819,
       CreateResourcesAndBorrowRequests1791900000000,
@@ -32,6 +34,7 @@ export async function createTestDataSource(): Promise<DataSource> {
       CreateVerificationTokens1792200000000,
       CreateAuditLogs1792300000000,
       CreateNotifications1792800000000,
+      CreateRefreshTokens1793400000000,
     ],
   });
   await ds.initialize();

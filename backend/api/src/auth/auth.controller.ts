@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Post,
   Req,
   UseGuards,
@@ -17,6 +18,7 @@ import { Throttle } from '@nestjs/throttler';
 import { VerifyEmailDto } from './dto/verify-email.dto.js';
 import { ForgotPasswordDto } from './dto/forgot-password.dto.js';
 import { ResetPasswordDto } from './dto/reset-password.dto.js';
+import { RefreshTokenDto } from './dto/refresh-token.dto.js';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -36,8 +38,29 @@ export class AuthController {
   @LoginThrottle()
   @Public()
   @Post('login')
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  login(@Body() dto: LoginDto, @Headers('user-agent') userAgent?: string) {
+    return this.authService.login(dto, userAgent ?? null);
+  }
+
+  /** Public: the access token is usually expired when this is called. The refresh token is the credential. */
+  @Public()
+  @HttpCode(200)
+  @Post('refresh')
+  refresh(@Body() dto: RefreshTokenDto, @Headers('user-agent') userAgent?: string) {
+    return this.authService.refresh(dto.refreshToken, userAgent ?? null);
+  }
+
+  @Public()
+  @HttpCode(204)
+  @Post('logout')
+  async logout(@Body() dto: RefreshTokenDto): Promise<void> {
+    await this.authService.logout(dto.refreshToken);
+  }
+
+  @HttpCode(204)
+  @Post('logout-all')
+  async logoutAll(@Req() req: AuthenticatedRequest): Promise<void> {
+    await this.authService.logoutAll(req.user.sub);
   }
 
   @Public()

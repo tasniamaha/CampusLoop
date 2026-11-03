@@ -6,10 +6,15 @@ import { AuthController } from './auth.controller.js';
 import { UsersModule } from '../users/users.module.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { VerificationModule } from '../verification/verification.module.js';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuditModule } from '../audit/audit.module.js';
+import { RefreshToken } from './entities/refresh-token.entity.js';
+import { RefreshTokenService } from './refresh-token.service.js';
 
 @Module({
   imports: [
-    UsersModule,VerificationModule,
+    UsersModule,VerificationModule,AuditModule,
+    TypeOrmModule.forFeature([RefreshToken]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -28,7 +33,7 @@ import { VerificationModule } from '../verification/verification.module.js';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthGuard],
+  providers: [AuthService, JwtAuthGuard, RefreshTokenService],
   exports: [JwtModule, JwtAuthGuard],
 })
 export class AuthModule {}

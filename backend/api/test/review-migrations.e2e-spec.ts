@@ -20,6 +20,7 @@ import { ReviewsBothSides1793000000000 } from '../src/database/migrations/179300
 import { ReviewBlindAndModeration1793100000000 } from '../src/database/migrations/1793100000000-ReviewBlindAndModeration.js';
 import { CreateReports1793200000000 } from '../src/database/migrations/1793200000000-CreateReports.js';
 import { ReviewHalfStarRatings1793300000000 } from '../src/database/migrations/1793300000000-ReviewHalfStarRatings.js';
+import { CreateRefreshTokens1793400000000 } from '../src/database/migrations/1793400000000-CreateRefreshTokens.js';
 
 // Proves the two review migrations on a database that ALREADY holds reviews written by the
 // original schema (one review per loan, no reviewee). Uses the existing campusloop_test database:
@@ -65,6 +66,25 @@ const indexes = async () =>
     )) as Array<{ i: string }>
   ).map((r) => r.i);
 
+// Undo by NAME, not by count, so adding an unrelated migration later cannot break these tests.
+// Ordered by id because TypeORM's undoLastMigration() reverts the most recently EXECUTED row.
+const executedNewestFirst = async () =>
+  ((await ds.query('SELECT name FROM migrations ORDER BY id DESC')) as Array<{ name: string }>).map((r) => r.name);
+
+async function undoUntilLatestIs(name: string) {
+  for (;;) {
+    const executed = await executedNewestFirst();
+    if (!executed.includes(name)) throw new Error(`Migration ${name} is not applied`);
+    if (executed[0] === name) return;
+    await ds.undoLastMigration();
+  }
+}
+
+async function undoThrough(name: string) {
+  await undoUntilLatestIs(name);
+  await ds.undoLastMigration();
+}
+
 let ownerId = '';
 const created = '2026-09-01 10:00:00.000000';
 
@@ -82,6 +102,7 @@ beforeAll(async () => {
       ReviewBlindAndModeration1793100000000,
       CreateReports1793200000000,
       ReviewHalfStarRatings1793300000000,
+      CreateRefreshTokens1793400000000,
     ] as never,
     synchronize: false,
     dropSchema: false,
@@ -91,10 +112,7 @@ beforeAll(async () => {
   // 1) Make sure we start fully migrated, clear leftover review rows, then step back to the legacy shape.
   await ds.runMigrations();
   await ds.query('DELETE FROM reviews');
-  await ds.undoLastMigration(); // ReviewHalfStarRatings
-  await ds.undoLastMigration(); // CreateReports
-  await ds.undoLastMigration(); // ReviewBlindAndModeration
-  await ds.undoLastMigration(); // ReviewsBothSides
+  await undoThrough('ReviewsBothSides1793000000000');
   expect(await columns()).not.toContain('revieweeId');
 
   // 2) Seed one owner, three borrowers and three RETURNED loans.
@@ -250,6 +268,7 @@ describe('review migrations on a database that already holds reviews', () => {
       [PROBE_ID, row.borrowRequestId, row.resourceId, row.revieweeId, row.reviewerId],
     );
     try {
+      await undoUntilLatestIs('ReviewHalfStarRatings1793300000000');
       await expect(ds.undoLastMigration()).rejects.toThrow(/half-star/i);
     } finally {
       await ds.query('DELETE FROM reviews WHERE id = ?', [PROBE_ID]);
@@ -262,10 +281,7 @@ describe('review migrations on a database that already holds reviews', () => {
     expect(col.dataType).toBe('decimal'); // still migrated
   });
   it('down (review and reports migrations): removes new columns and returns to the legacy review shape without losing rows', async () => {
-    await ds.undoLastMigration(); // ReviewHalfStarRatings
-    await ds.undoLastMigration(); // CreateReports
-    await ds.undoLastMigration(); // ReviewBlindAndModeration
-    await ds.undoLastMigration(); // ReviewsBothSides
+    await undoThrough('ReviewsBothSides1793000000000');
 
     const cols = await columns();
     for (const c of NEW_COLUMNS) expect(cols).not.toContain(c);

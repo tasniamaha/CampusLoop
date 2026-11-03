@@ -6,6 +6,11 @@ import { UsersService } from '../users/users.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { EmailVerificationService } from '../verification/email-verification.service.js';
 import { PasswordResetService } from '../verification/password-reset.service.js';
+import type { User } from '../users/entities/user.entity.js';
+import { RefreshTokenService, type IssuedRefreshToken } from './refresh-token.service.js';
+import { RefreshRevokeReason } from './entities/refresh-token.entity.js';
+
+export const ACCESS_TOKEN_TTL_SECONDS = 900;
 
 @Injectable()
 export class AuthService {
@@ -14,11 +19,11 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly verification: EmailVerificationService,
     private readonly passwordReset: PasswordResetService,
-
+    private readonly refreshTokens: RefreshTokenService,
   ) {}
     private readonly logger = new Logger(AuthService.name);
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, userAgent: string | null = null) {
     const user = await this.usersService.findByEmailWithPassword(
       dto.email,
     );
@@ -39,17 +44,37 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const payload = {
-      sub: user.id,
-      role: user.role,
-    };
+    const refresh = await this.refreshTokens.issueForLogin(user.id, userAgent);
+    return this.buildSession(user, refresh);
+  }
 
-    const accessToken = await this.jwtService.signAsync(payload);
+  /** Rotates the refresh token and re-reads the user, so role changes apply on next refresh. */
+  async refresh(rawRefreshToken: string, userAgent: string | null) {
+    const { userId, token } = await this.refreshTokens.rotate(rawRefreshToken, userAgent);
+    const user = await this.usersService.findById(userId);
+    if (!user) throw new UnauthorizedException('Session expired. Please log in again.');
+    return this.buildSession(user, token);
+  }
+
+  async logout(rawRefreshToken: string): Promise<void> {
+    await this.refreshTokens.revokeFamilyOf(rawRefreshToken);
+  }
+
+  /** Revokes every refresh token. Already-issued access tokens stay valid until they expire (≤15 min). */
+  async logoutAll(userId: string): Promise<void> {
+    await this.refreshTokens.revokeAllForUser(userId, RefreshRevokeReason.LOGOUT_ALL);
+  }
+
+  private async buildSession(user: User, refresh: IssuedRefreshToken) {
+    const payload = { sub: user.id, role: user.role };
+    const accessToken = await this.jwtService.signAsync(payload, { expiresIn: ACCESS_TOKEN_TTL_SECONDS });
 
     return {
       accessToken,
-      tokenType: 'Bearer',
-      expiresIn: 900,
+      tokenType: 'Bearer' as const,
+      expiresIn: ACCESS_TOKEN_TTL_SECONDS,
+      refreshToken: refresh.raw,
+      refreshExpiresAt: refresh.expiresAt.toISOString(),
       user: {
         id: user.id,
         name: user.name,

@@ -11,8 +11,8 @@ function build(passwordReset: Record<string, unknown> = {}) {
     reset: vi.fn().mockResolvedValue(undefined),
     ...passwordReset,
   };
-  // constructor order: users, jwt, emailVerification, passwordReset
-  const service = new AuthService({} as never, {} as never, {} as never, pr as never);
+  // constructor order: users, jwt, emailVerification, passwordReset, refreshTokens
+  const service = new AuthService({} as never, {} as never, {} as never, pr as never, {} as never);
   return { service, pr };
 }
 
