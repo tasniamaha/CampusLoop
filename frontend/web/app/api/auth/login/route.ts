@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { forwardedForHeader } from '../../../../lib/client-ip';
+import { isBackendSession, setSessionCookies } from '../../../../lib/session';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,6 +10,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
        'Content-Type': 'application/json',
+        'User-Agent': request.headers.get('user-agent') ?? '',
         ...forwardedForHeader(request),
       },
       body: JSON.stringify(body),
@@ -16,25 +18,21 @@ export async function POST(request: NextRequest) {
     });
 
 
-    const data = await response.json();
+    const data: unknown = await response.json();
 
     if (!response.ok) {
       return NextResponse.json(data, {
         status: response.status,
       });
     }
+    if (!isBackendSession(data)) {
+      return NextResponse.json({ message: 'Unexpected response from the authentication service' }, { status: 502 });
+    }
 
     const result = NextResponse.json({
       user: data.user,
     });
-
-    result.cookies.set('campusloop_token', data.accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: data.expiresIn,
-    });
+    setSessionCookies(result, data);
 
     return result;
   } catch {

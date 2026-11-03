@@ -1,16 +1,11 @@
+import { NextResponse, type NextRequest } from 'next/server';
+import { REFRESH_COOKIE, clearSessionCookies, revokeSession } from '../../../../lib/session';
 
-import { NextResponse } from 'next/server';
+export async function POST(request: NextRequest) {
+  const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
+  if (refreshToken) await revokeSession(refreshToken);
 
-export async function POST() {
   const response = NextResponse.json({ ok: true });
-
-  response.cookies.set('campusloop_token', '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 0,
-  });
-
+  clearSessionCookies(response);
   return response;
 }
