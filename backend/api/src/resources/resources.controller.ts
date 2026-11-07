@@ -20,20 +20,17 @@ import type { Request } from 'express';
 import { createReadStream } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { extname } from 'node:path';
-import {
-  MAX_IMAGE_BYTES,
-  MAX_IMAGES_PER_RESOURCE,
-  ResourcesService,
-} from './resources.service.js';
+import { MAX_IMAGES_PER_RESOURCE, ResourcesService } from './resources.service.js';
+import { MAX_IMAGE_BYTES } from '../images/image-limits.js';
 import { CreateResourceDto } from './dto/create-resource.dto.js';
 import { UpdateResourceDto } from './dto/update-resource.dto.js';
 import { ListResourcesQueryDto } from './dto/list-resources-query.dto.js';
-import { ImageStorageService, MIME_BY_EXT } from './storage/image-storage.service.js';
+import { ImageStorageService, MIME_BY_EXT } from '../images/image-storage.service.js';
 import { Public } from '../auth/public.decorator.js';
 import { RequireVerifiedEmail } from '../auth/require-verified-email.decorator.js'; // CHANGED
 import { Throttle } from '@nestjs/throttler';
 import { ReportContentDto } from '../reports/dto/reports.dto.js';
-import type { UploadedImageFile } from './storage/uploaded-file.js';
+import type { UploadedImageFile } from '../images/uploaded-file.js';
 interface AuthenticatedRequest extends Request {
   user: { sub: string; role: string };
 }
@@ -50,7 +47,7 @@ export class ResourcesController {
   @Public()
   @Get('images/:key')
   async image(@Param('key') key: string) {
-    const path = this.storage.pathFor(key);
+    const path = this.storage.pathFor('resources', key);
     if (!path) throw new NotFoundException();
     try {
       await access(path);

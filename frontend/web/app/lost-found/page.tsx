@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useSyncExternalStore, type FormEvent } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import PhotoDropzone, { preparePhotos, releasePhotos, type PendingPhoto } from '../../components/PhotoDropzone';
 
 type Report = {
   id: string;
@@ -11,7 +12,10 @@ type Report = {
   category: string;
   location: string;
   itemDate: string;
+  /** Legacy link, read-only. Only returned to viewers who may see this report's photos. */
   imageUrl: string | null;
+  /** Empty when the viewer may not see this report's photos (e.g. someone else's found item). */
+  photos: { id: string; url: string }[];
   status: 'open' | 'resolved';
   createdAt: string;
   isMine?: boolean;
@@ -35,6 +39,53 @@ async function readError(response: Response): Promise<string> {
   return body?.message || `Request failed (${response.status})`;
 }
 
+/** API photo URLs start with /api/; the browser loads them through the authenticated proxy. */
+const proxied = (url: string) => url.replace(/^\/api\//, '/api/backend/');
+
+type UploadResult = { ok: true } | { ok: false; status: number; message: string };
+
+/** One photo per request: keeps each request small and gives real progress (fetch has no upload progress). */
+function uploadPhoto(reportId: string, file: File, onProgress: (percent: number) => void): Promise<UploadResult> {
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `/api/backend/lost-found/${reportId}/photos`);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100));
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) return resolve({ ok: true });
+      let message = `Upload failed (${xhr.status})`;
+      try {
+        const body = JSON.parse(xhr.responseText) as { message?: string | string[] };
+        if (body.message) message = Array.isArray(body.message) ? body.message.join(', ') : body.message;
+      } catch { /* not JSON */ }
+      if (xhr.status === 413) message = 'is larger than 5 MB.';
+      // The API numbers files within a request; each request carries exactly one.
+      resolve({ ok: false, status: xhr.status, message: message.replace(/^File #1 /, '') });
+    };
+    xhr.onerror = () => resolve({ ok: false, status: 0, message: 'could not be uploaded. Check your connection and try again.' });
+    const form = new FormData();
+    form.append('files', file);
+    xhr.send(form);
+  });
+}
+
+function PhotoThumbnails({ photos, title, size = 'h-20 w-20' }: { photos: Report['photos']; title: string; size?: string }) {
+  if (!photos.length) return null;
+  return (
+    <ul aria-label={`Photos of ${title}`} className="mt-3 flex flex-wrap gap-2">
+      {photos.map((photo, index) => (
+        <li key={photo.id}>
+          <a href={proxied(photo.url)} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-lg border border-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={proxied(photo.url)} alt={`${title}, photo ${index + 1}`} loading="lazy" className={`${size} object-cover`} />
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function LostFoundPage() {
   const router = useRouter();
   const [reports, setReports] = useState<Report[]>([]);
@@ -51,7 +102,13 @@ export default function LostFoundPage() {
   const [itemDate, setItemDate] = useState('');
   const todayDate = useSyncExternalStore(subscribeNoop, getToday, getServerToday);
   const effectiveItemDate = itemDate || todayDate;
-  const [imageUrl, setImageUrl] = useState('');
+  const [photos, setPhotos] = useState<PendingPhoto[]>([]);
+  const [photoErrors, setPhotoErrors] = useState<string[]>([]);
+  // Set when the report was created but some photos failed: the form then only retries those photos.
+  const [savedReportId, setSavedReportId] = useState<string | null>(null);
+  const [uploadStep, setUploadStep] = useState<{ current: number; total: number } | null>(null);
+  // Preview URLs still alive, released on unmount.
+  const previewUrls = useRef(new Set<string>());
   const [matches, setMatches] = useState<Record<string, Match[]>>({});
   const [busy, setBusy] = useState(false);
   const [busyAction, setBusyAction] = useState<string | null>(null);
@@ -77,6 +134,38 @@ export default function LostFoundPage() {
   function changeFilter(next: string) {
     setFilter(next);
     requestReports(1);
+  }
+
+  useEffect(() => {
+    const urls = previewUrls.current;
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, []);
+
+  function addPhotos(files: File[]) {
+    const { added, errors } = preparePhotos(files, photos.length);
+    added.forEach((photo) => previewUrls.current.add(photo.previewUrl));
+    setPhotos((previous) => [...previous, ...added]);
+    setPhotoErrors(errors);
+  }
+
+  function removePhoto(key: string) {
+    const photo = photos.find((p) => p.key === key);
+    if (!photo) return;
+    releasePhotos([photo]);
+    previewUrls.current.delete(photo.previewUrl);
+    setPhotos((previous) => previous.filter((p) => p.key !== key));
+    setPhotoErrors([]);
+  }
+
+  function updatePhoto(key: string, patch: Partial<PendingPhoto>) {
+    setPhotos((previous) => previous.map((p) => (p.key === key ? { ...p, ...patch } : p)));
+  }
+
+  function resetForm() {
+    setTitle(''); setDescription(''); setCategory(''); setLocation(''); setItemDate('');
+    releasePhotos(photos);
+    photos.forEach((p) => previewUrls.current.delete(p.previewUrl));
+    setPhotos([]); setPhotoErrors([]); setSavedReportId(null);
   }
 
   useEffect(() => {
@@ -117,25 +206,64 @@ export default function LostFoundPage() {
     setBusy(true);
     setError('');
     setNotice('');
+    setPhotoErrors([]);
     try {
-      const response = await fetch('/api/backend/lost-found', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type, title, description, category, location, itemDate: effectiveItemDate,
-          ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
-        }),
-      });
-      if (response.status === 401) { router.replace('/login'); return; }
-      if (!response.ok) throw new Error(await readError(response));
-      setTitle(''); setDescription(''); setCategory(''); setLocation(''); setItemDate(''); setImageUrl('');
-      changeFilter(''); // the effect refetches with the new filter
-      setNotice('Your report has been submitted.');
+      // Step 1: create the report (skipped when retrying photos for a report that already exists).
+      let reportId = savedReportId;
+      if (!reportId) {
+        const response = await fetch('/api/backend/lost-found', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type, title, description, category, location, itemDate: effectiveItemDate }),
+        });
+        if (response.status === 401) { router.replace('/login'); return; }
+        if (!response.ok) throw new Error(await readError(response));
+        reportId = ((await response.json()) as Report).id;
+      }
+
+      // Step 2: upload photos one at a time. Successful ones leave the list; failed ones stay for a retry.
+      const queue = [...photos];
+      const failures: string[] = [];
+      for (let i = 0; i < queue.length; i++) {
+        const photo = queue[i];
+        setUploadStep({ current: i + 1, total: queue.length });
+        updatePhoto(photo.key, { status: 'uploading', progress: 0, error: undefined });
+        const result = await uploadPhoto(reportId, photo.file, (progress) => updatePhoto(photo.key, { progress }));
+        if (result.ok) {
+          releasePhotos([photo]);
+          previewUrls.current.delete(photo.previewUrl);
+          setPhotos((previous) => previous.filter((p) => p.key !== photo.key));
+        } else if (result.status === 401) {
+          router.replace('/login');
+          return;
+        } else {
+          updatePhoto(photo.key, { status: 'failed', progress: 0, error: result.message });
+          failures.push(`"${photo.file.name}" ${result.message}`);
+        }
+      }
+
+      changeFilter(''); // the report exists either way: show it
+      if (failures.length) {
+        setSavedReportId(reportId);
+        setPhotoErrors(failures);
+        setError(`Your report was saved, but ${failures.length} photo${failures.length === 1 ? '' : 's'} could not be uploaded. Retry, or remove ${failures.length === 1 ? 'it' : 'them'} and finish.`);
+        return;
+      }
+      const uploaded = queue.length;
+      resetForm();
+      setNotice(uploaded ? `Your report has been submitted with ${uploaded} photo${uploaded === 1 ? '' : 's'}.` : 'Your report has been submitted.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create report');
     } finally {
       setBusy(false);
+      setUploadStep(null);
     }
+  }
+
+  function finishWithoutFailedPhotos() {
+    resetForm();
+    setError('');
+    setNotice('Your report has been submitted.');
   }
 
   async function findMatches(id: string) {
@@ -246,8 +374,10 @@ export default function LostFoundPage() {
       {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}
       {notice && <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</p>}
 
-      <form onSubmit={submitReport} className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
+      <form onSubmit={submitReport} aria-busy={busy} className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
         <h2 className="text-lg font-semibold sm:col-span-2">Submit a report</h2>
+        {/* Locked once the report is saved: retrying only re-sends the photos. `contents` keeps the grid. */}
+        <fieldset disabled={busy || savedReportId !== null} className="contents">
         <label className="text-sm font-medium">Report type
           <select value={type} onChange={(e) => setType(e.target.value as 'lost' | 'found')} className="mt-1 block w-full rounded-lg border p-2">
             <option value="lost">I lost an item</option><option value="found">I found an item</option>
@@ -265,13 +395,27 @@ export default function LostFoundPage() {
         <label className="text-sm font-medium">Date lost or found
           <input required type="date" max={todayDate || undefined} value={effectiveItemDate} onChange={(e) => setItemDate(e.target.value)} className="mt-1 block w-full rounded-lg border p-2" />
         </label>
-        <label className="text-sm font-medium">Image URL (optional)
-          <input type="url" maxLength={500} value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." className="mt-1 block w-full rounded-lg border p-2" />
-        </label>
         <label className="text-sm font-medium sm:col-span-2">Description
           <textarea required minLength={5} maxLength={3000} rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe colour, brand, or distinguishing marks. Do not include passwords or sensitive ID details." className="mt-1 block w-full rounded-lg border p-2" />
         </label>
-        <button disabled={busy} className="rounded-lg bg-emerald-700 px-4 py-2 font-semibold text-white disabled:opacity-50 sm:col-span-2">{busy ? 'Submitting...' : 'Submit report'}</button>
+        </fieldset>
+        <div className="sm:col-span-2">
+          <p className="text-sm font-medium">Photos (optional)</p>
+          <p className="mb-2 text-xs text-slate-500">
+            {type === 'found'
+              ? 'Photos of found items are shown only to you and moderators, so nobody can copy details from them to make a false claim.'
+              : 'Photos of lost items are shown to everyone on your campus. Location data is removed from every photo.'}
+          </p>
+          <PhotoDropzone photos={photos} errors={photoErrors} disabled={busy} onAdd={addPhotos} onRemove={removePhoto} />
+        </div>
+        <div className="flex flex-col gap-2 sm:col-span-2 sm:flex-row">
+          <button disabled={busy || (savedReportId !== null && photos.length === 0)} className="rounded-lg bg-emerald-700 px-4 py-2 font-semibold text-white disabled:opacity-50 sm:flex-1">
+            {uploadStep ? `Uploading photo ${uploadStep.current} of ${uploadStep.total}...` : busy ? 'Submitting...' : savedReportId ? 'Retry photo upload' : 'Submit report'}
+          </button>
+          {savedReportId && !busy && (
+            <button type="button" onClick={finishWithoutFailedPhotos} className="rounded-lg border px-4 py-2 font-medium">Finish without these photos</button>
+          )}
+        </div>
       </form>
 
       <section>
@@ -291,6 +435,7 @@ export default function LostFoundPage() {
                 <div className="flex flex-wrap justify-between gap-2"><h3 className="font-semibold">{report.title}</h3><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium uppercase">{report.type}</span></div>
                 <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{report.description}</p>
                 <p className="mt-2 text-sm text-slate-500">{report.category} · {report.location} · {String(report.itemDate).slice(0, 10)}</p>
+                <PhotoThumbnails photos={report.photos} title={report.title} />
                 {report.imageUrl && <a href={report.imageUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm text-emerald-800 underline">View item image</a>}
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button type="button" disabled={busyAction !== null} onClick={() => void findMatches(report.id)} className="rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-50">{busyAction === `matches:${report.id}` ? 'Searching...' : 'Find possible matches'}</button>
@@ -302,7 +447,7 @@ export default function LostFoundPage() {
                   {claims[report.id].length === 0 ? <p className="mt-2 text-sm text-slate-500">No claims have been submitted.</p> : <ul className="mt-2 space-y-3">{claims[report.id].map((claim) => <li key={claim.id} className="rounded-lg bg-slate-50 p-3"><p className="text-sm font-medium">Status: {claim.status}</p><p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">Private ownership evidence: {claim.proofDetails}</p>{claim.reviewerNote && <p className="mt-1 text-sm text-slate-600">Note: {claim.reviewerNote}</p>}{claim.status === 'pending' && <div className="mt-3 flex gap-2"><button type="button" disabled={claimBusy !== null} onClick={() => void reviewClaim(report.id, claim.id, 'approved')} className="rounded-lg bg-emerald-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-50">Approve ownership</button><button type="button" disabled={claimBusy !== null} onClick={() => void reviewClaim(report.id, claim.id, 'rejected')} className="rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-50">Reject claim</button></div>}</li>)}</ul>}
                 </div>}
                 {matches[report.id] && <div className="mt-4 border-t pt-4"><h4 className="font-medium">Possible matches</h4>
-                  {matches[report.id].length === 0 ? <p className="mt-2 text-sm text-slate-500">No likely matches found yet.</p> : <ul className="mt-2 space-y-3">{matches[report.id].map((match) => <li key={match.report.id} className="rounded-lg bg-slate-50 p-3"><p className="font-medium">{match.report.title}<span className="ml-2 text-xs text-slate-500">Match score: {match.score}/100</span></p><p className="text-sm text-slate-600">{match.report.category} · {match.report.location} · {String(match.report.itemDate).slice(0, 10)}</p><p className="mt-1 text-xs text-slate-500">{match.reasons.join(' · ')}</p></li>)}</ul>}
+                  {matches[report.id].length === 0 ? <p className="mt-2 text-sm text-slate-500">No likely matches found yet.</p> : <ul className="mt-2 space-y-3">{matches[report.id].map((match) => <li key={match.report.id} className="rounded-lg bg-slate-50 p-3"><p className="font-medium">{match.report.title}<span className="ml-2 text-xs text-slate-500">Match score: {match.score}/100</span></p><p className="text-sm text-slate-600">{match.report.category} · {match.report.location} · {String(match.report.itemDate).slice(0, 10)}</p><p className="mt-1 text-xs text-slate-500">{match.reasons.join(' · ')}</p><PhotoThumbnails photos={match.report.photos} title={match.report.title} size="h-16 w-16" /></li>)}</ul>}
                 </div>}
               </li>
             ))}

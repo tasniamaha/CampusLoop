@@ -9,11 +9,12 @@ import { User } from '../users/entities/user.entity.js';
 import { ResourcesService } from './resources.service.js';
 import { ResourcesController } from './resources.controller.js';
 import { ResourceCategoriesController } from './resource-categories.controller.js';
-import { ImageStorageService } from './storage/image-storage.service.js';
+import { ImagesModule } from '../images/images.module.js';
 import { ReportsModule } from '../reports/reports.module.js';
 
 @Module({
   imports: [
+    ImagesModule,
     ReportsModule,
     TypeOrmModule.forFeature([
       Resource,
@@ -25,6 +26,6 @@ import { ReportsModule } from '../reports/reports.module.js';
     ]),
   ],
   controllers: [ResourcesController, ResourceCategoriesController],
-  providers: [ResourcesService, ImageStorageService],
+  providers: [ResourcesService],
 })
 export class ResourcesModule {}

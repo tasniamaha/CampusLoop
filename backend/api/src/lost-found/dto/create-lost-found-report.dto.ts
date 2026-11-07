@@ -1,12 +1,4 @@
-import {
-  IsDateString,
-  IsEnum,
-  IsOptional,
-  IsString,
-  IsUrl,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsDateString, IsEnum, IsString, MaxLength, MinLength } from 'class-validator';
 import { LostFoundType } from '../entities/lost-found-report.entity.js';
 
 export class CreateLostFoundReportDto {
@@ -36,8 +28,6 @@ export class CreateLostFoundReportDto {
   @IsDateString({ strict: true })
   itemDate!: string;
 
-  @IsOptional()
-  @IsUrl({ protocols: ['https'], require_protocol: true })
-  @MaxLength(500)
-  imageUrl?: string;
+  // imageUrl is no longer accepted (sending it is a 400 via forbidNonWhitelisted).
+  // Photos are uploaded to POST /lost-found/:id/photos after the report is created.
 }

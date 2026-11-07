@@ -19,15 +19,16 @@ import {
 import { CreateResourceDto } from './dto/create-resource.dto.js';
 import { UpdateResourceDto } from './dto/update-resource.dto.js';
 import { ListResourcesQueryDto } from './dto/list-resources-query.dto.js';
-import { ImageStorageService } from './storage/image-storage.service.js';
-import { detectImageType } from './storage/image-type.js';
-import type { UploadedImageFile } from './storage/uploaded-file.js';
+import { ImageStorageService } from '../images/image-storage.service.js';
+import { detectImageType } from '../images/image-type.js';
+import { sanitizeImage, type SanitizedImage } from '../images/sanitize-image.js';
+import { MAX_IMAGES_PER_ITEM } from '../images/image-limits.js';
+import type { UploadedImageFile } from '../images/uploaded-file.js';
 import { LoanEventType } from '../borrow-requests/entities/loan-event.entity.js';
 import { recordLoanEvent } from '../borrow-requests/loan-events.js';
 import { ReportsService } from '../reports/reports.service.js';
 import { ReportTarget } from '../reports/entities/report.entity.js';
-export const MAX_IMAGES_PER_RESOURCE = 5;
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+export const MAX_IMAGES_PER_RESOURCE = MAX_IMAGES_PER_ITEM;
 
 // Must match the statuses that occupy a resource (see borrow_requests.activeResourceId).
 const ON_LOAN_SQL = `EXISTS (SELECT 1 FROM borrow_requests b WHERE b.resourceId = r.id AND b.status IN ('approved','active'))`;
@@ -229,6 +230,13 @@ export class ResourcesService {
       return t;
     });
 
+    // Strip metadata (EXIF/GPS etc.) before anything touches disk. Sequential to bound memory use;
+    // done outside the transaction so the resource row is not locked while images are re-encoded.
+    const clean: SanitizedImage[] = [];
+    for (let i = 0; i < files.length; i++) {
+      clean.push(await sanitizeImage(files[i].buffer, detected[i], `File #${i + 1}`));
+    }
+
     const savedKeys: string[] = [];
     try {
       return await this.dataSource.transaction(async (m) => {
@@ -242,14 +250,14 @@ export class ResourcesService {
 
         const rows: ResourceImage[] = [];
         for (let i = 0; i < files.length; i++) {
-          const key = await this.storage.save(files[i].buffer, detected[i].ext);
+          const key = await this.storage.save('resources', clean[i].buffer, clean[i].ext);
           savedKeys.push(key);
           rows.push(
             m.create(ResourceImage, {
               resourceId,
               storageKey: key,
-              mimeType: detected[i].mime,
-              sizeBytes: files[i].size,
+              mimeType: clean[i].mime,
+              sizeBytes: clean[i].buffer.length,
               sortOrder: nextOrder + i,
             }),
           );
@@ -258,7 +266,7 @@ export class ResourcesService {
         return rows.map((r) => ({ id: r.id, url: imageUrl(r.storageKey), sortOrder: r.sortOrder }));
       });
     } catch (err) {
-      await Promise.all(savedKeys.map((k) => this.storage.remove(k)));
+      await Promise.all(savedKeys.map((k) => this.storage.remove('resources', k)));
       throw err;
     }
   }
@@ -271,7 +279,7 @@ export class ResourcesService {
       await m.delete(ResourceImage, { id: imageId });
       return image.storageKey;
     });
-    await this.storage.remove(key);
+    await this.storage.remove('resources', key);
     return { deleted: true };
   }
 
