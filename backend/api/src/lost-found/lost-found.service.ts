@@ -14,7 +14,7 @@ import { MAX_IMAGES_PER_ITEM } from '../images/image-limits.js';
 import { sanitizeImage, type SanitizedImage } from '../images/sanitize-image.js';
 import type { UploadedImageFile } from '../images/uploaded-file.js';
 import { LostFoundPhoto } from './entities/lost-found-photo.entity.js';
-import { canViewPhotos, type PhotoViewer } from './photo-access.js';
+import { canViewPhotos, canViewReport, type PhotoViewer } from './photo-access.js';
 import { User } from '../users/entities/user.entity.js';
 import { ReportsService } from '../reports/reports.service.js';
 import { ReportTarget } from '../reports/entities/report.entity.js';
@@ -158,6 +158,30 @@ export class LostFoundService {
       resolvedAt: null,
     });
     return publicReport(await this.reports.save(report), [], true);
+  }
+
+  /**
+   * One report, for its own page. Visibility: canViewReport (404 otherwise, so existence is not
+   * revealed). Photos still follow canViewPhotos. `myClaim` is the viewer's own claim, without the
+   * private proof details, or null; other people's claims are never included.
+   */
+  async get(id: string, userId: string) {
+    const viewer = await this.getViewer(userId);
+    const report = await this.reports.findOne({ where: { id } });
+    if (!report) throw new NotFoundException('Lost-and-found report not found');
+    const myClaim =
+      report.reporterId === viewer.id
+        ? null
+        : await this.claims.findOne({ where: { reportId: id, claimantId: viewer.id } });
+    if (!canViewReport(report, viewer, myClaim !== null)) {
+      throw new NotFoundException('Lost-and-found report not found');
+    }
+    const [response] = await this.withPhotos([report], viewer);
+    return {
+      ...response,
+      isMine: report.reporterId === viewer.id,
+      myClaim: myClaim ? this.claimResponse(myClaim) : null,
+    };
   }
 
   async report(userId: string, id: string, reason: string) {

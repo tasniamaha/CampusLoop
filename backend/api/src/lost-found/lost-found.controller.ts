@@ -43,6 +43,11 @@ export class LostFoundController {
     return this.service.list(req.user.sub, query);
   }
 
+  @Get(':id')
+  get(@Param('id', ParseUUIDPipe) id: string, @Req() req: AuthenticatedRequest) {
+    return this.service.get(id, req.user.sub);
+  }
+
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @RequireVerifiedEmail()
   @Post()

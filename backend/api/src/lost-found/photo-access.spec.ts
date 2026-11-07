@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canViewPhotos, type PhotoSubject, type PhotoViewer } from './photo-access.js';
+import { canViewPhotos, canViewReport, type PhotoSubject, type PhotoViewer } from './photo-access.js';
 import { LostFoundStatus, LostFoundType } from './entities/lost-found-report.entity.js';
 import { UserRole } from '../users/entities/user.entity.js';
 
@@ -43,5 +43,36 @@ describe('canViewPhotos', () => {
 
   it('treats an unknown role like a student', () => {
     expect(canViewPhotos(report(LostFoundType.FOUND), viewer('x', 'superuser' as UserRole))).toBe(false);
+  });
+});
+
+describe('canViewReport', () => {
+  const open = report(LostFoundType.FOUND);
+  const resolved = report(LostFoundType.FOUND, LostFoundStatus.RESOLVED);
+
+  // [label, report, viewer, viewerHasClaim, expected]
+  const reportCases: Array<[string, PhotoSubject, PhotoViewer, boolean, boolean]> = [
+    ['open: reporter', open, reporter, false, true],
+    ['open: same-campus student', open, student, false, true],
+    ['open: other-campus student', open, otherCampusStudent, false, false],
+    ['open: same-campus moderator', open, moderator, false, true],
+    ['open: other-campus moderator', open, otherCampusModerator, false, false],
+    ['open: admin on another campus', open, admin, false, true],
+    ['resolved: reporter', resolved, reporter, false, true],
+    ['resolved: same-campus student without a claim', resolved, student, false, false],
+    ['resolved: same-campus student with a claim', resolved, student, true, true],
+    ['resolved: same-campus moderator', resolved, moderator, false, true],
+    ['resolved: other-campus moderator', resolved, otherCampusModerator, false, false],
+    ['resolved: admin', resolved, admin, false, true],
+    ['open lost: same-campus student', report(LostFoundType.LOST), student, false, true],
+  ];
+
+  it.each(reportCases)('%s', (_label, subject, who, hasClaim, expected) => {
+    expect(canViewReport(subject, who, hasClaim)).toBe(expected);
+  });
+
+  it('a claimant still gets no photos of the found item after resolution', () => {
+    expect(canViewReport(resolved, student, true)).toBe(true);
+    expect(canViewPhotos(resolved, student)).toBe(false);
   });
 });
