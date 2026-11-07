@@ -25,6 +25,7 @@ import { LostFoundModule } from './lost-found/lost-found.module.js';
 import { StudyGroupsModule } from './study-groups/study-groups.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { RolesGuard } from './auth/guards/roles.guard.js';
+import { MIGRATIONS_GLOB } from './database/migrations-glob.js';
 const optIn = (name: string) => (ctx: ExecutionContext) =>
   !Reflect.getMetadata(`THROTTLER:LIMIT${name}`, ctx.getHandler());
 @Module({
@@ -69,7 +70,7 @@ const optIn = (name: string) => (ctx: ExecutionContext) =>
         database: config.get<string>('DB_DATABASE'),
         timezone: 'Z',
         autoLoadEntities: true,
-        migrations: ['src/database/migrations/*.ts'],
+        migrations: [MIGRATIONS_GLOB],
         migrationsRun: true,
         synchronize: false,
       }),
