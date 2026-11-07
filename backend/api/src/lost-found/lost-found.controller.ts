@@ -43,6 +43,12 @@ export class LostFoundController {
     return this.service.list(req.user.sub, query);
   }
 
+  // Must stay above @Get(':id'), whose ParseUUIDPipe would otherwise reject "mine" with a 400.
+  @Get('mine')
+  mine(@Req() req: AuthenticatedRequest) {
+    return this.service.mine(req.user.sub);
+  }
+
   @Get(':id')
   get(@Param('id', ParseUUIDPipe) id: string, @Req() req: AuthenticatedRequest) {
     return this.service.get(id, req.user.sub);

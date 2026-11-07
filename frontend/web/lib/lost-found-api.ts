@@ -36,6 +36,19 @@ export type MyClaim = {
 export type Claim = MyClaim & { claimantId: string; proofDetails: string };
 
 export type ReportDetail = Report & { isMine: boolean; myClaim: MyClaim | null };
+
+/** GET /lost-found/mine: only the caller's own reports and claims, each capped at 100 (newest first). */
+export type MyActivity = {
+  reports: { items: Report[]; truncated: boolean };
+  claims: { items: { claim: MyClaim; report: Report }[]; truncated: boolean };
+};
+export const MY_LIST_LIMIT = 100;
+
+export const CLAIM_STATUS_LABEL: Record<ClaimStatus, string> = {
+  pending: 'Pending review by the finder',
+  approved: 'Approved: the finder confirmed this item is yours',
+  rejected: 'Not approved',
+};
 export type Match = { report: Report; score: number; reasons: string[] };
 export type ReportList = { data: Report[]; pagination: { page: number; limit: number; total: number; pages: number } };
 export type NewReport = Pick<Report, 'type' | 'title' | 'description' | 'category' | 'location' | 'itemDate'>;
@@ -100,6 +113,8 @@ export function listReports({ type, page }: ListParams, signal?: AbortSignal) {
 
 export const getReport = (id: string, signal?: AbortSignal) =>
   call<ReportDetail>(`/lost-found/${encodeURIComponent(id)}`, { signal });
+
+export const getMine = (signal?: AbortSignal) => call<MyActivity>('/lost-found/mine', { signal });
 
 export const getMatches = (id: string, signal?: AbortSignal) =>
   call<Match[]>(`/lost-found/${encodeURIComponent(id)}/matches`, { signal });

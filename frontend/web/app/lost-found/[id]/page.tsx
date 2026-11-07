@@ -13,10 +13,6 @@ export default async function LostFoundReportPage({ params, searchParams }: Page
   const { id } = await params;
   const { submitted } = await searchParams;
 
-  return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
-      {/* key: a different report is a fresh component (no state carried over from the previous one). */}
-      <ReportDetail key={id} id={id} submitted={submitted === '1'} />
-    </main>
-  );
+  // key: a different report is a fresh component (no state carried over from the previous one).
+  return <ReportDetail key={id} id={id} submitted={submitted === '1'} />;
 }

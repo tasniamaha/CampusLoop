@@ -1271,6 +1271,20 @@
         ]
       }
     },
+    "/api/lost-found/mine": {
+      "get": {
+        "operationId": "LostFoundController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "LostFound"
+        ]
+      }
+    },
     "/api/lost-found/{id}": {
       "get": {
         "operationId": "LostFoundController_get",

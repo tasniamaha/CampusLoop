@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '../../../lib/auth';
 import VerifyBanner from '../../../components/verify-banner';
@@ -13,16 +12,13 @@ export default async function NewLostFoundReportPage() {
     redirect('/login');
   }
 
+  // The section title and the highlighted "Report an item" tab come from app/lost-found/layout.tsx.
   return (
-    <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
-      <Link href="/lost-found" className="text-sm font-semibold text-emerald-700 hover:underline">← All reports</Link>
-      <header>
-        <h1 className="text-2xl font-bold text-slate-900">Report an item</h1>
-        <p className="mt-1 text-sm text-slate-600">Tell your campus what you lost or found. We&apos;ll look for possible matches once it&apos;s submitted.</p>
-      </header>
+    <div className="space-y-4">
+      <p className="text-sm text-slate-600">Tell your campus what you lost or found. We&apos;ll look for possible matches once it&apos;s submitted.</p>
       {/* Creating a report needs a verified email; without this the user only learns it from a 403 on submit. */}
       {!user.emailVerifiedAt && <VerifyBanner email={user.email} />}
       <ReportForm />
-    </main>
+    </div>
   );
 }

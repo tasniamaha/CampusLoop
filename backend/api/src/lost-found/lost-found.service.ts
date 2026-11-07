@@ -30,6 +30,8 @@ import {
 } from './entities/lost-found-report.entity.js';
 
 export const MAX_PHOTOS_PER_REPORT = MAX_IMAGES_PER_ITEM;
+/** "My reports" returns at most this many of each list, newest first, plus a `truncated` flag. */
+export const MY_LIST_LIMIT = 100;
 
 const cleanText = (value: string) => value.trim().replace(/\s+/g, ' ');
 // Same shape as resource image URLs; the web app loads it through its authenticated proxy.
@@ -165,6 +167,49 @@ export class LostFoundService {
    * revealed). Photos still follow canViewPhotos. `myClaim` is the viewer's own claim, without the
    * private proof details, or null; other people's claims are never included.
    */
+  /**
+   * The caller's own lost-and-found activity. Built only from rows they own: reports they filed
+   * (any status) and claims they filed. Never includes other people's claims, and never proof
+   * details (not even the caller's own, same as `myClaim`). Claimed reports carry photos only
+   * where canViewPhotos allows, so a claimant never sees a found item's photos here either.
+   */
+  async mine(userId: string) {
+    const viewer = await this.getViewer(userId);
+    const [filed, filedTotal] = await this.reports.findAndCount({
+      where: { reporterId: viewer.id },
+      order: { createdAt: 'DESC' },
+      take: MY_LIST_LIMIT,
+    });
+    const [claims, claimsTotal] = await this.claims.findAndCount({
+      where: { claimantId: viewer.id },
+      order: { createdAt: 'DESC' },
+      take: MY_LIST_LIMIT,
+    });
+
+    const claimed = claims.length
+      ? await this.reports.find({ where: { id: In([...new Set(claims.map((c) => c.reportId))]) } })
+      : [];
+    const [filedResponses, claimedResponses] = await Promise.all([
+      this.withPhotos(filed, viewer),
+      this.withPhotos(claimed, viewer),
+    ]);
+    const claimedById = new Map(claimedResponses.map((r) => [r.id, r]));
+
+    return {
+      reports: {
+        items: filedResponses.map((r) => ({ ...r, isMine: true })),
+        truncated: filedTotal > MY_LIST_LIMIT,
+      },
+      claims: {
+        items: claims.flatMap((claim) => {
+          const report = claimedById.get(claim.reportId);
+          return report ? [{ claim: this.claimResponse(claim), report: { ...report, isMine: false } }] : [];
+        }),
+        truncated: claimsTotal > MY_LIST_LIMIT,
+      },
+    };
+  }
+
   async get(id: string, userId: string) {
     const viewer = await this.getViewer(userId);
     const report = await this.reports.findOne({ where: { id } });

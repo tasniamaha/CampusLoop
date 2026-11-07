@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import PhotoThumbnails from './PhotoThumbnails';
 import {
+  CLAIM_STATUS_LABEL,
   getMatches,
   getReport,
   listClaims,
@@ -20,12 +21,6 @@ import {
 type MatchesState = { status: 'loading' } | { status: 'ready'; items: Match[] } | { status: 'error'; message: string };
 type Loaded = { key: number; report: Detail; matches: MatchesState | null };
 type Settled = { key: number; ok: true } | { key: number; ok: false; notFound: boolean; message: string };
-
-const CLAIM_LABEL: Record<string, string> = {
-  pending: 'Pending review by the finder',
-  approved: 'Approved: the finder confirmed this item is yours',
-  rejected: 'Not approved',
-};
 
 /**
  * A single report. Visibility is decided by the API (404 when the viewer may not see it); photos are
@@ -149,7 +144,7 @@ export default function ReportDetail({ id, submitted }: { id: string; submitted:
   }
 
   const backLink = (
-    <Link href="/lost-found" className="text-sm font-semibold text-emerald-700 hover:underline">← All reports</Link>
+    <Link href="/lost-found" className="text-sm font-semibold text-emerald-700 hover:underline">← Back to reports</Link>
   );
 
   if (loading && !loaded) {
@@ -161,7 +156,7 @@ export default function ReportDetail({ id, submitted }: { id: string; submitted:
         {backLink}
         {settled.notFound ? (
           <div className="rounded-xl border border-dashed p-8 text-center">
-            <h1 className="text-lg font-semibold text-slate-900">Report not found</h1>
+            <h2 className="text-lg font-semibold text-slate-900">Report not found</h2>
             <p className="mt-1 text-sm text-slate-500">It may have been resolved, or it isn&apos;t visible to your account.</p>
           </div>
         ) : (
@@ -187,7 +182,8 @@ export default function ReportDetail({ id, submitted }: { id: string; submitted:
 
       <article className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <h1 className="text-2xl font-bold text-slate-900">{report.title}</h1>
+          {/* h2: the section layout provides the page's h1. */}
+          <h2 className="text-2xl font-bold text-slate-900">{report.title}</h2>
           <div className="flex gap-2">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium uppercase">{report.type}</span>
             <span className={`rounded-full px-3 py-1 text-xs font-medium ${isOpen ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>{isOpen ? 'Open' : 'Resolved'}</span>
@@ -203,7 +199,7 @@ export default function ReportDetail({ id, submitted }: { id: string; submitted:
 
         {report.myClaim && (
           <div className="mt-4 rounded-lg bg-slate-50 p-3 text-sm">
-            <p className="font-medium">Your claim: {CLAIM_LABEL[report.myClaim.status] ?? report.myClaim.status}</p>
+            <p className="font-medium">Your claim: {CLAIM_STATUS_LABEL[report.myClaim.status] ?? report.myClaim.status}</p>
             {report.myClaim.reviewerNote && <p className="mt-1 text-slate-600">Note from the finder: {report.myClaim.reviewerNote}</p>}
           </div>
         )}
