@@ -6,7 +6,8 @@ import request from 'supertest';
 import * as bcrypt from 'bcrypt';
 import { DataSource } from 'typeorm';
 import { existsSync } from 'node:fs';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import sharp from 'sharp';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -16,6 +17,13 @@ import { User } from '../src/users/entities/user.entity.js';
 import { Resource } from '../src/resources/entities/resource.entity.js';
 import { ResourceCategory } from '../src/resources/entities/resource-category.entity.js';
 import { ImageStorageService } from '../src/images/image-storage.service.js';
+import {
+  containsAnyMarker,
+  hasGpsPointer,
+  imageWithMetadata,
+  pixelBomb,
+  plainImage,
+} from './helpers/image-fixtures.js';
 
 // Real HTTP stack against the real image folders. The resource image endpoint is public, so it must
 // only ever read the resources folder: lost-and-found photos (and anything else on disk) stay out of reach.
@@ -23,8 +31,7 @@ import { ImageStorageService } from '../src/images/image-storage.service.js';
 
 const PASSWORD = 'correct-horse-battery';
 const IP = '203.0.113.61';
-// Smallest input detectImageType accepts as PNG; the endpoint stores bytes as uploaded.
-const PNG = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.from('resource-bytes')]);
+let PNG: Buffer; // a real PNG; uploads are re-encoded, so served bytes are compared with the stored file
 
 let app: INestApplication;
 let ds: DataSource;
@@ -39,6 +46,7 @@ const server = () => app.getHttpServer();
 const getImage = (key: string) => request(server()).get(`/resources/images/${key}`).set('X-Forwarded-For', IP);
 
 beforeAll(async () => {
+  PNG = await plainImage('png');
   base = await mkdtemp(join(tmpdir(), 'cl-resource-images-'));
   resourcesDir = join(base, 'resources');
   lostFoundDir = join(base, 'lost-found');
@@ -110,7 +118,7 @@ describe('resource images (shared image storage)', () => {
 
     const served = await getImage(key).expect(200); // public: no Authorization header
     expect(served.headers['content-type']).toBe('image/png');
-    expect(Buffer.compare(served.body as Buffer, PNG)).toBe(0);
+    expect(Buffer.compare(served.body as Buffer, await readFile(join(resourcesDir, key)))).toBe(0);
   });
 
   it('does not serve a lost-and-found photo through the resource endpoint', async () => {
@@ -151,5 +159,71 @@ describe('resource images (shared image storage)', () => {
 
     expect(existsSync(join(resourcesDir, key))).toBe(false);
     await getImage(key).expect(404);
+  });
+});
+
+describe('resource image metadata stripping', () => {
+  const upload = (buf: Buffer, filename: string, contentType: string) =>
+    request(server())
+      .post(`/resources/${resourceId}/images`)
+      .set('X-Forwarded-For', IP)
+      .set('Authorization', `Bearer ${token}`)
+      .attach('files', buf, { filename, contentType });
+
+  afterAll(async () => {
+    // Keep the 5-image cap free for other tests in this file.
+    await ds.query('DELETE FROM resource_images WHERE resourceId = ?', [resourceId]);
+  });
+
+  it('stores a JPEG with GPS and camera EXIF without any of it, turned upright', async () => {
+    const input = await imageWithMetadata('jpeg');
+    const inMeta = await sharp(input).metadata();
+    expect(hasGpsPointer(inMeta.exif)).toBe(true); // the fixture really carries GPS
+
+    const res = await upload(input, 'phone.jpg', 'image/jpeg').expect(201);
+    const key = (res.body as Array<{ url: string }>)[0].url.split('/').pop()!;
+    expect(key).toMatch(/\.jpg$/);
+
+    const stored = await readFile(join(resourcesDir, key));
+    const meta = await sharp(stored).metadata();
+    expect(meta.format).toBe('jpeg');
+    expect(meta.exif).toBeUndefined();
+    expect(meta.xmp).toBeUndefined();
+    expect(meta.orientation).toBeUndefined();
+    expect([meta.width, meta.height]).toEqual([20, 40]);
+    expect(containsAnyMarker(stored)).toBe(false);
+
+    const row = await ds.query('SELECT mimeType, sizeBytes FROM resource_images WHERE storageKey = ?', [key]);
+    expect(row[0].mimeType).toBe('image/jpeg');
+    expect(Number(row[0].sizeBytes)).toBe(stored.length); // size of what is stored, not what was sent
+
+    const served = await getImage(key).expect(200);
+    expect(containsAnyMarker(served.body as Buffer)).toBe(false);
+  });
+
+  it('strips PNG and WebP metadata too', async () => {
+    for (const [format, ext] of [['png', 'png'], ['webp', 'webp']] as const) {
+      const res = await upload(await imageWithMetadata(format), `p.${ext}`, `image/${format}`).expect(201);
+      const key = (res.body as Array<{ url: string }>)[0].url.split('/').pop()!;
+      const stored = await readFile(join(resourcesDir, key));
+      const meta = await sharp(stored).metadata();
+      expect(meta.format, format).toBe(format);
+      expect(meta.exif, format).toBeUndefined();
+      expect(meta.xmp, format).toBeUndefined();
+      expect(containsAnyMarker(stored), format).toBe(false);
+    }
+  });
+
+  it('rejects a GIF before decoding, and a pixel bomb, with nothing written to disk', async () => {
+    const before = await ds.query('SELECT COUNT(*) AS n FROM resource_images WHERE resourceId = ?', [resourceId]);
+
+    const gif = await upload(await plainImage('gif'), 'a.gif', 'image/gif').expect(400);
+    expect(gif.body.message).toBe('File #1 is not a valid JPEG, PNG or WebP image');
+
+    const bomb = await upload(await pixelBomb(), 'big.png', 'image/png').expect(400);
+    expect(bomb.body.message).toBe('File #1 has too many pixels (max 50 megapixels)');
+
+    const after = await ds.query('SELECT COUNT(*) AS n FROM resource_images WHERE resourceId = ?', [resourceId]);
+    expect(Number(after[0].n)).toBe(Number(before[0].n));
   });
 });

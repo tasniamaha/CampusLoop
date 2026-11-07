@@ -21,6 +21,7 @@ import { UpdateResourceDto } from './dto/update-resource.dto.js';
 import { ListResourcesQueryDto } from './dto/list-resources-query.dto.js';
 import { ImageStorageService } from '../images/image-storage.service.js';
 import { detectImageType } from '../images/image-type.js';
+import { sanitizeImage, type SanitizedImage } from '../images/sanitize-image.js';
 import { MAX_IMAGES_PER_ITEM } from '../images/image-limits.js';
 import type { UploadedImageFile } from '../images/uploaded-file.js';
 import { LoanEventType } from '../borrow-requests/entities/loan-event.entity.js';
@@ -229,6 +230,13 @@ export class ResourcesService {
       return t;
     });
 
+    // Strip metadata (EXIF/GPS etc.) before anything touches disk. Sequential to bound memory use;
+    // done outside the transaction so the resource row is not locked while images are re-encoded.
+    const clean: SanitizedImage[] = [];
+    for (let i = 0; i < files.length; i++) {
+      clean.push(await sanitizeImage(files[i].buffer, detected[i], `File #${i + 1}`));
+    }
+
     const savedKeys: string[] = [];
     try {
       return await this.dataSource.transaction(async (m) => {
@@ -242,14 +250,14 @@ export class ResourcesService {
 
         const rows: ResourceImage[] = [];
         for (let i = 0; i < files.length; i++) {
-          const key = await this.storage.save('resources', files[i].buffer, detected[i].ext);
+          const key = await this.storage.save('resources', clean[i].buffer, clean[i].ext);
           savedKeys.push(key);
           rows.push(
             m.create(ResourceImage, {
               resourceId,
               storageKey: key,
-              mimeType: detected[i].mime,
-              sizeBytes: files[i].size,
+              mimeType: clean[i].mime,
+              sizeBytes: clean[i].buffer.length,
               sortOrder: nextOrder + i,
             }),
           );
