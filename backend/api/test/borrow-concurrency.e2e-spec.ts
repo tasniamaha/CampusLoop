@@ -17,6 +17,7 @@ import { LoanEvent, LoanEventType } from '../src/borrow-requests/entities/loan-e
 import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
 import { AddEmailCanonical1792700000000 } from '../src/database/migrations/1792700000000-AddEmailCanonical.js';
 import { CreateNotifications1792800000000 } from '../src/database/migrations/1792800000000-CreateNotifications.js';
+import { AddBorrowApprovedAt1793500000000 } from '../src/database/migrations/1793500000000-AddBorrowApprovedAt.js';
 import { Notification } from '../src/notifications/entities/notification.entity.js';
 import { ResourcesService } from '../src/resources/resources.service.js';
 import { ImageStorageService } from '../src/resources/storage/image-storage.service.js';
@@ -87,6 +88,7 @@ beforeAll(async () => {
       ResourceMarketplace1792000000000,
       CreateLoanEvents1792100000000,
       CreateNotifications1792800000000,
+      AddBorrowApprovedAt1793500000000,
     ],
     dropSchema: false,
     synchronize: false,

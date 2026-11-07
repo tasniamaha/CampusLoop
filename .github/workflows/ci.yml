@@ -64,6 +64,8 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/app.e2e-spec.ts
       - name: Concurrency tests (real MySQL)
         run: npx vitest run --config vitest.config.e2e.ts test/borrow-concurrency.e2e-spec.ts
+      - name: Borrow expiry sweep tests (real MySQL)
+        run: npx vitest run --config vitest.config.e2e.ts test/borrow-expiry.e2e-spec.ts
       - name: Email verification tests (real MySQL)
         run: npx vitest run --config vitest.config.e2e.ts test/email-verification.e2e-spec.ts
       - name: Password reset tests (real MySQL)

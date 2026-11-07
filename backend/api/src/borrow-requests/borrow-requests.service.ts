@@ -263,7 +263,9 @@ constructor(
           throw new ConflictException('Resource is already on loan');
         }
 
-        await manager.update(BorrowRequest, { id: requestId }, { status: BorrowStatus.APPROVED });
+        const approvedAt = new Date();
+        await manager.update(BorrowRequest, { id: requestId }, { status: BorrowStatus.APPROVED, approvedAt });
+        request.approvedAt = approvedAt;
         await recordLoanEvent(manager, {
           borrowRequestId: requestId,
           resourceId,

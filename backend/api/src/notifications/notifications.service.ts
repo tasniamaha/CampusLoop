@@ -125,7 +125,7 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** Call this after a borrowing state transition commits. */
-  async notifyBorrowEvent(requestId: string, event: 'requested' | 'approved' | 'rejected' | 'cancelled' | 'picked-up' | 'returned' | 'expired') {
+  async notifyBorrowEvent(requestId: string, event: 'requested' | 'approved' | 'rejected' | 'cancelled' | 'picked-up' | 'returned' | 'expired' | 'pickup-expired') {
     const request = await this.requestsRepo.findOne({ where: { id: requestId } }); if (!request) return;
     const resource = await this.resourcesRepo.findOne({ where: { id: request.resourceId }, withDeleted: true }); if (!resource) return;
     const borrower = await this.usersRepo.findOne({ where: { id: request.borrowerId } }); const owner = await this.usersRepo.findOne({ where: { id: resource.ownerId } });
@@ -139,6 +139,7 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
       case 'picked-up': await send(owner, 'borrow.picked_up', 'Item pickup confirmed', `Pickup of “${resource.title}” was confirmed.`); await send(borrower, 'borrow.picked_up', 'Pickup confirmed', `Your pickup of “${resource.title}” was recorded. Due ${dateLabel(request.dueDate)}.`); await this.scheduleLoanReminders(request.id, request.dueDate); break;
       case 'returned': await this.cancelLoanReminders(request.id); await send(owner, 'borrow.returned', 'Item return recorded', `The return of “${resource.title}” was recorded.`); await send(borrower, 'borrow.returned', 'Loan completed', `Your loan for “${resource.title}” has been marked returned.`); break;
       case 'expired': await this.cancelLoanReminders(request.id); await send(borrower, 'borrow.expired', 'Borrowing request expired', `Your request for “${resource.title}” expired before approval.`); break;
+      case 'pickup-expired': await this.cancelLoanReminders(request.id); await send(borrower, 'borrow.pickup_expired', 'Pickup window passed', `Your approved request for “${resource.title}” expired because the item was not picked up in time. Send a new request if you still need it.`); await send(owner, 'borrow.pickup_expired', 'Item available again', `The approved request for “${resource.title}” expired without a pickup, so it is available to others again.`); break;
     }
   }
   private async enqueueEmail(notificationId: string) {

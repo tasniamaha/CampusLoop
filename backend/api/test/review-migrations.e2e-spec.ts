@@ -21,6 +21,8 @@ import { ReviewBlindAndModeration1793100000000 } from '../src/database/migration
 import { CreateReports1793200000000 } from '../src/database/migrations/1793200000000-CreateReports.js';
 import { ReviewHalfStarRatings1793300000000 } from '../src/database/migrations/1793300000000-ReviewHalfStarRatings.js';
 import { CreateRefreshTokens1793400000000 } from '../src/database/migrations/1793400000000-CreateRefreshTokens.js';
+import { AddBorrowApprovedAt1793500000000 } from '../src/database/migrations/1793500000000-AddBorrowApprovedAt.js';
+import { randomUUID } from 'node:crypto';
 
 // Proves the two review migrations on a database that ALREADY holds reviews written by the
 // original schema (one review per loan, no reviewee). Uses the existing campusloop_test database:
@@ -103,6 +105,7 @@ beforeAll(async () => {
       CreateReports1793200000000,
       ReviewHalfStarRatings1793300000000,
       CreateRefreshTokens1793400000000,
+      AddBorrowApprovedAt1793500000000,
     ] as never,
     synchronize: false,
     dropSchema: false,
@@ -146,14 +149,12 @@ beforeAll(async () => {
   // 3) Three legacy reviews in the OLD shape: borrower -> owner, ratings 5/3/1, one with a comment.
   const ratings = [5, 3, 1];
   for (const [i, borrower] of borrowers.entries()) {
-    const loan = await ds.getRepository(BorrowRequest).save(
-      ds.getRepository(BorrowRequest).create({
-        resourceId: resource.id,
-        borrowerId: borrower.id,
-        dueDate: new Date(Date.now() + 86_400_000),
-        message: null,
-        status: BorrowStatus.RETURNED,
-      }),
+    // Raw SQL with only the legacy columns: the schema is rolled back here, so the current
+    // entity may map columns (e.g. approvedAt) that do not exist yet.
+    const loan = { id: randomUUID() };
+    await ds.query(
+      'INSERT INTO borrow_requests (id, resourceId, borrowerId, status, dueDate, message) VALUES (?, ?, ?, ?, ?, NULL)',
+      [loan.id, resource.id, borrower.id, BorrowStatus.RETURNED, new Date(Date.now() + 86_400_000)],
     );
     await ds.query(
       `INSERT INTO reviews (id, borrowRequestId, resourceId, reviewerId, rating, comment, createdAt, updatedAt)

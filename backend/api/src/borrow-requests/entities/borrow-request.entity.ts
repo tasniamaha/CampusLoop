@@ -39,6 +39,10 @@ export class BorrowRequest {
   @Column({ type: 'varchar', length: 500, nullable: true })
   message!: string | null;
 
+  /** When the owner approved. Anchors the pickup window; null until approved. */
+  @Column({ type: 'datetime', precision: 6, nullable: true })
+  approvedAt!: Date | null;
+
   // NOTE: the generated column `activeResourceId` exists only in the database
   // (see migration). It is deliberately NOT mapped here so TypeORM never writes to it.
 

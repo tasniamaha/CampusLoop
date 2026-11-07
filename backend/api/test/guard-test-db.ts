@@ -20,3 +20,5 @@ process.env.SMTP_HOST = '';
 process.env.SMTP_USER = '';
 process.env.SMTP_PASS = '';
 process.env.NOTIFICATIONS_QUEUE_ENABLED ??= 'false';
+// Tests drive expiry explicitly (BorrowExpiryService.expireStale); a background sweep would race them.
+process.env.BORROW_EXPIRY_SWEEP_ENABLED ??= 'false';
