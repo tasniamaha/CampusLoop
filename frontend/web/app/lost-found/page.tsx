@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, useSyncExternalStore, type FormEvent } from 'react';
 
 type Report = {
   id: string;
@@ -24,6 +24,9 @@ const getToday = () => {
   const date = new Date();
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 };
+// The local date only exists in the browser: render '' on the server and during hydration, then today.
+const subscribeNoop = () => () => {};
+const getServerToday = () => '';
 
 async function readError(response: Response): Promise<string> {
   const body = await response.json().catch(() => null) as { message?: string | string[] } | null;
@@ -42,8 +45,10 @@ export default function LostFoundPage() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
+  // '' means "not chosen yet": the field shows and submits today until the user picks a date.
   const [itemDate, setItemDate] = useState('');
-  const [todayDate, setTodayDate] = useState('');
+  const todayDate = useSyncExternalStore(subscribeNoop, getToday, getServerToday);
+  const effectiveItemDate = itemDate || todayDate;
   const [imageUrl, setImageUrl] = useState('');
   const [matches, setMatches] = useState<Record<string, Match[]>>({});
   const [busy, setBusy] = useState(false);
@@ -52,31 +57,48 @@ export default function LostFoundPage() {
   const [notice, setNotice] = useState('');
   const [claims, setClaims] = useState<Record<string, Claim[]>>({});
   const [claimBusy, setClaimBusy] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [requestedPage, setRequestedPage] = useState(1);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  /** Event handlers call this; the effect below does the fetch. */
+  function requestReports(nextPage: number) {
+    setError('');
+    setLoading(true);
+    setRequestedPage(nextPage);
+    setReloadKey((key) => key + 1); // forces a refetch even when page and filter are unchanged
+  }
+
+  function changeFilter(next: string) {
+    setFilter(next);
+    requestReports(1);
+  }
 
   useEffect(() => {
-    const currentDate = getToday();
-    setTodayDate(currentDate);
-    setItemDate(currentDate);
-  }, []);
-
-  const loadReports = useCallback(async (requestedPage: number) => {
-    setError('');
+    const controller = new AbortController();
     const params = new URLSearchParams({ page: String(requestedPage), limit: '20' });
     if (filter) params.set('type', filter);
-    try {
-      const response = await fetch(`/api/backend/lost-found?${params}`, { cache: 'no-store' });
-      if (!response.ok) throw new Error(await readError(response));
-      const result = await response.json() as ListResponse;
-      setReports(result.data);
-      setPage(result.pagination.page);
-      setPages(Math.max(result.pagination.pages, 1));
-      setTotal(result.pagination.total);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not load reports');
+    async function run() {
+      try {
+        const response = await fetch(`/api/backend/lost-found?${params}`, { cache: 'no-store', signal: controller.signal });
+        if (!response.ok) throw new Error(await readError(response));
+        const result = await response.json() as ListResponse;
+        if (controller.signal.aborted) return;
+        setReports(result.data);
+        setPage(result.pagination.page);
+        setPages(Math.max(result.pagination.pages, 1));
+        setTotal(result.pagination.total);
+      } catch (err) {
+        // A newer request replaced this one; it owns error and loading now.
+        if (controller.signal.aborted) return;
+        setError(err instanceof Error ? err.message : 'Could not load reports');
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
     }
-  }, [filter]);
-
-  useEffect(() => { void loadReports(1); }, [filter, loadReports]);
+    void run();
+    return () => controller.abort();
+  }, [filter, requestedPage, reloadKey]);
 
   async function submitReport(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -88,15 +110,14 @@ export default function LostFoundPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type, title, description, category, location, itemDate,
+          type, title, description, category, location, itemDate: effectiveItemDate,
           ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
         }),
       });
       if (!response.ok) throw new Error(await readError(response));
-      setTitle(''); setDescription(''); setCategory(''); setLocation(''); setItemDate(getToday()); setImageUrl('');
-      setFilter('');
+      setTitle(''); setDescription(''); setCategory(''); setLocation(''); setItemDate(''); setImageUrl('');
+      changeFilter(''); // the effect refetches with the new filter
       setNotice('Your report has been submitted.');
-      await loadReports(1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create report');
     } finally {
@@ -173,7 +194,7 @@ export default function LostFoundPage() {
       if (!response.ok) throw new Error(await readError(response));
       setNotice(status === 'approved' ? 'Claim approved and item marked resolved.' : 'Claim rejected.');
       await loadClaims(reportId);
-      await loadReports(page);
+      requestReports(page);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not review claim');
     } finally {
@@ -189,7 +210,7 @@ export default function LostFoundPage() {
       if (!response.ok) throw new Error(await readError(response));
       setNotice('Report marked as resolved.');
       setMatches((previous) => { const next = { ...previous }; delete next[id]; return next; });
-      await loadReports(page);
+      requestReports(page);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not resolve report');
     } finally {
@@ -224,7 +245,7 @@ export default function LostFoundPage() {
           <input required minLength={2} maxLength={180} placeholder="General campus location; avoid private details" value={location} onChange={(e) => setLocation(e.target.value)} className="mt-1 block w-full rounded-lg border p-2" />
         </label>
         <label className="text-sm font-medium">Date lost or found
-          <input required type="date" max={todayDate || undefined} value={itemDate} onChange={(e) => setItemDate(e.target.value)} className="mt-1 block w-full rounded-lg border p-2" />
+          <input required type="date" max={todayDate || undefined} value={effectiveItemDate} onChange={(e) => setItemDate(e.target.value)} className="mt-1 block w-full rounded-lg border p-2" />
         </label>
         <label className="text-sm font-medium">Image URL (optional)
           <input type="url" maxLength={500} value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." className="mt-1 block w-full rounded-lg border p-2" />
@@ -238,13 +259,14 @@ export default function LostFoundPage() {
       <section>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div><h2 className="text-lg font-semibold">Open reports</h2><p className="text-sm text-slate-500">{total} report{total === 1 ? '' : 's'} in your campus</p></div>
-          <select aria-label="Filter reports by type" value={filter} onChange={(e) => setFilter(e.target.value)} className="rounded-lg border bg-white p-2 text-sm">
+          <select aria-label="Filter reports by type" value={filter} onChange={(e) => changeFilter(e.target.value)} className="rounded-lg border bg-white p-2 text-sm">
             <option value="">Lost and found</option><option value="lost">Lost only</option><option value="found">Found only</option>
           </select>
         </div>
 
-        {reports.length === 0 ? <p className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">No open reports found.</p> : (
-          <ul className="space-y-4">
+        {loading && reports.length === 0 ? <p role="status" className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">Loading reports...</p>
+        : reports.length === 0 ? <p className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">No open reports found.</p> : (
+          <ul aria-busy={loading} className={`space-y-4 ${loading ? 'opacity-60' : ''}`}>
             {reports.map((report) => (
               <li key={report.id} className="rounded-2xl border border-slate-200 bg-white p-5">
                 <div className="flex flex-wrap justify-between gap-2"><h3 className="font-semibold">{report.title}</h3><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium uppercase">{report.type}</span></div>
@@ -267,7 +289,7 @@ export default function LostFoundPage() {
             ))}
           </ul>
         )}
-        {pages > 1 && <nav aria-label="Report pages" className="mt-5 flex items-center justify-between"><button type="button" disabled={page <= 1} onClick={() => void loadReports(page - 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Previous</button><span className="text-sm text-slate-600">Page {page} of {pages}</span><button type="button" disabled={page >= pages} onClick={() => void loadReports(page + 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Next</button></nav>}
+        {pages > 1 && <nav aria-label="Report pages" className="mt-5 flex items-center justify-between"><button type="button" disabled={loading || page <= 1} onClick={() => requestReports(page - 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Previous</button><span className="text-sm text-slate-600">Page {page} of {pages}</span><button type="button" disabled={loading || page >= pages} onClick={() => requestReports(page + 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Next</button></nav>}
       </section>
     </main>
   );
