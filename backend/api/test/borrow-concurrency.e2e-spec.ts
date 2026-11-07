@@ -20,7 +20,7 @@ import { CreateNotifications1792800000000 } from '../src/database/migrations/179
 import { AddBorrowApprovedAt1793500000000 } from '../src/database/migrations/1793500000000-AddBorrowApprovedAt.js';
 import { Notification } from '../src/notifications/entities/notification.entity.js';
 import { ResourcesService } from '../src/resources/resources.service.js';
-import { ImageStorageService } from '../src/resources/storage/image-storage.service.js';
+import { ImageStorageService } from '../src/images/image-storage.service.js';
 import { JwtService } from '@nestjs/jwt';
 import { NotificationsService } from '../src/notifications/notifications.service.js';
 let ds: DataSource;
