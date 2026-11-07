@@ -22,6 +22,7 @@ import { CreateReports1793200000000 } from '../src/database/migrations/179320000
 import { ReviewHalfStarRatings1793300000000 } from '../src/database/migrations/1793300000000-ReviewHalfStarRatings.js';
 import { CreateRefreshTokens1793400000000 } from '../src/database/migrations/1793400000000-CreateRefreshTokens.js';
 import { AddBorrowApprovedAt1793500000000 } from '../src/database/migrations/1793500000000-AddBorrowApprovedAt.js';
+import { CreateLostFoundPhotos1793600000000 } from '../src/database/migrations/1793600000000-CreateLostFoundPhotos.js';
 import { randomUUID } from 'node:crypto';
 
 // Proves the two review migrations on a database that ALREADY holds reviews written by the
@@ -106,6 +107,7 @@ beforeAll(async () => {
       ReviewHalfStarRatings1793300000000,
       CreateRefreshTokens1793400000000,
       AddBorrowApprovedAt1793500000000,
+      CreateLostFoundPhotos1793600000000,
     ] as never,
     synchronize: false,
     dropSchema: false,

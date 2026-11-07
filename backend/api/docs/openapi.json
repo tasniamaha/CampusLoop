@@ -1437,6 +1437,89 @@
         ]
       }
     },
+    "/api/lost-found/{id}/photos": {
+      "post": {
+        "operationId": "LostFoundController_addPhotos",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "LostFound"
+        ]
+      }
+    },
+    "/api/lost-found/{id}/photos/{photoId}": {
+      "delete": {
+        "operationId": "LostFoundController_removePhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "photoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "LostFound"
+        ]
+      },
+      "get": {
+        "operationId": "LostFoundController_photo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "photoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "LostFound"
+        ]
+      }
+    },
     "/api/study-groups": {
       "get": {
         "operationId": "StudyGroupsController_list",
@@ -2315,11 +2398,6 @@
           },
           "itemDate": {
             "type": "string"
-          },
-          "imageUrl": {
-            "type": "string",
-            "maxLength": 500,
-            "format": "uri"
           }
         },
         "required": [

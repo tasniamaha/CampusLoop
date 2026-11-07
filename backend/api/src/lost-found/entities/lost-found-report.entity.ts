@@ -50,6 +50,10 @@ export class LostFoundReport {
   @Column({ type: 'date' })
   itemDate!: string;
 
+  /**
+   * @deprecated Retirement phase 1: no longer written; existing values are returned only under
+   * canViewPhotos. A later migration drops the column. Use LostFoundPhoto instead.
+   */
   @Column({ type: 'varchar', length: 500, nullable: true })
   imageUrl!: string | null;
 

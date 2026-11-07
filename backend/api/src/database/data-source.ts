@@ -10,6 +10,7 @@ import { LoanEvent } from '../borrow-requests/entities/loan-event.entity.js';
 import { VerificationToken } from '../verification/entities/verification-token.entity.js';
 import { AuditLog } from '../audit/entities/audit-log.entity.js';
 import { LostFoundReport } from '../lost-found/entities/lost-found-report.entity.js';
+import { LostFoundPhoto } from '../lost-found/entities/lost-found-photo.entity.js';
 import { StudyGroup } from '../study-groups/entities/study-group.entity.js';
 import { StudyGroupMember } from '../study-groups/entities/study-group-member.entity.js';
 import { Notification } from '../notifications/entities/notification.entity.js';
@@ -25,7 +26,7 @@ export default new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   timezone: 'Z',
-  entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken,AuditLog,LostFoundReport,StudyGroup,StudyGroupMember,Notification,Review,Report,RefreshToken],
+  entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite,LoanEvent, VerificationToken,AuditLog,LostFoundReport,LostFoundPhoto,StudyGroup,StudyGroupMember,Notification,Review,Report,RefreshToken],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,
 });

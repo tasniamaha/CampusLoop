@@ -92,6 +92,10 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/moderation-report-targets.e2e-spec.ts
       - name: Resource image storage tests (folder isolation)
         run: npx vitest run --config vitest.config.e2e.ts test/resource-images-http.e2e-spec.ts
+      - name: Lost-and-found photo tests (upload, privacy, limits)
+        run: npx vitest run --config vitest.config.e2e.ts test/lost-found-photos-http.e2e-spec.ts
+      - name: Lost-and-found photo migration tests (restores schema)
+        run: npx vitest run --config vitest.config.e2e.ts test/lost-found-photos-migration.e2e-spec.ts
       - name: Review migration tests (runs last, restores schema)
         run: npx vitest run --config vitest.config.e2e.ts test/review-migrations.e2e-spec.ts
   frontend:

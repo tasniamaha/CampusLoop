@@ -3,10 +3,18 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository, type EntityManager } from 'typeorm';
+import { ImageStorageService } from '../images/image-storage.service.js';
+import { detectImageType } from '../images/image-type.js';
+import { MAX_IMAGES_PER_ITEM } from '../images/image-limits.js';
+import { sanitizeImage, type SanitizedImage } from '../images/sanitize-image.js';
+import type { UploadedImageFile } from '../images/uploaded-file.js';
+import { LostFoundPhoto } from './entities/lost-found-photo.entity.js';
+import { canViewPhotos, type PhotoViewer } from './photo-access.js';
 import { User } from '../users/entities/user.entity.js';
 import { ReportsService } from '../reports/reports.service.js';
 import { ReportTarget } from '../reports/entities/report.entity.js';
@@ -21,8 +29,17 @@ import {
   LostFoundType,
 } from './entities/lost-found-report.entity.js';
 
+export const MAX_PHOTOS_PER_REPORT = MAX_IMAGES_PER_ITEM;
+
 const cleanText = (value: string) => value.trim().replace(/\s+/g, ' ');
-const publicReport = (report: LostFoundReport) => ({
+// Same shape as resource image URLs; the web app loads it through its authenticated proxy.
+const photoUrl = (reportId: string, photoId: string) => `/api/lost-found/${reportId}/photos/${photoId}`;
+
+/**
+ * `photosVisible` must come from canViewPhotos(). When false, both the photos and the legacy
+ * imageUrl are withheld, and an empty list does not reveal whether the report has photos.
+ */
+const publicReport = (report: LostFoundReport, photos: LostFoundPhoto[], photosVisible: boolean) => ({
   id: report.id,
   type: report.type,
   title: report.title,
@@ -30,7 +47,9 @@ const publicReport = (report: LostFoundReport) => ({
   category: report.category,
   location: report.location,
   itemDate: report.itemDate,
-  imageUrl: report.imageUrl,
+  /** @deprecated Read-only (phase 1 of retirement): no longer accepted on create. Use `photos`. */
+  imageUrl: photosVisible ? report.imageUrl : null,
+  photos: photosVisible ? photos.map((photo) => ({ id: photo.id, url: photoUrl(report.id, photo.id) })) : [],
   status: report.status,
   createdAt: report.createdAt,
   updatedAt: report.updatedAt,
@@ -47,19 +66,53 @@ export class LostFoundService {
     private readonly claims: Repository<LostFoundClaim>,
     private readonly dataSource: DataSource,
     private readonly moderation: ReportsService,
+    @InjectRepository(LostFoundPhoto)
+    private readonly photos: Repository<LostFoundPhoto>,
+    private readonly storage: ImageStorageService,
   ) {}
 
-  private async getCampus(userId: string): Promise<string> {
+  private readonly logger = new Logger(LostFoundService.name);
+
+  /** Campus and CURRENT role from the database; the role claim in the token may be stale. */
+  private async getViewer(userId: string): Promise<PhotoViewer> {
     const user = await this.users.findOne({
       where: { id: userId },
-      select: { id: true, campus: true },
+      select: { id: true, campus: true, role: true },
     });
     if (!user) throw new NotFoundException('Account not found');
-    return user.campus;
+    return { id: user.id, campus: user.campus, role: user.role };
+  }
+
+  private async getCampus(userId: string): Promise<string> {
+    return (await this.getViewer(userId)).campus;
+  }
+
+  /** Photos grouped by report, in display order. Only call it for reports the viewer may see. */
+  private async photosFor(reportIds: string[]): Promise<Map<string, LostFoundPhoto[]>> {
+    const byReport = new Map<string, LostFoundPhoto[]>();
+    if (!reportIds.length) return byReport;
+    const rows = await this.photos.find({
+      where: { reportId: In(reportIds) },
+      order: { sortOrder: 'ASC', createdAt: 'ASC' },
+    });
+    for (const row of rows) {
+      const list = byReport.get(row.reportId) ?? [];
+      list.push(row);
+      byReport.set(row.reportId, list);
+    }
+    return byReport;
+  }
+
+  /** Response objects for reports, with photos only where canViewPhotos allows. */
+  private async withPhotos(reports: LostFoundReport[], viewer: PhotoViewer) {
+    const visible = new Set(reports.filter((r) => canViewPhotos(r, viewer)).map((r) => r.id));
+    const photos = await this.photosFor([...visible]);
+    return reports.map((r) => publicReport(r, photos.get(r.id) ?? [], visible.has(r.id)));
   }
 
   async list(userId: string, query: ListLostFoundQueryDto) {
-    const campus = await this.getCampus(userId);
+    const viewer = await this.getViewer(userId);
+    const { campus } = viewer;
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
     const [rows, total] = await this.reports.findAndCount({
@@ -73,8 +126,9 @@ export class LostFoundService {
       take: limit,
     });
 
+    const data = await this.withPhotos(rows, viewer);
     return {
-      data: rows.map((row) => ({ ...publicReport(row), isMine: row.reporterId === userId })),
+      data: data.map((item, i) => ({ ...item, isMine: rows[i].reporterId === userId })),
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     };
   }
@@ -99,11 +153,11 @@ export class LostFoundService {
       category: cleanText(dto.category),
       location: cleanText(dto.location),
       itemDate: dto.itemDate,
-      imageUrl: dto.imageUrl?.trim() || null,
+      imageUrl: null, // retired: photos are uploaded to POST /lost-found/:id/photos
       status: LostFoundStatus.OPEN,
       resolvedAt: null,
     });
-    return publicReport(await this.reports.save(report));
+    return publicReport(await this.reports.save(report), [], true);
   }
 
   async report(userId: string, id: string, reason: string) {
@@ -123,7 +177,8 @@ export class LostFoundService {
   }
 
   async matches(id: string, userId: string) {
-    const campus = await this.getCampus(userId);
+    const viewer = await this.getViewer(userId);
+    const { campus } = viewer;
     const report = await this.reports.findOne({ where: { id, campus, status: LostFoundStatus.OPEN } });
     if (!report) throw new NotFoundException('Open lost-and-found report not found');
 
@@ -146,8 +201,10 @@ export class LostFoundService {
     const reportWords = words(`${report.title} ${report.description}`);
     const reportDate = new Date(`${report.itemDate}T00:00:00Z`).getTime();
 
-    return candidates
-      .filter((candidate) => candidate.id !== report.id && candidate.reporterId !== userId)
+    const eligible = candidates.filter((candidate) => candidate.id !== report.id && candidate.reporterId !== userId);
+    // Matching a LOST report surfaces FOUND reports: their photos must stay hidden here too.
+    const responses = new Map((await this.withPhotos(eligible, viewer)).map((r) => [r.id, r]));
+    return eligible
       .map((candidate) => {
         const candidateWords = words(`${candidate.title} ${candidate.description}`);
         const sharedWords = [...reportWords].filter((word) => candidateWords.has(word)).length;
@@ -165,7 +222,7 @@ export class LostFoundService {
           ...(sameCategory ? ['Same category'] : []),
           ...(daysApart <= 3 ? ['Dates are within 3 days'] : []),
         ];
-        return { report: publicReport(candidate), score, reasons };
+        return { report: responses.get(candidate.id)!, score, reasons };
       })
       .filter((match) => match.score > 0)
       .sort((a, b) => b.score - a.score || new Date(b.report.createdAt).getTime() - new Date(a.report.createdAt).getTime());
@@ -283,6 +340,106 @@ export class LostFoundService {
       report.resolvedAt = new Date();
       await this.reports.save(report);
     }
-    return publicReport(report);
+    const photos = await this.photosFor([report.id]);
+    return publicReport(report, photos.get(report.id) ?? [], true);
+  }
+
+  // ---------------- photos ----------------
+
+  /** Locks the caller's own report. Someone else's report is reported as not found. */
+  private async lockOwnReport(m: EntityManager, reportId: string, viewer: PhotoViewer) {
+    const report = await m.findOne(LostFoundReport, {
+      where: { id: reportId, campus: viewer.campus },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!report || report.reporterId !== viewer.id) {
+      throw new NotFoundException('Lost-and-found report not found');
+    }
+    return report;
+  }
+
+  async addPhotos(reportId: string, userId: string, files: UploadedImageFile[]) {
+    if (!files || files.length === 0) throw new BadRequestException('No files uploaded');
+    const detected = files.map((file, i) => {
+      const type = detectImageType(file.buffer);
+      if (!type) throw new BadRequestException(`File #${i + 1} is not a supported image. Please use JPG, PNG or WebP.`);
+      return type;
+    });
+
+    const viewer = await this.getViewer(userId);
+    // Cheap ownership check first, so nobody can make the server re-encode images for a report that isn't theirs.
+    const owned = await this.reports.findOne({ where: { id: reportId, campus: viewer.campus } });
+    if (!owned || owned.reporterId !== viewer.id) throw new NotFoundException('Lost-and-found report not found');
+
+    // Strip metadata before anything touches disk. Sequential to bound memory.
+    const clean: SanitizedImage[] = [];
+    for (let i = 0; i < files.length; i++) {
+      clean.push(await sanitizeImage(files[i].buffer, detected[i], `File #${i + 1}`));
+    }
+
+    // 1) write the files, 2) insert the rows in one transaction, 3) delete the files if that fails.
+    const savedKeys: string[] = [];
+    try {
+      for (const image of clean) savedKeys.push(await this.storage.save('lost-found', image.buffer, image.ext));
+
+      const rows = await this.dataSource.transaction(async (m) => {
+        // The lock serialises concurrent uploads, which keeps the photo cap exact.
+        const report = await this.lockOwnReport(m, reportId, viewer);
+        if (report.status !== LostFoundStatus.OPEN) {
+          throw new ConflictException('Photos can only be added to open reports');
+        }
+        const existing = await m.find(LostFoundPhoto, { where: { reportId } });
+        if (existing.length + clean.length > MAX_PHOTOS_PER_REPORT) {
+          throw new ConflictException(`A report can have at most ${MAX_PHOTOS_PER_REPORT} photos`);
+        }
+        const nextOrder = existing.length ? Math.max(...existing.map((e) => e.sortOrder)) + 1 : 0;
+        return m.save(
+          clean.map((image, i) =>
+            m.create(LostFoundPhoto, {
+              reportId,
+              storageKey: savedKeys[i],
+              mimeType: image.mime,
+              sizeBytes: image.buffer.length,
+              sortOrder: nextOrder + i,
+            }),
+          ),
+        );
+      });
+      return rows.map((row) => ({ id: row.id, url: photoUrl(reportId, row.id) }));
+    } catch (err) {
+      await Promise.all(savedKeys.map((key) => this.storage.remove('lost-found', key)));
+      throw err;
+    }
+  }
+
+  async removePhoto(reportId: string, photoId: string, userId: string) {
+    const viewer = await this.getViewer(userId);
+    const key = await this.dataSource.transaction(async (m) => {
+      await this.lockOwnReport(m, reportId, viewer);
+      const photo = await m.findOne(LostFoundPhoto, { where: { id: photoId, reportId } });
+      if (!photo) throw new NotFoundException('Photo not found');
+      await m.delete(LostFoundPhoto, { id: photo.id });
+      return photo.storageKey;
+    });
+    // After commit: a rolled-back delete must never lose the file.
+    await this.storage.remove('lost-found', key);
+    return { deleted: true };
+  }
+
+  /**
+   * Resolves a photo for the access-checked endpoint. Anything the viewer may not see is a 404,
+   * so the response does not reveal whether a hidden report has photos.
+   */
+  async photoFile(reportId: string, photoId: string, userId: string): Promise<{ path: string; mime: string }> {
+    const viewer = await this.getViewer(userId);
+    const report = await this.reports.findOne({ where: { id: reportId } });
+    if (!report || !canViewPhotos(report, viewer)) throw new NotFoundException('Photo not found');
+    const photo = await this.photos.findOne({ where: { id: photoId, reportId } });
+    const path = photo ? this.storage.pathFor('lost-found', photo.storageKey) : null;
+    if (!photo || !path) {
+      if (photo) this.logger.error(`Photo ${photo.id} has an invalid storage key`);
+      throw new NotFoundException('Photo not found');
+    }
+    return { path, mime: photo.mimeType };
   }
 }
