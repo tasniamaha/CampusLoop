@@ -24,3 +24,9 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* The landing page has its own header. SiteNav hides itself there; its loading placeholder can't
+   read the URL (it renders outside the Suspense boundary), so hide it with CSS instead. */
+body:has([data-landing-page]) [data-site-bar-fallback] {
+  display: none;
+}

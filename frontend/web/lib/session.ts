@@ -28,6 +28,17 @@ export type RefreshResult =
   /** fatal: the backend rejected the token, so the session is over. Otherwise a transient failure. */
   | { ok: false; fatal: boolean };
 
+/**
+ * Read-only: does this request carry a session? Signed in = access cookie OR refresh cookie, because
+ * the access cookie lasts ~15 minutes and proxy.ts renews it from the refresh cookie on the next request.
+ *
+ * For display only (which header links to show). It does not validate anything: every page and API
+ * call still checks access on its own. Takes the cookie store so this module stays free of next/headers.
+ */
+export function hasSessionCookie(store: { has(name: string): boolean }): boolean {
+  return store.has(ACCESS_COOKIE) || store.has(REFRESH_COOKIE);
+}
+
 export function isBackendSession(value: unknown): value is BackendSession {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
