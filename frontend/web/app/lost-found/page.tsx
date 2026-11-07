@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useSyncExternalStore, type FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Report = {
   id: string;
@@ -35,6 +36,7 @@ async function readError(response: Response): Promise<string> {
 }
 
 export default function LostFoundPage() {
+  const router = useRouter();
   const [reports, setReports] = useState<Report[]>([]);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
@@ -60,6 +62,9 @@ export default function LostFoundPage() {
   const [loading, setLoading] = useState(true);
   const [requestedPage, setRequestedPage] = useState(1);
   const [reloadKey, setReloadKey] = useState(0);
+  // Count and empty state are only truthful after a load succeeded; a failed load shows just the error.
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   /** Event handlers call this; the effect below does the fetch. */
   function requestReports(nextPage: number) {
@@ -81,6 +86,10 @@ export default function LostFoundPage() {
     async function run() {
       try {
         const response = await fetch(`/api/backend/lost-found?${params}`, { cache: 'no-store', signal: controller.signal });
+        if (response.status === 401) {
+          router.replace('/login');
+          return; // keep the loading state until the redirect lands
+        }
         if (!response.ok) throw new Error(await readError(response));
         const result = await response.json() as ListResponse;
         if (controller.signal.aborted) return;
@@ -88,17 +97,20 @@ export default function LostFoundPage() {
         setPage(result.pagination.page);
         setPages(Math.max(result.pagination.pages, 1));
         setTotal(result.pagination.total);
+        setHasLoaded(true);
+        setLoadFailed(false);
+        setLoading(false);
       } catch (err) {
         // A newer request replaced this one; it owns error and loading now.
         if (controller.signal.aborted) return;
+        setLoadFailed(true);
         setError(err instanceof Error ? err.message : 'Could not load reports');
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
+        setLoading(false);
       }
     }
     void run();
     return () => controller.abort();
-  }, [filter, requestedPage, reloadKey]);
+  }, [filter, requestedPage, reloadKey, router]);
 
   async function submitReport(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -114,6 +126,7 @@ export default function LostFoundPage() {
           ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
         }),
       });
+      if (response.status === 401) { router.replace('/login'); return; }
       if (!response.ok) throw new Error(await readError(response));
       setTitle(''); setDescription(''); setCategory(''); setLocation(''); setItemDate(''); setImageUrl('');
       changeFilter(''); // the effect refetches with the new filter
@@ -129,6 +142,7 @@ export default function LostFoundPage() {
     setBusyAction(`matches:${id}`); setError('');
     try {
       const response = await fetch(`/api/backend/lost-found/${id}/matches`, { cache: 'no-store' });
+      if (response.status === 401) { router.replace('/login'); return; }
       if (!response.ok) throw new Error(await readError(response));
       const result = await response.json() as Match[];
       setMatches((previous) => ({ ...previous, [id]: result }));
@@ -155,6 +169,7 @@ export default function LostFoundPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ proofDetails: proofDetails.trim() }),
       });
+      if (response.status === 401) { router.replace('/login'); return; }
       if (!response.ok) throw new Error(await readError(response));
       setNotice('Claim submitted. The person who reported the found item can review your ownership evidence.');
     } catch (err) {
@@ -168,6 +183,7 @@ export default function LostFoundPage() {
     setClaimBusy(`list:${reportId}`); setError('');
     try {
       const response = await fetch(`/api/backend/lost-found/${reportId}/claims`, { cache: 'no-store' });
+      if (response.status === 401) { router.replace('/login'); return; }
       if (!response.ok) throw new Error(await readError(response));
       const result = await response.json() as Claim[];
       setClaims((previous) => ({ ...previous, [reportId]: result }));
@@ -191,6 +207,7 @@ export default function LostFoundPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, reviewerNote: reviewerNote.trim() }),
       });
+      if (response.status === 401) { router.replace('/login'); return; }
       if (!response.ok) throw new Error(await readError(response));
       setNotice(status === 'approved' ? 'Claim approved and item marked resolved.' : 'Claim rejected.');
       await loadClaims(reportId);
@@ -207,6 +224,7 @@ export default function LostFoundPage() {
     setBusyAction(`resolve:${id}`); setError(''); setNotice('');
     try {
       const response = await fetch(`/api/backend/lost-found/${id}/resolve`, { method: 'PATCH' });
+      if (response.status === 401) { router.replace('/login'); return; }
       if (!response.ok) throw new Error(await readError(response));
       setNotice('Report marked as resolved.');
       setMatches((previous) => { const next = { ...previous }; delete next[id]; return next; });
@@ -258,13 +276,14 @@ export default function LostFoundPage() {
 
       <section>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div><h2 className="text-lg font-semibold">Open reports</h2><p className="text-sm text-slate-500">{total} report{total === 1 ? '' : 's'} in your campus</p></div>
+          <div><h2 className="text-lg font-semibold">Open reports</h2>{hasLoaded && !loadFailed && <p className="text-sm text-slate-500">{total} report{total === 1 ? '' : 's'} in your campus</p>}</div>
           <select aria-label="Filter reports by type" value={filter} onChange={(e) => changeFilter(e.target.value)} className="rounded-lg border bg-white p-2 text-sm">
             <option value="">Lost and found</option><option value="lost">Lost only</option><option value="found">Found only</option>
           </select>
         </div>
 
-        {loading && reports.length === 0 ? <p role="status" className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">Loading reports...</p>
+        {loading && (!hasLoaded || loadFailed || reports.length === 0) ? <p role="status" className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">Loading reports...</p>
+        : loadFailed ? null
         : reports.length === 0 ? <p className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">No open reports found.</p> : (
           <ul aria-busy={loading} className={`space-y-4 ${loading ? 'opacity-60' : ''}`}>
             {reports.map((report) => (
@@ -289,7 +308,7 @@ export default function LostFoundPage() {
             ))}
           </ul>
         )}
-        {pages > 1 && <nav aria-label="Report pages" className="mt-5 flex items-center justify-between"><button type="button" disabled={loading || page <= 1} onClick={() => requestReports(page - 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Previous</button><span className="text-sm text-slate-600">Page {page} of {pages}</span><button type="button" disabled={loading || page >= pages} onClick={() => requestReports(page + 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Next</button></nav>}
+        {!loadFailed && pages > 1 && <nav aria-label="Report pages" className="mt-5 flex items-center justify-between"><button type="button" disabled={loading || page <= 1} onClick={() => requestReports(page - 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Previous</button><span className="text-sm text-slate-600">Page {page} of {pages}</span><button type="button" disabled={loading || page >= pages} onClick={() => requestReports(page + 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Next</button></nav>}
       </section>
     </main>
   );
