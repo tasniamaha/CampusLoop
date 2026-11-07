@@ -8,7 +8,7 @@ import { AppModule } from '../src/app.module.js';
 import { MailService, type MailMessage } from '../src/mail/mail.service.js';
 
 // Each group of tests uses its own client IP so the per-IP throttlers never interfere.
-const IP = { compare: '203.0.113.21', flow: '203.0.113.22', validation: '203.0.113.23', limit: '203.0.113.24' };
+const IP = { compare: '203.0.113.21', flow: '203.0.113.22', validation: '203.0.113.23', limit: '203.0.113.24', sessions: '203.0.113.25' };
 const PASSWORD = 'correct-horse-battery';
 
 let app: INestApplication;
@@ -125,8 +125,43 @@ describe('POST /auth/reset-password', () => {
   });
 });
 
+describe('sessions after a reset', () => {
+  const refresh = (refreshToken: string) =>
+    request(server()).post('/auth/refresh').set('X-Forwarded-For', IP.sessions).send({ refreshToken });
+
+  it('ends every session issued before the reset, on every device', async () => {
+    const email = newEmail();
+    await register(email, IP.sessions).expect(201);
+    const laptop = (await login(email, PASSWORD, IP.sessions).expect(201)).body as { refreshToken: string };
+    const phone = (await login(email, PASSWORD, IP.sessions).expect(201)).body as { refreshToken: string };
+
+    await forgot(email, IP.sessions).expect(202);
+    await waitFor(() => resetMails(email).length === 1);
+    await resetPw(tokenFrom(resetMails(email)[0]), 'brand-new-password-1', IP.sessions).expect(200);
+
+    await refresh(laptop.refreshToken).expect(401);
+    await refresh(phone.refreshToken).expect(401);
+
+    const fresh = (await login(email, 'brand-new-password-1', IP.sessions).expect(201)).body as { refreshToken: string };
+    await refresh(fresh.refreshToken).expect(200);
+  });
+
+  it('documents the limit: an access token issued before the reset works until it expires (max 15 min)', async () => {
+    const email = newEmail();
+    await register(email, IP.sessions).expect(201);
+    const old = (await login(email, PASSWORD, IP.sessions).expect(201)).body as { accessToken: string };
+
+    await forgot(email, IP.sessions).expect(202);
+    await waitFor(() => resetMails(email).length === 1);
+    await resetPw(tokenFrom(resetMails(email)[0]), 'brand-new-password-1', IP.sessions).expect(200);
+
+    // Stateless JWTs are not checked against the database. If this starts failing, the limit was
+    // closed on purpose (e.g. a token version check): update this test and the docs together.
+    await request(server()).get('/auth/me').set('Authorization', `Bearer ${old.accessToken}`).expect(200);
+  });
+});
+
 describe('known gaps (todo)', () => {
-  it.todo('revokes sessions issued before the reset (needs refresh tokens)');
   it.todo('an unverified account does not keep the first registrant\'s password when someone else re-registers it');
   it.todo('sends a "your password was changed" notice to the account email');
 });
