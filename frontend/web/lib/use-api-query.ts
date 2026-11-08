@@ -7,7 +7,10 @@ import type { ApiResult } from './api-client';
 type Settled = { key: string; ok: true } | { key: string; ok: false; message: string };
 
 export type ApiQuery<T> = {
-  /** The last successful result. Kept while a newer request runs, so a list can dim instead of blanking. */
+  /**
+   * The last successful result. Kept while a newer request runs, so a list can dim instead of
+   * blanking; cleared when a request fails.
+   */
   data: T | null;
   /** The current request has not settled yet. */
   loading: boolean;
@@ -50,6 +53,8 @@ export function useApiQuery<T>(
             router.replace('/login');
             return;
           }
+          // After a failure, a retry shows the loading state rather than an older result.
+          setData(null);
           setSettled({ key: currentKey, ok: false, status: result.status, message: result.message });
           return;
         }
@@ -58,6 +63,7 @@ export function useApiQuery<T>(
         setSettled({ key: currentKey, ok: true });
       } catch (err) {
         if (controller.signal.aborted) return;
+        setData(null);
         setSettled({ key: currentKey, ok: false, status: 0, message: err instanceof Error ? err.message : 'Could not load' });
       }
     }
