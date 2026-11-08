@@ -2076,6 +2076,205 @@
           "Reviews"
         ]
       }
+    },
+    "/api/admin/users": {
+      "get": {
+        "operationId": "AdminUsersController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "name": "campus",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "student",
+                "moderator",
+                "admin"
+              ]
+            }
+          },
+          {
+            "name": "verified",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "deactivated"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminUsers"
+        ]
+      }
+    },
+    "/api/admin/users/{id}/role": {
+      "patch": {
+        "operationId": "AdminUsersController_changeRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "AdminUsers"
+        ]
+      }
+    },
+    "/api/admin/users/{id}/deactivate": {
+      "patch": {
+        "operationId": "AdminUsersController_deactivate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "AdminUsers"
+        ]
+      }
+    },
+    "/api/admin/users/{id}/reactivate": {
+      "patch": {
+        "operationId": "AdminUsersController_reactivate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "AdminUsers"
+        ]
+      }
     }
   },
   "info": {
@@ -2317,13 +2516,19 @@
           "createdAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "deactivatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "id",
           "name",
           "slug",
-          "createdAt"
+          "createdAt",
+          "deactivatedAt"
         ]
       },
       "ResolveReportDto": {
@@ -2825,6 +3030,22 @@
             "maxLength": 255
           }
         }
+      },
+      "ChangeRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "student",
+              "moderator",
+              "admin"
+            ]
+          }
+        },
+        "required": [
+          "role"
+        ]
       }
     }
   },

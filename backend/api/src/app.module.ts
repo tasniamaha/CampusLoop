@@ -12,6 +12,7 @@ import { BorrowRequestsModule } from './borrow-requests/borrow-requests.module.j
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ReviewsModule } from './reviews/reviews.module.js';
 import { ReportsModule } from './reports/reports.module.js';
+import { AdminModule } from './admin/admin.module.js';
 import {
   defaultTracker,
   isLoginHandler,
@@ -76,7 +77,7 @@ const optIn = (name: string) => (ctx: ExecutionContext) =>
       }),
     }),
     UsersModule,
-    AuthModule,ResourcesModule, BorrowRequestsModule,AuditModule,LostFoundModule,StudyGroupsModule,NotificationsModule,ReviewsModule,ReportsModule,
+    AuthModule,ResourcesModule, BorrowRequestsModule,AuditModule,LostFoundModule,StudyGroupsModule,NotificationsModule,ReviewsModule,ReportsModule,AdminModule,
   ],
   controllers: [AppController],
     providers: [
