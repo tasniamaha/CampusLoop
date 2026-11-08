@@ -62,6 +62,10 @@ Environment: copy `backend/api/.env.example` to `backend/api/.env` and `frontend
 
 ## Git
 
-- Do not commit or push unless asked.
+- **Work on `main`.** No feature branches. Before starting, run `git switch main` and `git pull`.
 - Check `git status` before substantial changes.
-- When asked to commit, use the prefixes `feat:`, `fix:`, `refactor:`, `test:`, `docs:` or `chore:`.
+- **Commits.** One commit per logical change, with the prefixes `feat:`, `fix:`, `refactor:`, `test:`, `docs:` or `chore:`.
+- **Before any push,** run all of these and never push if any fail:
+  - Backend: `npm run build`, `npm run lint`, `npm test`, `npm run test:e2e` (against the test containers).
+  - Frontend: `npm run lint`, `npm run build`.
+- **Pushing.** Push only when asked. Never force-push to `main`. To undo a pushed commit, use `git revert`, never `reset`.
