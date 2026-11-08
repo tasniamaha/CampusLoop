@@ -12,7 +12,7 @@ import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 
  * - Delete report: the API has no endpoint that deletes reports (resolving is the end state). If a
  *   report row is removed by the database (ON DELETE CASCADE from users), its photo rows cascade
  *   with it but the files stay on disk. Cleaning those up belongs to the account-deletion and data
- *   retention policy, which is still an open decision (project.md §13.6).
+ *   retention policy, which is still open (project.md open decision: Data retention).
  */
 @Entity('lost_found_photos')
 @Index('IDX_lost_found_photos_report_order', ['reportId', 'sortOrder'])

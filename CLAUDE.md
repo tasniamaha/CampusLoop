@@ -8,6 +8,7 @@ Campus resource sharing, lost & found and study-group platform. This is a monore
 
 - **Before any feature work,** read the relevant section of `project.md`.
 - **If it is silent or lists the point under "Open decisions",** ask. Do not invent business rules.
+- Refer to project.md open decisions by name, not number.
 - **Never edit `project.md` without being asked.**
 
 ## Layout

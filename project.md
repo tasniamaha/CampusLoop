@@ -231,18 +231,28 @@ These paths are illustrative. Once an endpoint exists, its published OpenAPI con
 - **Database:** MySQL 8 with TypeORM (chosen over Prisma). Migrations only, no schema sync.
 - **Async processing:** Redis + BullMQ.
 - **Monorepo:** NestJS owns all business rules and database writes. Next.js never writes to the database directly, and secrets stay server-side.
+- **Expiry windows:** A `pending` request expires when its due date passes. An `approved` loan expires when its due date passes, or if it isn't picked up within `BORROW_PICKUP_WINDOW_HOURS` (default 48) of approval, whichever comes first. A background check runs every 5 minutes, so expiry can be up to about 5 minutes late.
+- **Reputation:** a Bayesian average, `(priorWeight × priorMean + ratingSum) / (priorWeight + reviewerCount)`, with prior weight 5 and prior mean 3.5, rounded to 2 decimal places.
+  - **One vote per reviewer:** `ratingSum` adds one value per distinct reviewer: the average of all that reviewer's ratings of this user. `reviewerCount` is the number of distinct reviewers.
+  - **Which reviews count:** reviews of this user that are not hidden, that are either revealed or past their review window, and that are on a loan in status `returned` which has a `handed_over` event.
+  - **Bounds:** ratings range from 0.5 to 5, so the score stays within 0.5–5 with no separate clamp. A user with no reviews scores 3.5.
+
+### Known limitations
+
+- A crash between a transaction commit and the notification enqueue loses that notification. Planned fix: a transactional outbox using the notifications table.
+- Found-item photo files stay on disk when a report row is cascade-deleted, until a retention policy exists.
+- Lost-and-found matches are computed per request, not stored in `item_matches`.
+- `updatedAt` is stored at whole-second precision on updates, so it can be earlier than `createdAt`. This is a bug, to be fixed.
 
 ## 13. Open decisions
 
 Ask before implementing anything that depends on these. Record the answer in §12 once it is decided.
 
 1. **Multi-unit resources:** are resources with quantity > 1 supported, and how does INV-1 generalise?
-2. **Expiry windows:** how long before a `pending` request expires, and how long before an un-picked-up `approved` loan expires?
-3. **Loan rules:** maximum loan duration, and whether loans can be extended.
-4. **Disputes:** resolution outcomes, and their effect on reputation.
-5. **Reputation:** the exact formula and bounds.
-6. **Data retention:** periods for chat messages, claim evidence, audit logs and deleted accounts; and how account deletion coexists with immutable loan history (for example, anonymisation).
-7. **Image storage:** object storage or Cloudinary in production.
-8. **Frontend extras:** whether shadcn/ui and Playwright end-to-end tests are adopted.
-9. **Repeated join requests:** after the owner rejects a join request, may the student request again, and if so how often (no limit, a cooldown, a maximum number of attempts, or never)? Today a rejected student can re-request with no limit.
-10. **Archiving and pending requests:** what happens to `pending` join requests when the owner archives a group (left pending, rejected automatically, or withdrawn), and are the requesters notified? Today they stay `pending`.
+2. **Loan rules:** maximum loan duration, and whether loans can be extended.
+3. **Disputes:** resolution outcomes, and their effect on reputation.
+4. **Data retention:** periods for chat messages, claim evidence, audit logs and deleted accounts; and how account deletion coexists with immutable loan history (for example, anonymisation).
+5. **Image storage:** object storage or Cloudinary in production.
+6. **Frontend extras:** whether shadcn/ui and Playwright end-to-end tests are adopted.
+7. **Repeated join requests:** after the owner rejects a join request, may the student request again, and if so how often (no limit, a cooldown, a maximum number of attempts, or never)? Today a rejected student can re-request with no limit.
+8. **Archiving and pending requests:** what happens to `pending` join requests when the owner archives a group (left pending, rejected automatically, or withdrawn), and are the requesters notified? Today they stay `pending`.
