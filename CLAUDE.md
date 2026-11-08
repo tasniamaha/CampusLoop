@@ -66,6 +66,11 @@ Environment: copy `backend/api/.env.example` to `backend/api/.env` and `frontend
 - **Work on `main`.** No feature branches. Before starting, run `git switch main` and `git pull`.
 - Check `git status` before substantial changes.
 - **Commits.** One commit per logical change, with the prefixes `feat:`, `fix:`, `refactor:`, `test:`, `docs:` or `chore:`.
+- **The user runs all git writes.** Never run `git add`, `git commit`, `git push`, `git reset` or `git stash`. When a change is ready:
+  1. Show the diff summary (files and line counts).
+  2. Below it, give the exact commands in a PowerShell-ready code block: `git add` with each file listed explicitly (never `git add .` or `-A`), then `git commit` with one `-m` per paragraph.
+  3. After the user says they've committed, run `git log --oneline -1` and `git status` to confirm, then continue.
+- **No attribution.** Never add a `Co-Authored-By` line or any other AI attribution to commit messages.
 - **Before any push,** run all of these and never push if any fail:
   - Backend: `npm run build`, `npm run lint`, `npm test`, `npm run test:e2e` (against the test containers).
   - Frontend: `npm run lint`, `npm run build`.
