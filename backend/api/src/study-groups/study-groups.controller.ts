@@ -11,6 +11,9 @@ interface AuthenticatedRequest extends Request { user: { sub: string; role: stri
 export class StudyGroupsController {
   constructor(private readonly service: StudyGroupsService) {}
   @Get() list(@Req() req: AuthenticatedRequest, @Query() query: ListStudyGroupsQueryDto) { return this.service.list(req.user.sub, query); }
+  // Must stay above @Get(':id'), whose ParseUUIDPipe would otherwise reject "mine" with a 400.
+  @Get('mine') mine(@Req() req: AuthenticatedRequest) { return this.service.mine(req.user.sub); }
+  @Get(':id') get(@Req() req: AuthenticatedRequest, @Param('id', ParseUUIDPipe) id: string) { return this.service.get(id, req.user.sub); }
   @Throttle({ default: { ttl: 60_000, limit: 5 } }) @RequireVerifiedEmail() @Post()
   create(@Req() req: AuthenticatedRequest, @Body() dto: CreateStudyGroupDto) { return this.service.create(req.user.sub, dto); }
   @Throttle({ default: { ttl: 60_000, limit: 10 } }) @RequireVerifiedEmail() @Post(':id/join')

@@ -1641,6 +1641,43 @@
         ]
       }
     },
+    "/api/study-groups/mine": {
+      "get": {
+        "operationId": "StudyGroupsController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StudyGroups"
+        ]
+      }
+    },
+    "/api/study-groups/{id}": {
+      "get": {
+        "operationId": "StudyGroupsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StudyGroups"
+        ]
+      }
+    },
     "/api/study-groups/{id}/join": {
       "post": {
         "operationId": "StudyGroupsController_join",

@@ -244,3 +244,5 @@ Ask before implementing anything that depends on these. Record the answer in §1
 6. **Data retention:** periods for chat messages, claim evidence, audit logs and deleted accounts; and how account deletion coexists with immutable loan history (for example, anonymisation).
 7. **Image storage:** object storage or Cloudinary in production.
 8. **Frontend extras:** whether shadcn/ui and Playwright end-to-end tests are adopted.
+9. **Repeated join requests:** after the owner rejects a join request, may the student request again, and if so how often (no limit, a cooldown, a maximum number of attempts, or never)? Today a rejected student can re-request with no limit.
+10. **Archiving and pending requests:** what happens to `pending` join requests when the owner archives a group (left pending, rejected automatically, or withdrawn), and are the requesters notified? Today they stay `pending`.

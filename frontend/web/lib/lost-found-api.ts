@@ -1,6 +1,8 @@
-// Browser-side client for the lost-and-found API. Every call goes through the /api/backend proxy,
-// which attaches the bearer token from the httpOnly cookie. Callers handle `status === 401` by
-// sending the user to /login (the session can expire mid-use).
+// Browser-side client for the lost-and-found API. Shared fetch helpers live in ./api-client.
+
+import { call, firstParam, json, parsePage, type RawSearchParams } from './api-client';
+
+export { readError, type ApiResult } from './api-client';
 
 export type LostFoundType = 'lost' | 'found';
 export type Photo = { id: string; url: string };
@@ -53,14 +55,6 @@ export type Match = { report: Report; score: number; reasons: string[] };
 export type ReportList = { data: Report[]; pagination: { page: number; limit: number; total: number; pages: number } };
 export type NewReport = Pick<Report, 'type' | 'title' | 'description' | 'category' | 'location' | 'itemDate'>;
 
-export type ApiResult<T> = { ok: true; data: T } | { ok: false; status: number; message: string };
-
-export async function readError(response: Response): Promise<string> {
-  const body = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
-  if (Array.isArray(body?.message)) return body.message.join(', ');
-  return body?.message || `Request failed (${response.status})`;
-}
-
 /** API photo URLs start with /api/; the browser loads them through the authenticated proxy. */
 export const proxied = (url: string) => url.replace(/^\/api\//, '/api/backend/');
 
@@ -68,17 +62,12 @@ export const proxied = (url: string) => url.replace(/^\/api\//, '/api/backend/')
 
 export const PAGE_SIZE = 20;
 export type ListParams = { type: LostFoundType | null; page: number };
-type RawSearchParams = Record<string, string | string[] | undefined>;
-
-const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
-
 /** Anything unexpected falls back to the defaults (all types, page 1) instead of failing. */
 export function parseListParams(raw: RawSearchParams): ListParams {
-  const type = first(raw.type);
-  const page = first(raw.page);
+  const type = firstParam(raw.type);
   return {
     type: type === 'lost' || type === 'found' ? type : null,
-    page: page && /^[1-9]\d{0,5}$/.test(page) ? Number(page) : 1,
+    page: parsePage(raw.page),
   };
 }
 
@@ -92,18 +81,6 @@ export function listHref({ type, page }: ListParams): string {
 }
 
 // ---------------- calls ----------------
-
-async function call<T>(path: string, init: RequestInit = {}): Promise<ApiResult<T>> {
-  const response = await fetch(`/api/backend${path}`, { cache: 'no-store', ...init });
-  if (!response.ok) return { ok: false, status: response.status, message: await readError(response) };
-  return { ok: true, data: (await response.json()) as T };
-}
-
-const json = (method: string, body: unknown): RequestInit => ({
-  method,
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(body),
-});
 
 export function listReports({ type, page }: ListParams, signal?: AbortSignal) {
   const query = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
