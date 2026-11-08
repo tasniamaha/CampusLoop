@@ -1,23 +1,21 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
+import LandingAuthLinks, { LandingSignedOutLinks } from '../components/site-header/LandingAuthLinks';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    // data-landing-page: hides the site bar's loading placeholder here (see globals.css).
+    <main data-landing-page className="min-h-screen bg-slate-50 text-slate-900">
       <nav className="flex items-center justify-between border-b bg-white px-6 py-4 md:px-12">
         <Link href="/" className="text-2xl font-bold text-emerald-700">
           CampusLoop
         </Link>
 
         <div className="flex items-center gap-4">
-          <Link href="/login" className="font-medium hover:text-emerald-700">
-            Log in
-          </Link>
-          <Link
-            href="/register"
-            className="rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white hover:bg-emerald-800"
-          >
-            Get started
-          </Link>
+          {/* Reads session cookies at request time, so it streams in; the fallback is the signed-out links. */}
+          <Suspense fallback={<LandingSignedOutLinks />}>
+            <LandingAuthLinks />
+          </Suspense>
         </div>
       </nav>
 

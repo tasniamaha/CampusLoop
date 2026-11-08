@@ -94,6 +94,10 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/resource-images-http.e2e-spec.ts
       - name: Lost-and-found photo tests (upload, privacy, limits)
         run: npx vitest run --config vitest.config.e2e.ts test/lost-found-photos-http.e2e-spec.ts
+      - name: Lost-and-found report page tests (single report visibility)
+        run: npx vitest run --config vitest.config.e2e.ts test/lost-found-report-detail-http.e2e-spec.ts
+      - name: Lost-and-found "My reports" tests (own reports and claims only)
+        run: npx vitest run --config vitest.config.e2e.ts test/lost-found-mine-http.e2e-spec.ts
       - name: Lost-and-found photo migration tests (restores schema)
         run: npx vitest run --config vitest.config.e2e.ts test/lost-found-photos-migration.e2e-spec.ts
       - name: Review migration tests (runs last, restores schema)

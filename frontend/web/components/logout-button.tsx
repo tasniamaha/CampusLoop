@@ -4,7 +4,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function LogoutButton() {
+/** `className` styles the button; without it the original look is kept (used on /dashboard). */
+export default function LogoutButton({ className = 'rounded border px-4 py-2 disabled:opacity-50' }: { className?: string } = {}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -38,7 +39,7 @@ export default function LogoutButton() {
         type="button"
         onClick={handleLogout}
         disabled={loading}
-        className="rounded border px-4 py-2 disabled:opacity-50"
+        className={className}
       >
         {loading ? 'Logging out...' : 'Log out'}
       </button>

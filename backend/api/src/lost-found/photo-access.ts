@@ -35,3 +35,23 @@ export function canViewPhotos(report: PhotoSubject, viewer: PhotoViewer): boolea
   if (viewer.role === UserRole.MODERATOR) return true;
   return report.status === LostFoundStatus.OPEN && report.type === LostFoundType.LOST;
 }
+
+/**
+ * Who may open a single report (GET /lost-found/:id). Broader than the list, which shows only open
+ * reports on the viewer's campus:
+ *
+ * - The reporter, admins, and moderators on the report's campus: always.
+ * - Anyone on the same campus: while the report is open (same as the list).
+ * - A user who filed a claim on it: also after it is resolved, so they can see how their claim
+ *   ended. They still get photos only if canViewPhotos allows, which it doesn't for found items.
+ *
+ * Everyone else gets a 404.
+ */
+export function canViewReport(report: PhotoSubject, viewer: PhotoViewer, viewerHasClaim: boolean): boolean {
+  if (report.reporterId === viewer.id) return true;
+  if (viewer.role === UserRole.ADMIN) return true;
+  if (viewerHasClaim && report.status === LostFoundStatus.RESOLVED) return true;
+  if (report.campus !== viewer.campus) return false;
+  if (viewer.role === UserRole.MODERATOR) return true;
+  return report.status === LostFoundStatus.OPEN;
+}

@@ -1,26 +1,18 @@
-
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Suspense, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-const PUBLIC_PATHS = [
-  '/',
-  '/login',
-  '/register',
-  '/forgot-password',
-  '/reset-password',
-  '/verify-email',
-];
-
-function NotificationBellContent() {
-  const pathname = usePathname();
-  const isPublic = PUBLIC_PATHS.includes(pathname);
+/**
+ * Unread-notification bell. `signedIn` comes from the site header (session cookies), so the bell
+ * neither renders nor polls for signed-out visitors. A 401 still stops polling, for sessions that
+ * end while the page is open.
+ */
+export default function NotificationBell({ signedIn }: { signedIn: boolean }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    if (isPublic) {
+    if (!signedIn) {
       return;
     }
 
@@ -89,10 +81,10 @@ function NotificationBellContent() {
         handleVisibilityChange,
       );
     };
-  }, [isPublic]);
+  }, [signedIn]);
 
-  // Don't display the bell or poll on public pages.
-  if (isPublic) return null;
+  // Don't display the bell or poll for signed-out visitors.
+  if (!signedIn) return null;
 
   return (
     <Link
@@ -102,7 +94,7 @@ function NotificationBellContent() {
           ? `Notifications, ${unreadCount} unread`
           : 'Notifications'
       }
-      className="relative inline-flex items-center justify-center rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+      className="relative inline-flex items-center justify-center rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -126,12 +118,5 @@ function NotificationBellContent() {
         </span>
       )}
     </Link>
-  );
-}
-export default function NotificationBell() {
-  return (
-    <Suspense fallback={null}>
-      <NotificationBellContent />
-    </Suspense>
   );
 }

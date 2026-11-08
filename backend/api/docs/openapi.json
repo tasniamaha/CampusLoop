@@ -1271,6 +1271,43 @@
         ]
       }
     },
+    "/api/lost-found/mine": {
+      "get": {
+        "operationId": "LostFoundController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "LostFound"
+        ]
+      }
+    },
+    "/api/lost-found/{id}": {
+      "get": {
+        "operationId": "LostFoundController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "LostFound"
+        ]
+      }
+    },
     "/api/lost-found/{id}/report": {
       "post": {
         "operationId": "LostFoundController_report",

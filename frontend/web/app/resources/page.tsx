@@ -149,25 +149,6 @@ export default function ResourcesPage() {
 
   return (
     <main className="min-h-screen bg-[#f6f8f7] text-slate-900">
-      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-8">
-          <Link href="/dashboard" className="flex items-center gap-2.5" aria-label="CampusLoop dashboard">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-700 text-lg font-black text-white">C</span>
-            <span className="text-lg font-bold tracking-tight">Campus<span className="text-emerald-700">Loop</span></span>
-          </Link>
-          <nav className="flex items-center gap-2 text-sm">
-            <Link href="/dashboard" className="rounded-lg px-3 py-2 font-medium text-slate-600 hover:bg-slate-100">Dashboard</Link>
-            <span className="rounded-lg bg-emerald-50 px-3 py-2 font-semibold text-emerald-800">Resources</span>
-            <Link
-                href="/borrowings"
-                className="rounded-lg px-3 py-2 font-semibold text-emerald-700 hover:bg-emerald-50"
-            >
-            My borrowings
-            </Link>
-          </nav>
-        </div>
-      </header>
-
       <div className="mx-auto max-w-7xl px-5 py-8 md:px-8 md:py-10">
         <section className="relative overflow-hidden rounded-3xl bg-emerald-950 px-6 py-8 text-white md:px-10 md:py-10">
           <div className="pointer-events-none absolute -right-12 -top-24 h-72 w-72 rounded-full border-[36px] border-emerald-800/60" />
