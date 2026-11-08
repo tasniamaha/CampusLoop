@@ -5,6 +5,7 @@ export enum RefreshRevokeReason {
   LOGOUT_ALL = 'logout_all',
   REUSE_DETECTED = 'reuse_detected',
   PASSWORD_RESET = 'password_reset',
+  DEACTIVATED = 'deactivated',
 }
 
 /**

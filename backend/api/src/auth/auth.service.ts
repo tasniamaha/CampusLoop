@@ -11,6 +11,7 @@ import { RefreshTokenService, type IssuedRefreshToken } from './refresh-token.se
 import { RefreshRevokeReason } from './entities/refresh-token.entity.js';
 
 export const ACCESS_TOKEN_TTL_SECONDS = 900;
+export const ACCOUNT_DEACTIVATED = 'This account has been deactivated.';
 
 @Injectable()
 export class AuthService {
@@ -44,6 +45,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    // Checked after the password, so this message never reveals whether an email is registered.
+    if (user.deactivatedAt) {
+      this.logger.warn(`login refused: user ${user.id} is deactivated`);
+      throw new UnauthorizedException(ACCOUNT_DEACTIVATED);
+    }
+
     const refresh = await this.refreshTokens.issueForLogin(user.id, userAgent);
     return this.buildSession(user, refresh);
   }
@@ -53,6 +60,8 @@ export class AuthService {
     const { userId, token } = await this.refreshTokens.rotate(rawRefreshToken, userAgent);
     const user = await this.usersService.findById(userId);
     if (!user) throw new UnauthorizedException('Session expired. Please log in again.');
+    // Deactivation revokes refresh tokens; this also covers a rotation that raced with it.
+    if (user.deactivatedAt) throw new UnauthorizedException(ACCOUNT_DEACTIVATED);
     return this.buildSession(user, token);
   }
 

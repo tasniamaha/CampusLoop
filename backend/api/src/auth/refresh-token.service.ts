@@ -110,7 +110,7 @@ export class RefreshTokenService {
   /** Ends every session of a user. Pass the caller's manager to commit with its transaction. */
   revokeAllForUser(
     userId: string,
-    reason: RefreshRevokeReason.LOGOUT_ALL | RefreshRevokeReason.PASSWORD_RESET,
+    reason: RefreshRevokeReason.LOGOUT_ALL | RefreshRevokeReason.PASSWORD_RESET | RefreshRevokeReason.DEACTIVATED,
     manager: EntityManager = this.dataSource.manager,
   ): Promise<void> {
     return this.revokeWhere(manager, { userId }, reason);

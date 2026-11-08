@@ -104,6 +104,10 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/study-groups-detail-http.e2e-spec.ts
       - name: Study group "My groups" tests (own groups and requests only)
         run: npx vitest run --config vitest.config.e2e.ts test/study-groups-mine-http.e2e-spec.ts
+      - name: Deactivation tests (accounts and categories)
+        run: npx vitest run --config vitest.config.e2e.ts test/deactivation-http.e2e-spec.ts
+      - name: Deactivation migration tests (restores schema)
+        run: npx vitest run --config vitest.config.e2e.ts test/deactivation-migration.e2e-spec.ts
       - name: Lost-and-found photo migration tests (restores schema)
         run: npx vitest run --config vitest.config.e2e.ts test/lost-found-photos-migration.e2e-spec.ts
       - name: Review migration tests (runs last, restores schema)

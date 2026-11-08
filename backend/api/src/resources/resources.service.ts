@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Brackets, DataSource, EntityManager, In, SelectQueryBuilder } from 'typeorm';
+import { Brackets, DataSource, EntityManager, In, IsNull, SelectQueryBuilder } from 'typeorm';
 import { Resource, ItemCondition } from './entities/resource.entity.js';
 import { ResourceCategory } from './entities/resource-category.entity.js';
 import { ResourceImage } from './entities/resource-image.entity.js';
@@ -82,7 +82,10 @@ export class ResourcesService {
   // ---------------- categories ----------------
 
   listCategories() {
-    return this.dataSource.getRepository(ResourceCategory).find({ order: { name: 'ASC' } });
+    // Public list: only categories that can still be chosen.
+    return this.dataSource
+      .getRepository(ResourceCategory)
+      .find({ where: { deactivatedAt: IsNull() }, select: { id: true, name: true, slug: true }, order: { name: 'ASC' } });
   }
 
   // ---------------- create / edit / delete ----------------
@@ -110,10 +113,10 @@ export class ResourcesService {
   }
 
   async update(id: string, userId: string, dto: UpdateResourceDto) {
-    if (dto.categoryId !== undefined) await this.assertCategory(dto.categoryId);
-
     await this.dataSource.transaction(async (m) => {
       const resource = await this.lockOwned(m, id, userId);
+      // Re-sending the resource's current (possibly deactivated) category is not a change.
+      if (dto.categoryId !== undefined && dto.categoryId !== resource.categoryId) await this.assertCategory(dto.categoryId);
 
       if (dto.title !== undefined) {
         const t = dto.title.trim();
@@ -309,8 +312,11 @@ export class ResourcesService {
   // ---------------- helpers ----------------
 
   private async assertCategory(categoryId: string) {
-    const exists = await this.dataSource.getRepository(ResourceCategory).existsBy({ id: categoryId });
-    if (!exists) throw new BadRequestException('Unknown category');
+    const category = await this.dataSource
+      .getRepository(ResourceCategory)
+      .findOne({ where: { id: categoryId }, select: { id: true, deactivatedAt: true } });
+    if (!category) throw new BadRequestException('Unknown category');
+    if (category.deactivatedAt) throw new BadRequestException('This category is no longer available');
   }
 
   private async lockOwned(m: EntityManager, id: string, userId: string) {

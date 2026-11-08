@@ -75,4 +75,9 @@ export class UsersService {
   async findById(id: string) {
     return this.usersRepository.findOne({ where: { id } });
   }
+
+  /** What the auth guards need on every request: current role and whether the account is active. */
+  async findAuthState(id: string): Promise<Pick<User, 'id' | 'role' | 'deactivatedAt'> | null> {
+    return this.usersRepository.findOne({ where: { id }, select: { id: true, role: true, deactivatedAt: true } });
+  }
 }

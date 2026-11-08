@@ -12,10 +12,11 @@ import { RolesGuard } from './roles.guard.js';
 
 function setup(
   requiredRoles: UserRole[],
-  user?: { id: string; role: UserRole },
+  user?: { id: string; role: UserRole; deactivatedAt?: Date | null },
+  requestUser: { sub: string; role: string; roleFromDb?: true } = { sub: 'user-1', role: UserRole.ADMIN },
 ) {
-  const request: { user?: { sub: string; role: string } } = {
-    user: { sub: 'user-1', role: UserRole.ADMIN },
+  const request: { user?: { sub: string; role: string; roleFromDb?: true } } = {
+    user: requestUser,
   };
 
   const reflector = {
@@ -23,7 +24,7 @@ function setup(
   };
 
   const users = {
-    findById: vi.fn().mockResolvedValue(user ?? null),
+    findAuthState: vi.fn().mockResolvedValue(user ? { deactivatedAt: null, ...user } : null),
   };
 
   const context = {
@@ -50,7 +51,7 @@ describe('RolesGuard', () => {
     const { guard, users, context } = setup([]);
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
-    expect(users.findById).not.toHaveBeenCalled();
+    expect(users.findAuthState).not.toHaveBeenCalled();
   });
 
   it('allows an admin on an admin-only route', async () => {
@@ -92,5 +93,22 @@ describe('RolesGuard', () => {
       ForbiddenException,
     );
     expect(request.user?.role).toBe(UserRole.STUDENT);
+  });
+
+  it('reuses the role JwtAuthGuard loaded from the database (no second read)', async () => {
+    const { guard, users, context } = setup([UserRole.ADMIN], undefined, { sub: 'user-1', role: UserRole.ADMIN, roleFromDb: true });
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+    expect(users.findAuthState).not.toHaveBeenCalled();
+  });
+
+  it('rejects a database-loaded student role on an admin route without reading again', async () => {
+    const { guard, users, context } = setup([UserRole.ADMIN], undefined, { sub: 'user-1', role: UserRole.STUDENT, roleFromDb: true });
+    await expect(guard.canActivate(context)).rejects.toBeInstanceOf(ForbiddenException);
+    expect(users.findAuthState).not.toHaveBeenCalled();
+  });
+
+  it('rejects a deactivated user when it has to read the user itself', async () => {
+    const { guard, context } = setup([UserRole.ADMIN], { id: 'user-1', role: UserRole.ADMIN, deactivatedAt: new Date() });
+    await expect(guard.canActivate(context)).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });

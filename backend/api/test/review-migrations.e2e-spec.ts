@@ -23,6 +23,7 @@ import { ReviewHalfStarRatings1793300000000 } from '../src/database/migrations/1
 import { CreateRefreshTokens1793400000000 } from '../src/database/migrations/1793400000000-CreateRefreshTokens.js';
 import { AddBorrowApprovedAt1793500000000 } from '../src/database/migrations/1793500000000-AddBorrowApprovedAt.js';
 import { CreateLostFoundPhotos1793600000000 } from '../src/database/migrations/1793600000000-CreateLostFoundPhotos.js';
+import { AddUserAndCategoryDeactivation1793700000000 } from '../src/database/migrations/1793700000000-AddUserAndCategoryDeactivation.js';
 import { randomUUID } from 'node:crypto';
 
 // Proves the two review migrations on a database that ALREADY holds reviews written by the
@@ -108,6 +109,7 @@ beforeAll(async () => {
       CreateRefreshTokens1793400000000,
       AddBorrowApprovedAt1793500000000,
       CreateLostFoundPhotos1793600000000,
+      AddUserAndCategoryDeactivation1793700000000,
     ] as never,
     synchronize: false,
     dropSchema: false,
@@ -121,23 +123,23 @@ beforeAll(async () => {
   expect(await columns()).not.toContain('revieweeId');
 
   // 2) Seed one owner, three borrowers and three RETURNED loans.
-  const users = ds.getRepository(User);
-  const mk = (label: string) =>
-    users.save(
-      users.create({
-        name: label,
-        email: `${label}-${rand()}@mig.local`,
-        passwordHash: 'x',
-        campus: 'test',
-        role: UserRole.STUDENT,
-        emailVerifiedAt: null,
-      }),
+  // Raw SQL with only the legacy columns: the schema is rolled back here, so the current User
+  // and ResourceCategory entities map columns (e.g. deactivatedAt) that do not exist yet.
+  const mk = async (label: string) => {
+    const id = randomUUID();
+    const email = `${label}-${rand()}@mig.local`;
+    await ds.query(
+      'INSERT INTO users (id, name, email, emailCanonical, passwordHash, campus, role, emailVerifiedAt) VALUES (?, ?, ?, ?, ?, ?, ?, NULL)',
+      [id, label, email, email, 'x', 'test', UserRole.STUDENT],
     );
+    return { id };
+  };
   const owner = await mk('owner');
   ownerId = owner.id;
   const borrowers = [await mk('b1'), await mk('b2'), await mk('b3')];
 
-  const category = await ds.getRepository(ResourceCategory).findOneByOrFail({ slug: 'calculators' });
+  const [category] = (await ds.query("SELECT id FROM resource_categories WHERE slug = 'calculators'")) as Array<{ id: string }>;
+  if (!category) throw new Error('Seed category "calculators" is missing');
   const resource = await ds.getRepository(Resource).save(
     ds.getRepository(Resource).create({
       ownerId: owner.id,

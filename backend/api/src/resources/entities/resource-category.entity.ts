@@ -13,4 +13,8 @@ export class ResourceCategory {
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  /** NULL = active. Deactivated categories are hidden from the public list and can't be newly chosen. */
+  @Column({ type: 'datetime', precision: 6, nullable: true })
+  deactivatedAt!: Date | null;
 }

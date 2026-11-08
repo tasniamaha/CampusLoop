@@ -14,6 +14,7 @@ interface AuthenticatedRequest {
   user?: {
     sub: string;
     role: string;
+    roleFromDb?: true;
   };
 }
 
@@ -42,20 +43,22 @@ export class RolesGuard implements CanActivate {
       throw new UnauthorizedException('Authentication required');
     }
 
-    // Read the current role from the database, not the potentially stale
-    // role claim embedded in an access token.
-    const user = await this.users.findById(subject);
-
-    if (!user) {
-      throw new UnauthorizedException('User no longer exists');
+    // JwtAuthGuard already read the current role from the database on this request.
+    // Otherwise read it here, never trusting the possibly stale role claim in the token.
+    let role = request.user?.roleFromDb ? (request.user.role as UserRole) : null;
+    if (role === null) {
+      const user = await this.users.findAuthState(subject);
+      if (!user) {
+        throw new UnauthorizedException('User no longer exists');
+      }
+      if (user.deactivatedAt) {
+        throw new UnauthorizedException('This account has been deactivated.');
+      }
+      role = user.role;
+      request.user = { sub: user.id, role, roleFromDb: true };
     }
 
-    request.user = {
-      sub: user.id,
-      role: user.role,
-    };
-
-    if (!requiredRoles.includes(user.role)) {
+    if (!requiredRoles.includes(role)) {
       throw new ForbiddenException('Insufficient role');
     }
 

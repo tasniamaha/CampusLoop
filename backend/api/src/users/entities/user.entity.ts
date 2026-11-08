@@ -49,6 +49,10 @@ export class User {
   @Column({ type: 'datetime', nullable: true })
   emailVerifiedAt!: Date | null;
 
+  // NULL = active. Set by an admin; a deactivated user can't log in, refresh or use a token.
+  @Column({ type: 'datetime', precision: 6, nullable: true })
+  deactivatedAt!: Date | null;
+
   @CreateDateColumn()
   createdAt!: Date;
 
