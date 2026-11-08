@@ -57,6 +57,34 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Create the first admin
+
+The admin API can only be used by an admin, so the first admin is created from the command line. `admin:promote` promotes an existing account to admin. It is a command-line script only, with no HTTP route.
+
+1. Register the account in the app and verify its email address.
+2. Run the script, setting `DB_DATABASE` for this command only:
+
+```powershell
+# PowerShell
+$env:DB_DATABASE='campusloop_db'; npm run admin:promote -- user@example.com
+```
+
+```bash
+# bash
+DB_DATABASE=campusloop_db npm run admin:promote -- user@example.com
+```
+
+- **What it changes:** it builds the API, prints the host, port and database it is about to change, then promotes the account. The change is audit-logged as `user.role_changed` with the system actor (`actorId` NULL, `metadata.via` = `cli`).
+- **Refusals:** it refuses, changing nothing, when:
+  - `DB_DATABASE` isn't set for the command (a value in `.env` alone is not enough);
+  - the database has pending migrations (run `npm run migration:run` first; the script never migrates);
+  - no account uses that email address;
+  - the account isn't verified;
+  - the account is deactivated;
+  - the account is already an admin.
+- **Matching:** the email is matched the same way login matches it, ignoring case, and also ignoring dots and `+tags` for Gmail addresses.
+- **Exit codes:** `0` promoted, `1` refused for this account, `2` bad usage or unsafe environment.
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

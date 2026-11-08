@@ -108,6 +108,8 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/deactivation-http.e2e-spec.ts
       - name: Admin users tests (roles, deactivation, last-admin lock under concurrency)
         run: npx vitest run --config vitest.config.e2e.ts test/admin-users-http.e2e-spec.ts
+      - name: Admin promote CLI tests (bootstrap first admin, needs the build above)
+        run: npx vitest run --config vitest.config.e2e.ts test/admin-promote-cli.e2e-spec.ts
       - name: Deactivation migration tests (restores schema)
         run: npx vitest run --config vitest.config.e2e.ts test/deactivation-migration.e2e-spec.ts
       - name: Lost-and-found photo migration tests (restores schema)

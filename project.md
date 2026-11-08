@@ -15,7 +15,7 @@ Verified university students share underused academic resources, borrow equipmen
 **In scope (first release)**
 - One or more participating campuses.
 - Free resource borrowing and exchange.
-- Access limited to verified students (university email).
+- Access limited to accounts with a verified email address (see §12, Registration).
 - Moderation and administration.
 - Web-based notifications and real-time chat.
 
@@ -41,7 +41,7 @@ Rules:
 ## 4. Modules and functional requirements
 
 ### 4.1 Authentication and profiles
-- Register with a university email. The email is unique, compared case-insensitively in canonical form.
+- Register with any email address the student can verify (personal or university; see §12, Registration). The email is unique, compared case-insensitively in canonical form.
 - Email ownership is verified with an expiring, single-use token.
 - JWT access tokens plus refresh tokens with **rotation**. A refresh token is invalidated on use and on logout.
 - Passwords are stored with a modern adaptive hashing algorithm.
@@ -187,7 +187,7 @@ These must hold under concurrent requests. They are enforced in the database lay
 | Completed loan → Review | Optional, at most one per participant. |
 
 **Constraints:**
-- Unique canonical university email.
+- Unique canonical email.
 - Indexes on resource status, category and campus.
 - Foreign keys throughout.
 - Soft deletion for user-generated content that other records reference.
@@ -231,6 +231,7 @@ These paths are illustrative. Once an endpoint exists, its published OpenAPI con
 - **Database:** MySQL 8 with TypeORM (chosen over Prisma). Migrations only, no schema sync.
 - **Async processing:** Redis + BullMQ.
 - **Monorepo:** NestJS owns all business rules and database writes. Next.js never writes to the database directly, and secrets stay server-side.
+- **Registration:** Registration accepts any verified email address (personal or university); a university-domain restriction is not enforced.
 - **Expiry windows:** A `pending` request expires when its due date passes. An `approved` loan expires when its due date passes, or if it isn't picked up within `BORROW_PICKUP_WINDOW_HOURS` (default 48) of approval, whichever comes first. A background check runs every 5 minutes, so expiry can be up to about 5 minutes late.
 - **Reputation:** a Bayesian average, `(priorWeight × priorMean + ratingSum) / (priorWeight + reviewerCount)`, with prior weight 5 and prior mean 3.5, rounded to 2 decimal places.
   - **One vote per reviewer:** `ratingSum` adds one value per distinct reviewer: the average of all that reviewer's ratings of this user. `reviewerCount` is the number of distinct reviewers.

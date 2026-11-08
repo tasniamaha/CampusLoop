@@ -1,9 +1,10 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource, type EntityManager } from 'typeorm';
 import { AuditService } from '../audit/audit.service.js';
 import { RefreshTokenService } from '../auth/refresh-token.service.js';
 import { RefreshRevokeReason } from '../auth/entities/refresh-token.entity.js';
 import { User, UserRole } from '../users/entities/user.entity.js';
+import { canonicalEmail } from '../common/email.js';
 import { assertAdminChangeAllowed, type AccountChange } from './admin-rules.js';
 import type { ListUsersQuery } from './dto/admin-users.dto.js';
 
@@ -26,6 +27,8 @@ const toView = (user: User): AdminUserView => ({
 const likeContains = (value: string) => `%${value.replace(/[\\%_]/g, '\\$&')}%`;
 
 export type Actor = { id: string; ip: string | null };
+/** Command-line changes (npm run admin:promote). Audited with actorId null, the system actor. */
+export const SYSTEM_ACTOR = 'system' as const;
 
 @Injectable()
 export class AdminUsersService {
@@ -108,6 +111,32 @@ export class AdminUsersService {
   }
 
   /**
+   * Bootstrap path for the first admin, used only by the admin:promote CLI (never over HTTP).
+   * Looks the account up by canonical email, as login does, so Gmail dot/+tag variants find the
+   * same account. Same transaction, locks and rules as an admin's own role change.
+   */
+  async promoteBySystem(email: string): Promise<AdminUserView> {
+    const found = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { emailCanonical: canonicalEmail(email.trim().toLowerCase()) }, select: { id: true } });
+    if (!found) throw new NotFoundException('No account uses this email address');
+
+    return this.mutate(SYSTEM_ACTOR, found.id, 'promote-or-keep', async (m, target) => {
+      if (target.deactivatedAt) throw new ConflictException('This account is deactivated; reactivate it before promoting it');
+      if (!target.emailVerifiedAt) throw new BadRequestException('This account has not verified its email address yet');
+      if (target.role === UserRole.ADMIN) throw new ConflictException('This account is already an admin');
+      await m.update(User, { id: target.id }, { role: UserRole.ADMIN });
+      await this.audit.record(m, {
+        actorId: null,
+        action: 'user.role_changed',
+        targetType: 'user',
+        targetId: target.id,
+        metadata: { from: target.role, to: UserRole.ADMIN, actor: SYSTEM_ACTOR, via: 'cli' },
+      });
+    });
+  }
+
+  /**
    * One transaction per change: lock every active admin (fixed id order, so concurrent changes
    * serialise without deadlocks), then the target; re-check the actor and the last-admin rule
    * against the locked rows; apply the change and its audit row together.
@@ -117,7 +146,7 @@ export class AdminUsersService {
    * taken on the users index, so sign-ups are never blocked by an admin change.
    */
   private async mutate(
-    actor: Actor,
+    actor: Actor | typeof SYSTEM_ACTOR,
     targetId: string,
     change: AccountChange,
     apply: (m: EntityManager, target: User) => Promise<void>,
@@ -132,7 +161,7 @@ export class AdminUsersService {
 
       const activeAdminIds = admins.map((row) => row.id);
       assertAdminChangeAllowed(
-        { id: actor.id },
+        actor === SYSTEM_ACTOR ? SYSTEM_ACTOR : { id: actor.id },
         { id: target.id, isActiveAdmin: target.role === UserRole.ADMIN && !target.deactivatedAt },
         activeAdminIds,
         change,

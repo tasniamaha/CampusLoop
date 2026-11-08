@@ -7,6 +7,6 @@ describe('canonicalEmail', () => {
     expect(canonicalEmail('abc@googlemail.com')).toBe('abc@gmail.com');
   });
   it('leaves other providers alone', () => {
-    expect(canonicalEmail('First.Last+x@Uni.edu')).toBe('first.last+x@uni.edu');
+    expect(canonicalEmail('First.Last+x@Example.com')).toBe('first.last+x@example.com');
   });
 });
