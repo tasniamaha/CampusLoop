@@ -244,6 +244,7 @@ These paths are illustrative. Once an endpoint exists, its published OpenAPI con
 - Found-item photo files stay on disk when a report row is cascade-deleted, until a retention policy exists.
 - Lost-and-found matches are computed per request, not stored in `item_matches`.
 - `updatedAt` is stored at whole-second precision on updates, so it can be earlier than `createdAt`. This is a bug, to be fixed.
+- Admin analytics groups by campus as stored. Users and resources store the campus as typed, while study groups normalise it, so one campus can appear as more than one row.
 
 ## 13. Open decisions
 

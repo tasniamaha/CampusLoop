@@ -110,6 +110,8 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/admin-users-http.e2e-spec.ts
       - name: Admin categories tests (create, rename, deactivate, no delete)
         run: npx vitest run --config vitest.config.e2e.ts test/admin-categories-http.e2e-spec.ts
+      - name: Admin audit log and analytics tests
+        run: npx vitest run --config vitest.config.e2e.ts test/admin-audit-analytics-http.e2e-spec.ts
       - name: Admin promote CLI tests (bootstrap first admin, needs the build above)
         run: npx vitest run --config vitest.config.e2e.ts test/admin-promote-cli.e2e-spec.ts
       - name: Deactivation migration tests (restores schema)
