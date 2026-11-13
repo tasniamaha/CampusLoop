@@ -365,6 +365,42 @@ describe('review reports and moderator queue', () => {
     ]);
   });
 
+  it('summarises review targets in the queue with an excerpt and the hidden state only', async () => {
+    const { review } = await seedReview();
+    const long = `Rude   comment\n${'x'.repeat(200)}`;
+    await ds.getRepository(Review).update({ id: review.id }, { comment: long });
+    await api('post', `/reviews/${review.id}/report`, 'reporter2')
+      .send({ reason: 'Abusive comment' })
+      .expect(201);
+    const report = await ds.getRepository(Report).findOneByOrFail({
+      reporterId: actors.reporter2.id,
+      targetId: review.id,
+    });
+    const find = async (status: ReportStatus) => {
+      const res = await api('get', `/moderation/reports?status=${status}&limit=50`, 'moderator').expect(200);
+      return (res.body.items as Array<{ id: string; target: unknown }>).find((item) => item.id === report.id);
+    };
+
+    const open = await find(ReportStatus.OPEN);
+    expect(open?.target).toEqual({
+      type: 'review',
+      excerpt: `Rude comment ${'x'.repeat(107)}…`,
+      isHidden: false,
+    });
+
+    await api('patch', `/reviews/${review.id}/hide`, 'moderator')
+      .send({ reason: 'Abusive' })
+      .expect(200);
+    expect((await find(ReportStatus.RESOLVED))?.target).toEqual({
+      type: 'review',
+      excerpt: `Rude comment ${'x'.repeat(107)}…`,
+      isHidden: true,
+    });
+
+    const remote = await api('get', '/moderation/reports?limit=50', 'moderator2').expect(200);
+    expect(remote.body.items.map((item: Report) => item.id)).not.toContain(report.id);
+  });
+
   it('blocks moderators from other campuses from resolving or hiding reviews', async () => {
     const review = (await seedReview()).review;
     await api('post', `/reviews/${review.id}/report`, 'reporter')

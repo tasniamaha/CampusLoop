@@ -249,6 +249,16 @@ describe('POST /resources/:id/report', () => {
       'moderator',
     ).expect(200);
     expect(sameCampus.body.items.map((item: Report) => item.id)).toContain(report!.id);
+    const listed = sameCampus.body.items.find((item: Report) => item.id === report!.id);
+    expect(listed.target).toEqual({ type: 'resource', title: 'Report-target resource', removed: false });
+    await ds.query('UPDATE resources SET deletedAt = UTC_TIMESTAMP(6) WHERE id = ?', [resource.id]);
+    const afterRemoval = await api('get', '/moderation/reports?status=open&limit=50', 'moderator').expect(200);
+    expect(afterRemoval.body.items.find((item: Report) => item.id === report!.id).target).toEqual({
+      type: 'resource',
+      title: 'Report-target resource',
+      removed: true,
+    });
+    await ds.query('UPDATE resources SET deletedAt = NULL WHERE id = ?', [resource.id]);
     const otherCampus = await api(
       'get',
       '/moderation/reports?status=open&limit=50',
@@ -339,6 +349,13 @@ describe('POST /lost-found/:id/report', () => {
       'moderator2',
     ).expect(200);
     expect(otherCampus.body.items.map((item: Report) => item.id)).not.toContain(report!.id);
+    // Title and type only: no description, location, photos or claim details.
+    const sameCampus = await api('get', '/moderation/reports?status=open&limit=50', 'moderator').expect(200);
+    expect(sameCampus.body.items.find((item: Report) => item.id === report!.id).target).toEqual({
+      type: 'lost_found',
+      title: 'Blue calculator',
+      noticeType: 'lost',
+    });
     await api('patch', `/moderation/reports/${report!.id}/resolve`, 'moderator2')
       .send({ status: ReportStatus.RESOLVED })
       .expect(404);

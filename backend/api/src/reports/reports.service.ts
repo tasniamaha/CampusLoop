@@ -12,8 +12,24 @@ import { isDuplicateEntry } from '../common/db-errors.js';
 import { User, UserRole } from '../users/entities/user.entity.js';
 import { Review } from '../reviews/entities/review.entity.js';
 import { Resource } from '../resources/entities/resource.entity.js';
-import { LostFoundReport } from '../lost-found/entities/lost-found-report.entity.js';
+import { LostFoundReport, LostFoundType } from '../lost-found/entities/lost-found-report.entity.js';
 import { Report, ReportStatus, ReportTarget } from './entities/report.entity.js';
+
+/** What the moderation queue shows about a reported item (see ReportsService.targetSummaries). */
+export type TargetSummary =
+  | { type: ReportTarget.REVIEW; excerpt: string | null; isHidden: boolean }
+  | { type: ReportTarget.RESOURCE; title: string; removed: boolean }
+  | { type: ReportTarget.LOST_FOUND; title: string; noticeType: LostFoundType };
+
+export const EXCERPT_LENGTH = 120;
+
+/** The first EXCERPT_LENGTH characters of a review comment, whitespace collapsed. */
+export function excerpt(comment: string | null): string | null {
+  const text = comment?.replace(/\s+/g, ' ').trim();
+  if (!text) return null;
+  const chars = Array.from(text);
+  return chars.length > EXCERPT_LENGTH ? `${chars.slice(0, EXCERPT_LENGTH).join('').trimEnd()}…` : text;
+}
 
 @Injectable()
 export class ReportsService {
@@ -141,7 +157,73 @@ export class ReportsService {
       .limit(limit)
       .getManyAndCount();
 
-    return { page, limit, total, totalPages: Math.ceil(total / limit), items };
+    const summaries = await this.targetSummaries(items);
+    return {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      items: items.map((item) =>
+        Object.assign(item, {
+          target: summaries.get(`${item.targetType}:${item.targetId}`) ?? null,
+        }),
+      ),
+    };
+  }
+
+  /**
+   * A short description of each reported item, so the queue can be read without opening it.
+   * Only display fields: a lost-and-found notice gives its title and type (never photos,
+   * description or claim proof); a review gives an excerpt and whether it is hidden; a resource
+   * gives its title and whether it was removed. Built only for the page being returned, which is
+   * already campus-scoped, with one query per target type. `null` when the item no longer exists.
+   */
+  private async targetSummaries(items: Report[]): Promise<Map<string, TargetSummary>> {
+    const ids = (type: ReportTarget) => [
+      ...new Set(items.filter((item) => item.targetType === type).map((item) => item.targetId)),
+    ];
+    const query = async <T>(type: ReportTarget, sql: string): Promise<T[]> => {
+      const list = ids(type);
+      return list.length ? ((await this.dataSource.query(sql, [list])) as T[]) : [];
+    };
+    const [reviews, resources, notices] = await Promise.all([
+      query<{ id: string; comment: string | null; isHidden: number | boolean }>(
+        ReportTarget.REVIEW,
+        'SELECT id, comment, isHidden FROM reviews WHERE id IN (?)',
+      ),
+      query<{ id: string; title: string; deletedAt: Date | null }>(
+        ReportTarget.RESOURCE,
+        'SELECT id, title, deletedAt FROM resources WHERE id IN (?)',
+      ),
+      query<{ id: string; title: string; type: LostFoundType }>(
+        ReportTarget.LOST_FOUND,
+        'SELECT id, title, type FROM lost_found_reports WHERE id IN (?)',
+      ),
+    ]);
+
+    const map = new Map<string, TargetSummary>();
+    for (const row of reviews) {
+      map.set(`${ReportTarget.REVIEW}:${row.id}`, {
+        type: ReportTarget.REVIEW,
+        excerpt: excerpt(row.comment),
+        isHidden: Boolean(Number(row.isHidden)),
+      });
+    }
+    for (const row of resources) {
+      map.set(`${ReportTarget.RESOURCE}:${row.id}`, {
+        type: ReportTarget.RESOURCE,
+        title: row.title,
+        removed: row.deletedAt !== null,
+      });
+    }
+    for (const row of notices) {
+      map.set(`${ReportTarget.LOST_FOUND}:${row.id}`, {
+        type: ReportTarget.LOST_FOUND,
+        title: row.title,
+        noticeType: row.type,
+      });
+    }
+    return map;
   }
 
   async resolve(
