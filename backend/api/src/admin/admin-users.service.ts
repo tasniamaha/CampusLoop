@@ -6,7 +6,7 @@ import { RefreshRevokeReason } from '../auth/entities/refresh-token.entity.js';
 import { User, UserRole } from '../users/entities/user.entity.js';
 import { canonicalEmail } from '../common/email.js';
 import { assertAdminChangeAllowed, type AccountChange } from './admin-rules.js';
-import type { ListUsersQuery } from './dto/admin-users.dto.js';
+import type { ListUsersQuery, UserFilters } from './dto/admin-users.dto.js';
 
 /** What an admin sees about a user. No password hash, no canonical email, no tokens. */
 const ADMIN_USER_FIELDS = ['id', 'name', 'email', 'campus', 'role', 'emailVerifiedAt', 'deactivatedAt', 'createdAt'] as const;
@@ -41,24 +41,34 @@ export class AdminUsersService {
   async list(query: ListUsersQuery) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
+    const [rows, total] = await this.filtered(query)
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+    return { data: rows.map(toView), pagination: { page, limit, total, pages: Math.ceil(total / limit) } };
+  }
+
+  /** Every user matching the filters, newest first (admin fields only). Used by the CSV export. */
+  async findAll(filters: UserFilters, limit: number): Promise<{ rows: AdminUserView[]; total: number }> {
+    const qb = this.filtered(filters);
+    const total = await qb.getCount();
+    if (total > limit) return { rows: [], total };
+    return { rows: (await qb.getMany()).map(toView), total };
+  }
+
+  /** The admin user listing query: admin fields only, filters applied, newest first. */
+  private filtered(filters: UserFilters) {
     const qb = this.dataSource
       .getRepository(User)
       .createQueryBuilder('u')
       .select(ADMIN_USER_FIELDS.map((field) => `u.${field}`));
 
-    if (query.q) qb.andWhere('(u.name LIKE :q OR u.email LIKE :q)', { q: likeContains(query.q) });
-    if (query.campus) qb.andWhere('u.campus = :campus', { campus: query.campus });
-    if (query.role) qb.andWhere('u.role = :role', { role: query.role });
-    if (query.verified) qb.andWhere(query.verified === 'true' ? 'u.emailVerifiedAt IS NOT NULL' : 'u.emailVerifiedAt IS NULL');
-    if (query.status) qb.andWhere(query.status === 'active' ? 'u.deactivatedAt IS NULL' : 'u.deactivatedAt IS NOT NULL');
-
-    const [rows, total] = await qb
-      .orderBy('u.createdAt', 'DESC')
-      .addOrderBy('u.id', 'ASC')
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
-    return { data: rows.map(toView), pagination: { page, limit, total, pages: Math.ceil(total / limit) } };
+    if (filters.q) qb.andWhere('(u.name LIKE :q OR u.email LIKE :q)', { q: likeContains(filters.q) });
+    if (filters.campus) qb.andWhere('u.campus = :campus', { campus: filters.campus });
+    if (filters.role) qb.andWhere('u.role = :role', { role: filters.role });
+    if (filters.verified) qb.andWhere(filters.verified === 'true' ? 'u.emailVerifiedAt IS NOT NULL' : 'u.emailVerifiedAt IS NULL');
+    if (filters.status) qb.andWhere(filters.status === 'active' ? 'u.deactivatedAt IS NULL' : 'u.deactivatedAt IS NOT NULL');
+    return qb.orderBy('u.createdAt', 'DESC').addOrderBy('u.id', 'ASC');
   }
 
   changeRole(actor: Actor, targetId: string, role: UserRole) {

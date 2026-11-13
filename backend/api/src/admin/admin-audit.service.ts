@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import type { ListAuditLogsQuery } from './dto/admin-audit.dto.js';
+import type { AuditFilters, ListAuditLogsQuery } from './dto/admin-audit.dto.js';
 
 export interface AuditLogView {
   id: string;
@@ -26,6 +26,11 @@ const upperBound = (value: string): { at: Date; exclusive: boolean } =>
     ? { at: new Date(new Date(`${value}T00:00:00.000Z`).getTime() + 86_400_000), exclusive: true }
     : { at: new Date(value), exclusive: false };
 
+const SELECT = `SELECT a.id, a.createdAt, a.actorId, a.action, a.targetType, a.targetId, a.metadata, a.ipAddress,
+                       u.name AS actorName, u.email AS actorEmail
+                  FROM audit_logs a
+                  LEFT JOIN users u ON u.id = a.actorId`;
+
 /** Read-only view of audit_logs for admins. Newest first; the table itself is append-only. */
 @Injectable()
 export class AdminAuditService {
@@ -34,19 +39,49 @@ export class AdminAuditService {
   async list(query: ListAuditLogsQuery) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 50;
+    const { filter, params } = this.where(query);
+    const [rows, total] = await Promise.all([
+      this.dataSource.query(`${SELECT} ${filter} ORDER BY a.createdAt DESC, a.id DESC LIMIT ? OFFSET ?`, [
+        ...params,
+        limit,
+        (page - 1) * limit,
+      ]) as Promise<Array<Record<string, unknown>>>,
+      this.count(filter, params),
+    ]);
+    return { data: rows.map(toView), pagination: { page, limit, total, pages: Math.ceil(total / limit) } };
+  }
+
+  /** Every entry matching the filters, newest first, or none when there are more than `limit`. */
+  async findAll(filters: AuditFilters, limit: number): Promise<{ rows: AuditLogView[]; total: number }> {
+    const { filter, params } = this.where(filters);
+    const total = await this.count(filter, params);
+    if (total > limit) return { rows: [], total };
+    const rows = (await this.dataSource.query(`${SELECT} ${filter} ORDER BY a.createdAt DESC, a.id DESC`, params)) as Array<
+      Record<string, unknown>
+    >;
+    return { rows: rows.map(toView), total };
+  }
+
+  private async count(filter: string, params: unknown[]): Promise<number> {
+    const [row] = (await this.dataSource.query(`SELECT COUNT(*) AS total FROM audit_logs a ${filter}`, params)) as Array<{
+      total: string | number;
+    }>;
+    return Number(row.total);
+  }
+
+  private where(filters: AuditFilters): { filter: string; params: unknown[] } {
     const where: string[] = [];
     const params: unknown[] = [];
-
-    if (query.action) {
+    if (filters.action) {
       where.push('a.action = ?');
-      params.push(query.action);
+      params.push(filters.action);
     }
-    if (query.actorId) {
+    if (filters.actorId) {
       where.push('a.actorId = ?');
-      params.push(query.actorId);
+      params.push(filters.actorId);
     }
-    const from = query.from ? lowerBound(query.from) : null;
-    const to = query.to ? upperBound(query.to) : null;
+    const from = filters.from ? lowerBound(filters.from) : null;
+    const to = filters.to ? upperBound(filters.to) : null;
     if (from && to && from.getTime() >= to.at.getTime() + (to.exclusive ? 0 : 1)) {
       throw new BadRequestException('"from" must be before "to"');
     }
@@ -58,34 +93,23 @@ export class AdminAuditService {
       where.push(to.exclusive ? 'a.createdAt < ?' : 'a.createdAt <= ?');
       params.push(to.at);
     }
-    const filter = where.length ? `WHERE ${where.join(' AND ')}` : '';
-
-    const [rows, [count]] = await Promise.all([
-      this.dataSource.query(
-        `SELECT a.id, a.createdAt, a.actorId, a.action, a.targetType, a.targetId, a.metadata, a.ipAddress,
-                u.name AS actorName, u.email AS actorEmail
-           FROM audit_logs a
-           LEFT JOIN users u ON u.id = a.actorId
-           ${filter}
-          ORDER BY a.createdAt DESC, a.id DESC
-          LIMIT ? OFFSET ?`,
-        [...params, limit, (page - 1) * limit],
-      ) as Promise<Array<Record<string, unknown>>>,
-      this.dataSource.query(`SELECT COUNT(*) AS total FROM audit_logs a ${filter}`, params) as Promise<Array<{ total: string | number }>>,
-    ]);
-
-    const total = Number(count.total);
-    const data: AuditLogView[] = rows.map((row) => ({
-      id: row.id as string,
-      createdAt: row.createdAt as Date,
-      actorId: (row.actorId as string | null) ?? null,
-      actor: row.actorName ? { name: row.actorName as string, email: row.actorEmail as string } : null,
-      action: row.action as string,
-      targetType: row.targetType as string,
-      targetId: (row.targetId as string | null) ?? null,
-      metadata: typeof row.metadata === 'string' ? (JSON.parse(row.metadata) as Record<string, unknown>) : ((row.metadata as Record<string, unknown> | null) ?? null),
-      ipAddress: (row.ipAddress as string | null) ?? null,
-    }));
-    return { data, pagination: { page, limit, total, pages: Math.ceil(total / limit) } };
+    return { filter: where.length ? `WHERE ${where.join(' AND ')}` : '', params };
   }
+}
+
+function toView(row: Record<string, unknown>): AuditLogView {
+  return {
+    id: row.id as string,
+    createdAt: row.createdAt as Date,
+    actorId: (row.actorId as string | null) ?? null,
+    actor: row.actorName ? { name: row.actorName as string, email: row.actorEmail as string } : null,
+    action: row.action as string,
+    targetType: row.targetType as string,
+    targetId: (row.targetId as string | null) ?? null,
+    metadata:
+      typeof row.metadata === 'string'
+        ? (JSON.parse(row.metadata) as Record<string, unknown>)
+        : ((row.metadata as Record<string, unknown> | null) ?? null),
+    ipAddress: (row.ipAddress as string | null) ?? null,
+  };
 }

@@ -112,6 +112,8 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/admin-categories-http.e2e-spec.ts
       - name: Admin audit log and analytics tests
         run: npx vitest run --config vitest.config.e2e.ts test/admin-audit-analytics-http.e2e-spec.ts
+      - name: Admin CSV export tests (formula escaping, field allowlist, row cap, audited)
+        run: npx vitest run --config vitest.config.e2e.ts test/admin-exports-http.e2e-spec.ts
       - name: Admin promote CLI tests (bootstrap first admin, needs the build above)
         run: npx vitest run --config vitest.config.e2e.ts test/admin-promote-cli.e2e-spec.ts
       - name: Deactivation migration tests (restores schema)
