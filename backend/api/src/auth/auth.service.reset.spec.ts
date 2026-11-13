@@ -49,8 +49,9 @@ describe('AuthService.forgotPassword', () => {
 describe('AuthService.resetPassword', () => {
   it('delegates and reports success', async () => {
     const { service, pr } = build();
-    await expect(service.resetPassword('tok', 'new-password-123')).resolves.toEqual({ reset: true });
-    expect(pr.reset).toHaveBeenCalledWith('tok', 'new-password-123');
+    await expect(service.resetPassword('tok', 'new-password-123', '203.0.113.9')).resolves.toEqual({ reset: true });
+    // The caller's IP goes along for the auth.password_reset audit row.
+    expect(pr.reset).toHaveBeenCalledWith('tok', 'new-password-123', '203.0.113.9');
   });
 
   it('propagates a rejected token as a 400', async () => {

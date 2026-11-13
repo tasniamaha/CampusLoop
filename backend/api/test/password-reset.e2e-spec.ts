@@ -7,6 +7,7 @@ import { DataSource } from 'typeorm';
 import { User } from '../src/users/entities/user.entity.js';
 import { VerificationToken, VerificationType } from '../src/verification/entities/verification-token.entity.js';
 import { PasswordResetService } from '../src/verification/password-reset.service.js';
+import { AuditService } from '../src/audit/audit.service.js';
 import { EmailVerificationService } from '../src/verification/email-verification.service.js';
 import { sha256 } from '../src/verification/token.util.js';
 import type { MailMessage, MailService } from '../src/mail/mail.service.js';
@@ -26,7 +27,7 @@ const matches = async (plain: string, userId: string) => bcrypt.compare(plain, (
 beforeAll(async () => {
   ds = await createTestDataSource();
   const config = new ConfigService({ WEB_URL: 'http://web.test' });
-  reset = new PasswordResetService(ds, fakeMail, config);
+  reset = new PasswordResetService(ds, fakeMail, config, new AuditService());
   verification = new EmailVerificationService(ds, fakeMail, config);
 }, 60_000);
 

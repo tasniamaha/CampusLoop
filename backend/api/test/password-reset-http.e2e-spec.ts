@@ -6,9 +6,10 @@ import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module.js';
 import { MailService, type MailMessage } from '../src/mail/mail.service.js';
+import { applyTrustProxy } from '../src/common/trust-proxy.js';
 
 // Each group of tests uses its own client IP so the per-IP throttlers never interfere.
-const IP = { compare: '203.0.113.21', flow: '203.0.113.22', validation: '203.0.113.23', limit: '203.0.113.24', sessions: '203.0.113.25' };
+const IP = { compare: '203.0.113.21', flow: '203.0.113.22', validation: '203.0.113.23', limit: '203.0.113.24', sessions: '203.0.113.25', audit: '203.0.113.26' };
 const PASSWORD = 'correct-horse-battery';
 
 let app: INestApplication;
@@ -45,7 +46,7 @@ beforeAll(async () => {
     .useValue(fakeMail)
     .compile();
   app = moduleRef.createNestApplication();
-  app.getHttpAdapter().getInstance().set('trust proxy', true);
+  applyTrustProxy(app); // as main.ts: X-Forwarded-For only from loopback (the local Next server)
   // main.ts installs this globally; test apps do not get it for free.
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   await app.init();
@@ -102,6 +103,37 @@ describe('POST /auth/reset-password', () => {
     await resetPw(token, 'brand-new-password-1', IP.flow).expect(200).expect({ reset: true }); // no bearer token needed
     await login(email, 'brand-new-password-1', IP.flow).expect(201);
     await login(email, PASSWORD, IP.flow).expect(401);
+  });
+
+  it('writes one auth.password_reset audit row with the user as actor and the IP; failed resets write none', async () => {
+    const email = newEmail();
+    await register(email, IP.audit).expect(201);
+    const [user] = (await app.get(DataSource).query('SELECT id FROM users WHERE email = ?', [email])) as Array<{ id: string }>;
+    await login(email, PASSWORD, IP.audit).expect(201); // a session for the reset to end
+    await forgot(email, IP.audit).expect(202);
+    await waitFor(() => resetMails(email).length === 1);
+    const token = tokenFrom(resetMails(email)[0]);
+    const auditRows = () =>
+      app.get(DataSource).query(
+        `SELECT actorId, targetType, targetId, ipAddress, metadata FROM audit_logs WHERE action = 'auth.password_reset' AND targetId = ?`,
+        [user.id],
+      ) as Promise<Array<{ actorId: string; targetType: string; targetId: string; ipAddress: string; metadata: unknown }>>;
+
+    await resetPw(`${token}x`, 'brand-new-password-2', IP.audit).expect(400); // unknown token
+    expect(await auditRows()).toHaveLength(0);
+
+    await resetPw(token, 'brand-new-password-2', IP.audit).expect(200);
+    const rows = await auditRows();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ actorId: user.id, targetType: 'user', targetId: user.id, ipAddress: IP.audit });
+    const metadata = typeof rows[0].metadata === 'string' ? JSON.parse(rows[0].metadata) : rows[0].metadata;
+    expect(metadata).toEqual({ sessionsEnded: 1 });
+    // Never the token or the password.
+    expect(JSON.stringify(rows[0])).not.toContain(token);
+    expect(JSON.stringify(rows[0])).not.toContain('brand-new-password-2');
+
+    await resetPw(token, 'brand-new-password-3', IP.audit).expect(400); // replay
+    expect(await auditRows()).toHaveLength(1);
   });
 
   it('a too-short password fails validation and does not burn the link', async () => {

@@ -130,8 +130,8 @@ async resendVerification(userId: string) {
     return { message: 'If that email has an account, a reset link is on its way.' };
   }
 
-  async resetPassword(token: string, password: string) {
-    await this.passwordReset.reset(token, password);
+  async resetPassword(token: string, password: string, ip: string | null = null) {
+    await this.passwordReset.reset(token, password, ip);
     return { reset: true };
   }
 }

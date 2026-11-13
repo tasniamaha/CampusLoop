@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource, IsNull, MoreThan } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { AuditService } from '../audit/audit.service.js';
 import { MailService } from '../mail/mail.service.js';
 import { User } from '../users/entities/user.entity.js';
 import { VerificationToken, VerificationType } from './entities/verification-token.entity.js';
@@ -22,6 +23,7 @@ export class PasswordResetService {
     private readonly dataSource: DataSource,
     private readonly mail: MailService,
     config: ConfigService,
+    private readonly audit: AuditService,
   ) {
     const url = config.get<string>('WEB_URL');
     if (!url && config.get('NODE_ENV') === 'production') throw new Error('WEB_URL is required in production');
@@ -83,7 +85,8 @@ export class PasswordResetService {
     }
   }
 
-  async reset(raw: string, newPassword: string): Promise<void> {
+  /** `ip`: the caller's address, for the audit row. */
+  async reset(raw: string, newPassword: string, ip: string | null = null): Promise<void> {
     if (Buffer.byteLength(newPassword, 'utf8') > 72) {
       throw new BadRequestException('Password must not exceed 72 bytes when encoded as UTF-8');
     }
@@ -100,13 +103,22 @@ export class PasswordResetService {
       await m.update(VerificationToken, { id: token.id }, { usedAt: now });
       await m.update(User, { id: token.userId }, { passwordHash });
       // A reset must end every existing session, including one held by whoever knew the old password.
-      await m.update(
+      const revoked = await m.update(
         RefreshToken,
         { userId: token.userId, revokedAt: IsNull() },
         { revokedAt: now, revokeReason: RefreshRevokeReason.PASSWORD_RESET },
       );
       // Clicking the emailed link proves inbox ownership.
       await m.update(User, { id: token.userId, emailVerifiedAt: IsNull() }, { emailVerifiedAt: now });
+      // Same transaction: the reset and its audit row commit together or not at all.
+      await this.audit.record(m, {
+        actorId: token.userId,
+        action: 'auth.password_reset',
+        targetType: 'user',
+        targetId: token.userId,
+        metadata: { sessionsEnded: revoked.affected ?? 0 },
+        ipAddress: ip,
+      });
       return true;
     });
     if (!ok) throw new BadRequestException('This reset link is invalid or has expired. Request a new one.');

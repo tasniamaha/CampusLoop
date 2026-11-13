@@ -246,6 +246,7 @@ These paths are illustrative. Once an endpoint exists, its published OpenAPI con
 - Lost-and-found matches are computed per request, not stored in `item_matches`.
 - `updatedAt` is stored at whole-second precision on updates, so it can be earlier than `createdAt`. This is a bug, to be fixed.
 - Admin analytics groups by campus as stored. Users and resources store the campus as typed, while study groups normalise it, so one campus can appear as more than one row.
+- Failed logins are not audited yet. Successful password resets are (`auth.password_reset`).
 
 ## 13. Open decisions
 
@@ -261,3 +262,4 @@ Ask before implementing anything that depends on these. Record the answer in §1
 8. **Archiving and pending requests:** what happens to `pending` join requests when the owner archives a group (left pending, rejected automatically, or withdrawn), and are the requesters notified? Today they stay `pending`.
 9. **Campus normalisation:** users and resources store the campus as typed, while study groups normalise it (for example `IUT` and "Islamic University of Technology"). Should every module normalise campus names the same way, and how are existing rows migrated?
 10. **Deactivated users' listings and loans:** what happens to a deactivated user's listings, reports and groups, and to loans in progress (for example, a borrower with a `pending` or `approved` loan on a deactivated owner's resource)? Today deactivation only blocks access, and all content stays as it is.
+11. **Platform settings:** which admin-editable settings exist, if any (proposal section 3).

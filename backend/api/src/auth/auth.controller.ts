@@ -90,7 +90,7 @@ export class AuthController {
   @Throttle({ 'mail-ip': { limit: 30, ttl: 3_600_000 } })
   @HttpCode(200)
   @Post('reset-password')
-  resetPassword(@Body() dto: ResetPasswordDto) {
-    return this.authService.resetPassword(dto.token, dto.password);
+  resetPassword(@Body() dto: ResetPasswordDto, @Req() req: Request) {
+    return this.authService.resetPassword(dto.token, dto.password, req.ip ?? null);
   }
 }
