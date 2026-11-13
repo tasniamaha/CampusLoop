@@ -7,14 +7,14 @@ export const instant = false;
 
 export default async function ModerationPage({ searchParams }: PageProps<'/moderation'>) {
   const me = await requireRole(['moderator', 'admin']);
-  // Invalid ?status= or ?page= falls back to open reports, page 1.
+  // Invalid ?status= or ?page= falls back to All, page 1.
   const params = parseQueueParams(await searchParams);
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
       <header>
         <h1 className="text-2xl font-bold text-slate-900">Moderation</h1>
         <p className="mt-1 text-sm text-slate-600">
-          {me.role === 'admin' ? 'Reports from every campus' : `Reports about content on your campus (${me.campus})`}, oldest first. Every decision is recorded in the audit log.
+          {me.role === 'admin' ? 'Reports from every campus' : `Reports about content on your campus (${me.campus})`}. Open reports come first, oldest first. Every decision is recorded in the audit log.
         </p>
       </header>
       <ReportQueue params={params} />

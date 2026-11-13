@@ -28,6 +28,9 @@ const IP = {
   student: '203.0.113.78',
   anon: '203.0.113.79',
   moderator2: '203.0.113.80',
+  moderator3: '203.0.113.69',
+  reporter3: '203.0.113.68',
+  moderator4: '203.0.113.67',
 };
 const MISSING_UUID = '00000000-0000-4000-8000-000000000000';
 
@@ -484,5 +487,54 @@ describe('review reports and moderator queue', () => {
     );
     expect(rows).toHaveLength(1);
     expect(rows[0].actorId).toBe(actors.moderator.id);
+  });
+});
+
+describe('the All view (no status filter)', () => {
+  it('lists open reports first (oldest first), then closed ones (newest first), paged in SQL', async () => {
+    // A campus of its own, so reports from other tests cannot change the order.
+    const campus = `sort-${Math.random().toString(36).slice(2, 8)}`;
+    await makeUser('moderator3', UserRole.MODERATOR, true, campus);
+    // A moderator on an empty campus: any count it sees would come from another campus.
+    await makeUser('moderator4', UserRole.MODERATOR, true, `${campus}-other`);
+    // Its own reporter: reporting is rate limited (10 a minute), and the others used theirs up.
+    await makeUser('reporter3');
+    const reviews: Review[] = [];
+    for (let i = 0; i < 4; i++) reviews.push((await seedReview(campus)).review);
+    const reportIds: string[] = [];
+    for (const review of reviews) {
+      await api('post', `/reviews/${review.id}/report`, 'reporter3').send({ reason: 'Sort order check' }).expect(201);
+      reportIds.push((await ds.getRepository(Report).findOneByOrFail({ reporterId: actors.reporter3.id, targetId: review.id })).id);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    }
+    const [a, b, c, d] = reportIds;
+    await api('patch', `/moderation/reports/${b}/resolve`, 'moderator3').send({ status: ReportStatus.RESOLVED }).expect(200);
+    await api('patch', `/moderation/reports/${d}/resolve`, 'moderator3').send({ status: ReportStatus.DISMISSED }).expect(200);
+
+    const all = await api('get', '/moderation/reports', 'moderator3').expect(200);
+    expect(all.body.items.map((item: Report) => item.id)).toEqual([a, c, d, b]);
+    expect(all.body).toMatchObject({ total: 4, openTotal: 2, totalPages: 1 });
+
+    // One per page: the order holds across pages, so it is sorted in the query, not on the page.
+    const paged: string[] = [];
+    for (let page = 1; page <= 4; page++) {
+      const res = await api('get', `/moderation/reports?limit=1&page=${page}`, 'moderator3').expect(200);
+      paged.push(...res.body.items.map((item: Report) => item.id));
+    }
+    expect(paged).toEqual([a, c, d, b]);
+
+    // A single status keeps the queue order (oldest first) and its own counts.
+    const open = await api('get', '/moderation/reports?status=open', 'moderator3').expect(200);
+    expect(open.body.items.map((item: Report) => item.id)).toEqual([a, c]);
+    expect(open.body).toMatchObject({ total: 2, openTotal: 2 });
+    const resolved = await api('get', '/moderation/reports?status=resolved', 'moderator3').expect(200);
+    expect(resolved.body).toMatchObject({ total: 1, openTotal: 0 });
+
+    // Campus scope holds in the All view: another campus never sees these.
+    const other = await api('get', '/moderation/reports?limit=50', 'moderator2').expect(200);
+    for (const id of reportIds) expect(other.body.items.map((item: Report) => item.id)).not.toContain(id);
+    // The open count is campus-scoped too: a moderator elsewhere gets 0 open, 0 total.
+    const empty = await api('get', '/moderation/reports', 'moderator4').expect(200);
+    expect(empty.body).toMatchObject({ total: 0, openTotal: 0, items: [] });
   });
 });

@@ -27,26 +27,31 @@ export type ModerationReport = {
   target: TargetSummary | null;
 };
 
-export type ReportPage = { page: number; limit: number; total: number; totalPages: number; items: ModerationReport[] };
+/** `openTotal`: open reports in the same campus scope (for the All view heading). */
+export type ReportPage = { page: number; limit: number; total: number; openTotal: number; totalPages: number; items: ModerationReport[] };
 
 // ---------------- URL state ----------------
 
-export const STATUS_FILTERS = ['open', 'resolved', 'dismissed', 'all'] as const;
+/** In display order. All is the default (see parseQueueParams). */
+export const STATUS_FILTERS = ['all', 'open', 'resolved', 'dismissed'] as const;
 export type StatusFilter = (typeof STATUS_FILTERS)[number];
 export type QueueParams = { status: StatusFilter; page: number };
 
-/** The queue opens on open reports; anything unexpected falls back to that and page 1. */
+/**
+ * The queue opens on All (no status in the URL): open reports first, oldest first, then closed
+ * ones, newest first, sorted by the API. Anything unexpected falls back to All and page 1.
+ */
 export function parseQueueParams(raw: RawSearchParams): QueueParams {
   const status = firstParam(raw.status);
   return {
-    status: STATUS_FILTERS.includes(status as StatusFilter) ? (status as StatusFilter) : 'open',
+    status: STATUS_FILTERS.includes(status as StatusFilter) ? (status as StatusFilter) : 'all',
     page: parsePage(raw.page),
   };
 }
 
 export function queueHref({ status, page }: QueueParams): string {
   const query = new URLSearchParams();
-  if (status !== 'open') query.set('status', status);
+  if (status !== 'all') query.set('status', status);
   if (page > 1) query.set('page', String(page));
   const qs = query.toString();
   return qs ? `/moderation?${qs}` : '/moderation';

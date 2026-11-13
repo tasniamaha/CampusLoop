@@ -150,18 +150,35 @@ export class ReportsService {
       );
     }
 
-    const [items, total] = await query
-      .orderBy('report.createdAt', 'ASC')
-      .addOrderBy('report.id', 'ASC')
-      .offset((page - 1) * limit)
-      .limit(limit)
-      .getManyAndCount();
+    // Open reports in the same scope, for the All view heading ("3 open, 12 total").
+    const openInAll = status
+      ? null
+      : await query.clone().andWhere('report.status = :openStatus', { openStatus: ReportStatus.OPEN }).getCount();
+
+    if (status) {
+      // One status: oldest first, as a queue.
+      query.orderBy('report.createdAt', 'ASC').addOrderBy('report.id', 'ASC');
+    } else {
+      // All: open reports first, oldest first (the queue); then closed ones, newest first.
+      // Sorted in SQL so that paging stays correct.
+      query
+        .addSelect(`CASE WHEN report.status = :openStatus THEN 0 ELSE 1 END`, 'report_closed')
+        .addSelect(`CASE WHEN report.status = :openStatus THEN report.createdAt END`, 'report_open_at')
+        .setParameter('openStatus', ReportStatus.OPEN)
+        .orderBy('report_closed', 'ASC')
+        .addOrderBy('report_open_at', 'ASC')
+        .addOrderBy('report.createdAt', 'DESC')
+        .addOrderBy('report.id', 'ASC');
+    }
+
+    const [items, total] = await query.offset((page - 1) * limit).limit(limit).getManyAndCount();
 
     const summaries = await this.targetSummaries(items);
     return {
       page,
       limit,
       total,
+      openTotal: openInAll ?? (status === ReportStatus.OPEN ? total : 0),
       totalPages: Math.ceil(total / limit),
       items: items.map((item) =>
         Object.assign(item, {

@@ -74,7 +74,7 @@ export default function AdminCategories() {
       setNotice({ id: category.id, text: problem, error: true });
       return;
     }
-    if (await act(category.id, () => renameCategory(category.id, name), (c) => `Renamed to ${c.name}. The slug stays ${c.slug}.`)) setRenaming(null);
+    if (await act(category.id, () => renameCategory(category.id, name), (c) => `Renamed to ${c.name}.`)) setRenaming(null);
   }
 
   const categories = query.data ?? [];
@@ -131,7 +131,7 @@ export default function AdminCategories() {
                     </p>
                   )}
                   <p className="mt-1 text-sm text-slate-500">
-                    Slug {category.slug} · {category.resourceCount} resource{category.resourceCount === 1 ? '' : 's'}
+                    {category.resourceCount} resource{category.resourceCount === 1 ? '' : 's'}
                   </p>
                   {notice?.id === category.id && (
                     <p role={notice.error ? 'alert' : 'status'} className={`mt-1 text-sm ${notice.error ? 'text-rose-700' : 'text-emerald-800'}`}>{notice.text}</p>

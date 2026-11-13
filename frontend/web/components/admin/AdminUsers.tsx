@@ -108,7 +108,7 @@ export default function AdminUsers({ params, currentUserId }: { params: UserList
           </select>
         </label>
         <label className="text-sm font-medium">
-          Email
+          Email verified
           <select name="verified" defaultValue={params.verified ?? ''} className={selectClass}>
             <option value="">Any</option>
             <option value="true">Verified</option>

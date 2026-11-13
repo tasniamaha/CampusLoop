@@ -147,8 +147,8 @@ function ReportCard({ report, onChanged }: { report: ModerationReport; onChanged
 }
 
 /**
- * The report queue, oldest first, filtered by status from the URL (already validated by the
- * page). Moderators only get their campus from the API; buttons for reports they cannot act on
+ * The report queue, filtered by status from the URL (already validated by the page). All lists
+ * open reports first (oldest first), then closed ones (newest first); one status is oldest first. Moderators only get their campus from the API; buttons for reports they cannot act on
  * (their own, or about their own content) still show, and the API's refusal is shown in place.
  */
 export default function ReportQueue({ params }: { params: QueueParams }) {
@@ -186,7 +186,11 @@ export default function ReportQueue({ params }: { params: QueueParams }) {
       <div>
         <h2 id="queue-heading" className="text-lg font-semibold">{STATUS_LABELS[status]} reports</h2>
         {!query.loading && query.data && (
-          <p className="text-sm text-slate-500">{query.data.total} report{query.data.total === 1 ? '' : 's'}</p>
+          <p className="text-sm text-slate-500">
+            {status === 'all'
+              ? `${query.data.openTotal} open, ${query.data.total} total`
+              : `${query.data.total} report${query.data.total === 1 ? '' : 's'}`}
+          </p>
         )}
         <p role="status" className="text-sm text-emerald-800">{message}</p>
       </div>
@@ -196,7 +200,9 @@ export default function ReportQueue({ params }: { params: QueueParams }) {
       ) : query.loading && reports.length === 0 ? (
         <LoadingState>Loading reports...</LoadingState>
       ) : reports.length === 0 ? (
-        <EmptyState>{status === 'open' ? 'No open reports. The queue is clear.' : `No ${STATUS_LABELS[status].toLowerCase()} reports.`}</EmptyState>
+        <EmptyState>
+          {status === 'all' ? 'No reports yet.' : status === 'open' ? 'No open reports. The queue is clear.' : `No ${STATUS_LABELS[status].toLowerCase()} reports.`}
+        </EmptyState>
       ) : (
         <ul aria-busy={query.loading} className={`space-y-4 ${query.loading ? 'opacity-60' : ''}`}>
           {reports.map((report) => (
