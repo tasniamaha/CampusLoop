@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getClientIp } from '../../../../lib/client-ip';
 
 const API_URL = process.env.API_URL;
+const PASSED_RESPONSE_HEADERS = ['content-type', 'content-disposition', 'cache-control', 'x-content-type-options'] as const;
 
 async function proxy(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
   if (!API_URL) {
@@ -28,8 +29,12 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   try {
     const upstream = await fetch(target, { method, headers, body, cache: 'no-store' });
     const responseHeaders = new Headers();
-    const upstreamType = upstream.headers.get('content-type');
-    if (upstreamType) responseHeaders.set('content-type', upstreamType);
+    // Only these response headers pass through. content-disposition keeps a download's file name
+    // (admin CSV exports); cache-control and nosniff keep the API's no-store and no-sniffing rules.
+    for (const name of PASSED_RESPONSE_HEADERS) {
+      const value = upstream.headers.get(name);
+      if (value) responseHeaders.set(name, value);
+    }
     return new NextResponse(upstream.body, { status: upstream.status, headers: responseHeaders });
   } catch {
     return NextResponse.json({ message: 'Unable to connect to the CampusLoop API.' }, { status: 502 });

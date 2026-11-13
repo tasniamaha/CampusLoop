@@ -22,6 +22,32 @@ export const json = (method: string, body: unknown): RequestInit => ({
   body: JSON.stringify(body),
 });
 
+/** Only plain file names from Content-Disposition; anything else falls back. */
+function downloadName(header: string | null, fallback: string): string {
+  const name = header?.match(/filename="([^"]+)"/)?.[1];
+  return name && /^[\w.-]{1,100}$/.test(name) ? name : fallback;
+}
+
+/**
+ * Downloads a file (e.g. an admin CSV export) through the proxy. Fetched first, so an error such as
+ * "too many rows" (422) is shown to the user instead of being saved as the file.
+ */
+export async function download(path: string, fallbackName: string): Promise<ApiResult<{ filename: string }>> {
+  const response = await fetch(`/api/backend${path}`, { cache: 'no-store' });
+  if (!response.ok) return { ok: false, status: response.status, message: await readError(response) };
+  const filename = downloadName(response.headers.get('content-disposition'), fallbackName);
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  // Revoked on the next tick: the click has started the download by then.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+  return { ok: true, data: { filename } };
+}
+
 // ---------------- URL search params ----------------
 
 export type RawSearchParams = Record<string, string | string[] | undefined>;

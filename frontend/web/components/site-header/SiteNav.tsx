@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useId, useRef, useState } from 'react';
+import type { UserRole } from '../../lib/auth';
 import NotificationBell from '../NotificationBell';
 import LogoutButton from '../logout-button';
 
@@ -13,6 +14,12 @@ const SECTIONS = [
   { href: '/lost-found', label: 'Lost & Found' },
   { href: '/study-groups', label: 'Study Groups' },
 ] as const;
+
+/** Staff sections, shown only to these roles. Display only: the pages and the API check the role. */
+const STAFF_SECTIONS: ReadonlyArray<{ href: string; label: string; roles: readonly UserRole[] }> = [
+  { href: '/moderation', label: 'Moderation', roles: ['moderator', 'admin'] },
+  { href: '/admin', label: 'Admin', roles: ['admin'] },
+];
 
 /** Prefix match on a path boundary: /lost-found/new matches /lost-found, /resources-x does not match /resources. */
 const isCurrent = (pathname: string, href: string) => pathname === href || pathname.startsWith(`${href}/`);
@@ -48,10 +55,11 @@ export function SiteBarFallback() {
 }
 
 /**
- * Site-wide top bar. `signedIn` comes from SiteHeader (session cookies); it only decides which links
- * to show, never access. Below md the section links collapse into a menu button.
+ * Site-wide top bar. `signedIn` (session cookies) and `role` (from /auth/me, null if unknown) come
+ * from SiteHeader; they only decide which links to show, never access. Below md (lg when the staff
+ * links show) the section links collapse into a menu button.
  */
-export default function SiteNav({ signedIn }: { signedIn: boolean }) {
+export default function SiteNav({ signedIn, role }: { signedIn: boolean; role: UserRole | null }) {
   const pathname = usePathname();
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -89,8 +97,11 @@ export default function SiteNav({ signedIn }: { signedIn: boolean }) {
 
   const linkClass = (current: boolean) =>
     `rounded-lg px-3 py-2 text-sm font-medium ${focusRing} ${current ? 'bg-emerald-50 text-emerald-800' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`;
+  const sections = [...SECTIONS, ...STAFF_SECTIONS.filter((section) => role !== null && section.roles.includes(role))];
+  // With the staff links the bar no longer fits at md, so it collapses into the menu until lg.
+  const bp = sections.length > SECTIONS.length ? { show: 'lg:flex', block: 'lg:block', hide: 'lg:hidden' } : { show: 'md:flex', block: 'md:block', hide: 'md:hidden' };
   const sectionLinks = (onNavigate?: () => void) =>
-    SECTIONS.map((section) => {
+    sections.map((section) => {
       const current = isCurrent(pathname, section.href);
       return (
         <li key={section.href}>
@@ -105,10 +116,10 @@ export default function SiteNav({ signedIn }: { signedIn: boolean }) {
     <header className={barClass}>
       <nav aria-label="Site" className={innerClass}>
         <Logo signedIn />
-        <ul className="hidden flex-1 items-center gap-1 md:flex">{sectionLinks()}</ul>
+        <ul className={`hidden flex-1 items-center gap-1 ${bp.show}`}>{sectionLinks()}</ul>
         <div className="flex items-center gap-2">
           <NotificationBell signedIn />
-          <div className="hidden md:block">
+          <div className={`hidden ${bp.block}`}>
             <LogoutButton className={`rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50 ${focusRing}`} />
           </div>
           <button
@@ -117,7 +128,7 @@ export default function SiteNav({ signedIn }: { signedIn: boolean }) {
             aria-expanded={open}
             aria-controls={menuId}
             onClick={() => setOpenOn(open ? null : pathname)}
-            className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 md:hidden ${focusRing}`}
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 ${bp.hide} ${focusRing}`}
           >
             <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
@@ -127,7 +138,7 @@ export default function SiteNav({ signedIn }: { signedIn: boolean }) {
         </div>
       </nav>
       {/* Always in the DOM (hidden when closed) so aria-controls points at a real element. */}
-      <div id={menuId} hidden={!open} className="border-t border-slate-200 bg-white px-4 pb-4 pt-2 md:hidden">
+      <div id={menuId} hidden={!open} className={`border-t border-slate-200 bg-white px-4 pb-4 pt-2 ${bp.hide}`}>
         <ul className="space-y-1">{sectionLinks(() => setOpenOn(null))}</ul>
         <div className="mt-3 border-t border-slate-200 pt-3">
           <LogoutButton className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50 ${focusRing}`} />
