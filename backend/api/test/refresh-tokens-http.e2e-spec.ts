@@ -98,6 +98,44 @@ describe('POST /auth/refresh', () => {
     expect(revoked).toBe(0);
   });
 
+  // Reproduces the 2026-11-13 reuse incident: three parallel rotations of one token (as when the
+  // proxy renews a session for a page, its prefetches and notification polling at once), then the
+  // browser never stores any of the three answers and sends the parent again much later.
+  it('3 concurrent refreshes fork the family; replaying the parent after the grace window revokes all of it', async () => {
+    const s = await newSession();
+    const parent = await rowOf(s.refreshToken);
+
+    const results = await Promise.all([1, 2, 3].map(() => refreshCall(s.refreshToken)));
+    expect(results.map((r) => r.status)).toEqual([200, 200, 200]);
+    const children = results.map((r) => r.body as Session);
+    expect(new Set(children.map((c) => c.refreshToken)).size).toBe(3);
+
+    // The parent is rotated once; each child is a separate, live token in the same family.
+    const afterRace = await rowOf(s.refreshToken);
+    expect(afterRace.rotatedAt).not.toBeNull();
+    for (const child of children) {
+      const row = await rowOf(child.refreshToken);
+      expect(row.familyId).toBe(parent.familyId);
+      expect(row.rotatedAt).toBeNull();
+      expect(row.revokedAt).toBeNull();
+      await request(server()).get('/auth/me').set('Authorization', `Bearer ${child.accessToken}`).expect(200);
+    }
+    expect(await ds.getRepository(RefreshToken).countBy({ familyId: parent.familyId })).toBe(4);
+    expect(await ds.getRepository(AuditLog).countBy({ action: 'auth.refresh_reuse_detected', targetId: s.user.id })).toBe(0);
+
+    // Within the grace window the parent still works and forks a fourth child.
+    await refreshCall(s.refreshToken).expect(200);
+
+    // Later (simulated by moving rotatedAt back), the parent comes back: the whole family is revoked.
+    await ds.getRepository(RefreshToken).update({ id: parent.id }, { rotatedAt: new Date(Date.now() - REFRESH_REUSE_GRACE_MS - 1_000) });
+    await refreshCall(s.refreshToken).expect(401);
+    for (const child of children) {
+      expect((await rowOf(child.refreshToken)).revokeReason).toBe(RefreshRevokeReason.REUSE_DETECTED);
+      await refreshCall(child.refreshToken).expect(401);
+    }
+    expect(await ds.getRepository(AuditLog).countBy({ action: 'auth.refresh_reuse_detected', targetId: s.user.id })).toBe(1);
+  });
+
   it('revokes the whole family when a rotated token is replayed after the grace window', async () => {
     const s = await newSession();
     const child = (await refreshCall(s.refreshToken).expect(200)).body as Session;
