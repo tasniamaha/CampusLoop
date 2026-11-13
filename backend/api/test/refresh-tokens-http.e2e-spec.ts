@@ -13,6 +13,7 @@ import { VerificationToken, VerificationType } from '../src/verification/entitie
 import { PasswordResetService } from '../src/verification/password-reset.service.js';
 import { AuditLog } from '../src/audit/entities/audit-log.entity.js';
 import { newOpaqueToken, sha256 } from '../src/verification/token.util.js';
+import { applyTrustProxy } from '../src/common/trust-proxy.js';
 
 const PASSWORD = 'correct-horse-battery';
 const EMAIL_PREFIX = 'refresh-http-';
@@ -55,7 +56,7 @@ beforeAll(async () => {
     .useValue({ send: async (_m: MailMessage) => undefined })
     .compile();
   app = moduleRef.createNestApplication();
-  app.getHttpAdapter().getInstance().set('trust proxy', true);
+  applyTrustProxy(app); // as main.ts: X-Forwarded-For only from loopback (the local Next server)
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   await app.init();
   ds = app.get(DataSource);

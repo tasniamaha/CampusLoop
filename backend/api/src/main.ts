@@ -7,6 +7,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { Logger} from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { assertUtcDatabaseClock } from './database/assert-utc-clock.js';
+import { applyTrustProxy } from './common/trust-proxy.js';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
@@ -16,15 +17,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
-    // Only trust X-Forwarded-For when the API sits behind a proxy YOU control that overwrites it.
-  // TRUST_PROXY examples: "1" (one hop), "loopback", "10.0.0.0/8". Unset = ignore the header.
-  const trustProxy = process.env.TRUST_PROXY;
-  if (trustProxy) {
-    app
-      .getHttpAdapter()
-      .getInstance()
-      .set('trust proxy', /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
-  }
+  // X-Forwarded-For is believed only from the proxies named in TRUST_PROXY (default: loopback,
+  // the Next server on this host). Hop counts and "true" are refused; see common/trust-proxy.ts.
+  applyTrustProxy(app);
   app.setGlobalPrefix('api')
   app.enableCors({ origin: process.env.WEB_URL ?? 'http://localhost:3000' });
     const isProd = process.env.NODE_ENV === 'production';
