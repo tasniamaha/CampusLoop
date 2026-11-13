@@ -109,6 +109,52 @@ export async function refreshSession(refreshToken: string, request: NextRequest)
   }
 }
 
+// ---------------- de-duplicated renewal ----------------
+
+/**
+ * Safety expiry for an in-flight renewal: a call that never settles stops being shared after this,
+ * so a stuck request cannot block renewals. Normal entries are removed as soon as the call settles.
+ */
+export const RENEWAL_SHARE_MS = 10_000;
+
+type InFlight = { promise: Promise<RefreshResult>; expiresAt: number };
+/** Keyed by a SHA-256 of the refresh token, never the token itself. Per server process. */
+const inFlight = new Map<string, InFlight>();
+
+async function tokenKey(refreshToken: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(refreshToken));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * refreshSession, shared between concurrent callers with the same refresh token. When the access
+ * cookie expires, a page, its prefetches and notification polling arrive at once with one refresh
+ * cookie; without this, each rotated it and the family forked. Now one /auth/refresh call runs and
+ * every waiter gets the same result, so every response sets the same cookie pair.
+ *
+ * Nothing is cached once the call settles: a later request with the same (now rotated) cookie makes
+ * a new call, so a failure is never replayed as a success and a success is never reused after the
+ * fact. Multi-instance deployments would need a shared store for this (project.md section 12).
+ */
+export async function refreshSessionOnce(refreshToken: string, request: NextRequest): Promise<RefreshResult> {
+  const key = await tokenKey(refreshToken);
+  // No await between this lookup and the set below, so two callers cannot both start a call.
+  const now = Date.now();
+  const existing = inFlight.get(key);
+  if (existing && existing.expiresAt > now) return existing.promise;
+
+  const entry: InFlight = { promise: refreshSession(refreshToken, request), expiresAt: now + RENEWAL_SHARE_MS };
+  inFlight.set(key, entry);
+  void entry.promise.finally(() => {
+    // Only remove our own entry: after the safety expiry a newer call may own the key.
+    if (inFlight.get(key) === entry) inFlight.delete(key);
+  });
+  return entry.promise;
+}
+
+/** Test hook: how many renewals are in flight. */
+export const inFlightRenewals = () => inFlight.size;
+
 /** Best effort: the cookies are cleared regardless of the outcome. */
 export async function revokeSession(refreshToken: string): Promise<void> {
   const base = apiUrl();

@@ -144,13 +144,21 @@ describe('POST /auth/refresh', () => {
       { rotatedAt: new Date(Date.now() - REFRESH_REUSE_GRACE_MS - 1_000) },
     );
 
-    await refreshCall(s.refreshToken).expect(401);
+    await request(server())
+      .post('/auth/refresh')
+      .set('X-Forwarded-For', '203.0.113.250')
+      .set('User-Agent', 'ReplayBrowser/1.0')
+      .send({ refreshToken: s.refreshToken })
+      .expect(401);
     // The legitimate holder of the child is also logged out: we cannot tell thief from owner.
     await refreshCall(child.refreshToken).expect(401);
     expect((await rowOf(child.refreshToken)).revokeReason).toBe(RefreshRevokeReason.REUSE_DETECTED);
 
-    const audit = await ds.getRepository(AuditLog).findOneBy({ action: 'auth.refresh_reuse_detected', targetId: s.user.id });
-    expect(audit).not.toBeNull();
+    const audit = await ds.getRepository(AuditLog).findOneByOrFail({ action: 'auth.refresh_reuse_detected', targetId: s.user.id });
+    // Who presented the replayed token: IP and user agent, but never the token itself.
+    expect(audit.ipAddress).toBe('203.0.113.250');
+    expect(audit.metadata).toEqual({ familyId: (await rowOf(s.refreshToken)).familyId, userAgent: 'ReplayBrowser/1.0' });
+    expect(JSON.stringify(audit)).not.toContain(s.refreshToken);
   });
 
   it('rejects an expired token', async () => {

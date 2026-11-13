@@ -52,7 +52,7 @@ export class RefreshTokenService {
    * Exchanges a refresh token for a new one. The presented row is locked so concurrent
    * rotations serialise; reuse of an already-rotated token revokes the whole family.
    */
-  async rotate(raw: string, userAgent: string | null): Promise<{ userId: string; token: IssuedRefreshToken }> {
+  async rotate(raw: string, userAgent: string | null, ip: string | null = null): Promise<{ userId: string; token: IssuedRefreshToken }> {
     // READ COMMITTED: under REPEATABLE READ the queued FOR UPDATE takes a next-key (gap) lock on the
     // hash index, and the holder's INSERT of the new hash into that gap deadlocks against it.
     // Correctness only needs the record lock on the presented row, which RC still takes.
@@ -79,7 +79,9 @@ export class RefreshTokenService {
           action: 'auth.refresh_reuse_detected',
           targetType: 'user',
           targetId: current.userId,
-          metadata: { familyId: current.familyId },
+          // Who presented the replayed token, to tell a lost renewal from a stolen token later.
+          metadata: { familyId: current.familyId, userAgent: userAgent?.slice(0, 255) || null },
+          ipAddress: ip,
         });
         return { kind: 'reuse', userId: current.userId, familyId: current.familyId };
       }

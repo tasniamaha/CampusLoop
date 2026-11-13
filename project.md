@@ -237,6 +237,7 @@ These paths are illustrative. Once an endpoint exists, its published OpenAPI con
   - **One vote per reviewer:** `ratingSum` adds one value per distinct reviewer: the average of all that reviewer's ratings of this user. `reviewerCount` is the number of distinct reviewers.
   - **Which reviews count:** reviews of this user that are not hidden, that are either revealed or past their review window, and that are on a loan in status `returned` which has a `handed_over` event.
   - **Bounds:** ratings range from 0.5 to 5, so the score stays within 0.5–5 with no separate clamp. A user with no reviews scores 3.5.
+- **Refresh-token reuse:** detection is strict. A rotated refresh token presented again within 10 seconds is treated as a race between parallel requests and gets a new token; after that, the whole session family is revoked and audited (`auth.refresh_reuse_detected`, with IP and user agent). Concurrent renewals are de-duplicated in the frontend proxy, so requests carrying the same refresh cookie share one refresh call; this is per server process, and multi-instance deployments would need a shared store. Trade-off: a renewal response lost to sleep or a closed tab can force one browser to log in again; this is accepted to keep theft detection strict.
 
 ### Known limitations
 

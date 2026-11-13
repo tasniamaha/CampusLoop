@@ -56,8 +56,8 @@ export class AuthService {
   }
 
   /** Rotates the refresh token and re-reads the user, so role changes apply on next refresh. */
-  async refresh(rawRefreshToken: string, userAgent: string | null) {
-    const { userId, token } = await this.refreshTokens.rotate(rawRefreshToken, userAgent);
+  async refresh(rawRefreshToken: string, userAgent: string | null, ip: string | null = null) {
+    const { userId, token } = await this.refreshTokens.rotate(rawRefreshToken, userAgent, ip);
     const user = await this.usersService.findById(userId);
     if (!user) throw new UnauthorizedException('Session expired. Please log in again.');
     // Deactivation revokes refresh tokens; this also covers a rotation that raced with it.

@@ -46,8 +46,9 @@ export class AuthController {
   @Public()
   @HttpCode(200)
   @Post('refresh')
-  refresh(@Body() dto: RefreshTokenDto, @Headers('user-agent') userAgent?: string) {
-    return this.authService.refresh(dto.refreshToken, userAgent ?? null);
+  // req.ip honours Express "trust proxy" (see main.ts); the frontend proxy forwards the browser's IP.
+  refresh(@Body() dto: RefreshTokenDto, @Req() req: Request, @Headers('user-agent') userAgent?: string) {
+    return this.authService.refresh(dto.refreshToken, userAgent ?? null, req.ip ?? null);
   }
 
   @Public()

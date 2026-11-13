@@ -3,13 +3,13 @@ import {
   ACCESS_COOKIE,
   REFRESH_COOKIE,
   clearSessionCookies,
-  refreshSession,
+  refreshSessionOnce,
   setSessionCookies,
 } from './lib/session';
 
 /**
  * Silent session renewal. When the access cookie has expired but a refresh cookie exists,
- * rotate once here, then:
+ * rotate once here (shared by concurrent requests carrying the same cookie), then:
  *  - set the new cookies on the response (browser), and
  *  - rewrite the request cookies (so server components and /api/backend see the new token now).
  */
@@ -18,7 +18,8 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
   if (hasAccess || !refreshToken) return NextResponse.next();
 
-  const result = await refreshSession(refreshToken, request);
+  // Concurrent requests with the same refresh cookie share one renewal (see refreshSessionOnce).
+  const result = await refreshSessionOnce(refreshToken, request);
 
   if (result.ok) {
     request.cookies.set(ACCESS_COOKIE, result.session.accessToken);
