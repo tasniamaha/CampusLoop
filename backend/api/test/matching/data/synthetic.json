@@ -55,7 +55,7 @@
     {
       "id": "f-005",
       "title": "Money bag found at the cafeteria",
-      "description": "Picked up a money bag at cafeteria. With a few cards inside.",
+      "description": "Picked up a money bag at cafeteria. Leather, with a zip.",
       "category": "Personal items",
       "location": "cafeteria",
       "itemDate": "2026-09-12",
@@ -127,7 +127,7 @@
     {
       "id": "f-011",
       "title": "Shades found at the Admin Building",
-      "description": "Picked up a shades at Admin Building reception. With aviator frames.",
+      "description": "Picked up a shades at Admin Building reception. With tinted lenses.",
       "category": "Glasses",
       "location": "Admin Building reception",
       "itemDate": "2026-08-30",
@@ -1603,7 +1603,7 @@
     {
       "id": "f-134",
       "title": "Pencil case found at the library",
-      "description": "Picked up a pencil case at Central Library ground floor near the printers during the exam. With a zip pull charm.",
+      "description": "Picked up a pencil case at Central Library ground floor near the printers during the exam. With pens and a ruler inside.",
       "category": "Stationery",
       "location": "Central Library ground floor near the printers",
       "itemDate": "2026-09-17",
@@ -3187,7 +3187,7 @@
     {
       "id": "f-266",
       "title": "Found red food container",
-      "description": "Picked up a food container at North Hall common room. In an insulated bag.",
+      "description": "Picked up a food container at North Hall common room. Two compartments.",
       "category": "Others",
       "location": "North Hall common room",
       "itemDate": "2026-08-16",

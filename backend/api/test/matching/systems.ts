@@ -91,7 +91,7 @@ export const currentMatches: MatchSystem = {
  */
 export const currentScoringUncapped: MatchSystem = {
   name: 'current, no cap (diagnostic)',
-  description: 'The current scoring over every candidate, without the newest-100 cap. Not a production system.',
+  description: 'The current scoring over every candidate, without the newest-100 cap: the fair comparison for scoring quality. Not a production system.',
   rank: rankByCurrentScore,
 };
 

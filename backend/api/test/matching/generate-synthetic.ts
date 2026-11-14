@@ -231,8 +231,10 @@ function hardNegatives(rng: Rng, item: Item, window: LostWindow): Item[] {
       const kind = kindByKey(rng.pick(item.kind.confusable));
       return { ...randomItem(rng, kind), color: kind.colors.includes(item.color) ? item.color : rng.pick(kind.colors), place: item.place, date: near() };
     },
-    // The same description, but found weeks before the owner lost theirs.
-    () => ({ ...item, detail: rng.pick(item.kind.details), date: addDays(window.from, -rng.int(20, 45)) }),
+    // A DIFFERENT physical item of the same kind, colour, brand and place, found weeks before the
+    // owner lost theirs. Its detail always differs from the real item's, so it never reads as a
+    // duplicate report of the same item (which would have to be labelled relevant).
+    () => ({ ...item, detail: rng.pick(item.kind.details.filter((d) => d !== item.detail)), date: addDays(window.from, -rng.int(20, 45)) }),
     // Something else entirely, same place and day.
     () => ({ ...randomItem(rng, rng.pick(KINDS.filter((k) => k.key !== item.kind.key))), place: item.place, date: item.date }),
     // Same kind at a similarly named place, different colour.
