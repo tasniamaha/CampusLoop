@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, it, mock } from 'node:test';
 process.env.API_URL = 'http://api.test/api';
 const { NextRequest } = await import('next/server');
 const { proxy } = await import('../proxy.ts');
-const { RENEWAL_SHARE_MS, inFlightRenewals } = await import('../lib/session.ts');
+const { RENEWAL_SHARE_MS, inFlightRenewals, renewalLookups } = await import('../lib/session.ts');
 
 const realFetch = globalThis.fetch;
 let refreshCalls;
@@ -29,9 +29,23 @@ function gate() {
   const opened = new Promise((resolve) => (release = resolve));
   return { opened, release };
 }
-// Real time, not a tick: hashing the token (Web Crypto) is asynchronous, so give every request
-// time to reach the in-flight lookup before the fake API answers.
-const settle = () => new Promise((resolve) => setTimeout(resolve, 50));
+/**
+ * Resolves once `count` more callers have reached the in-flight lookup. Hashing the token (Web
+ * Crypto) is asynchronous, so the fake API must not answer before every request got that far.
+ * Polls on real timers (mock.timers only fakes Date here) and fails after `timeoutMs`.
+ */
+function lookupsReached(count, timeoutMs = 2_000) {
+  const target = renewalLookups() + count;
+  const deadline = performance.now() + timeoutMs;
+  return new Promise((resolve, reject) => {
+    const check = () => {
+      if (renewalLookups() >= target) return resolve();
+      if (performance.now() > deadline) return reject(new Error(`expected ${target} renewal lookups, saw ${renewalLookups()}`));
+      setTimeout(check, 1);
+    };
+    check();
+  });
+}
 
 const session = (n) =>
   Response.json({
@@ -64,8 +78,10 @@ describe('proxy renewal', () => {
     });
 
     // The page, two prefetches and the notification poll, all at once with one refresh cookie.
-    const pending = ['/dashboard', '/resources', '/borrowings', '/api/backend/notifications/unread-count'].map((path) => proxy(expired('old-token', path)));
-    await settle();
+    const paths = ['/dashboard', '/resources', '/borrowings', '/api/backend/notifications/unread-count'];
+    const reached = lookupsReached(paths.length);
+    const pending = paths.map((path) => proxy(expired('old-token', path)));
+    await reached;
     assert.equal(inFlightRenewals(), 1);
     release();
     const responses = await Promise.all(pending);
@@ -96,8 +112,9 @@ describe('proxy renewal', () => {
       }
       return session(n);
     });
+    const reached = lookupsReached(3);
     const pending = [1, 2, 3].map(() => proxy(expired('old-token')));
-    await settle();
+    await reached;
     release();
     const failed = await Promise.all(pending);
     assert.equal(refreshCalls.length, 1);
@@ -115,8 +132,9 @@ describe('proxy renewal', () => {
       await opened;
       return Response.json({ message: 'Session expired. Please log in again.' }, { status: 401 });
     });
+    const reached = lookupsReached(2);
     const pending = [1, 2].map(() => proxy(expired('old-token')));
-    await settle();
+    await reached;
     release();
     const responses = await Promise.all(pending);
     assert.equal(refreshCalls.length, 1);
@@ -141,10 +159,12 @@ describe('proxy renewal', () => {
     const never = new Promise(() => {});
     fakeApi(async (_call, n) => (n === 1 ? never : session(n)));
 
+    let reached = lookupsReached(1);
     void proxy(expired('old-token'));
-    await settle();
+    await reached;
+    reached = lookupsReached(1);
     void proxy(expired('old-token')); // within the expiry: shares the stuck call
-    await settle();
+    await reached;
     assert.equal(refreshCalls.length, 1);
 
     mock.timers.tick(RENEWAL_SHARE_MS + 1);

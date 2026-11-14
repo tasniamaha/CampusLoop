@@ -120,6 +120,8 @@ export const RENEWAL_SHARE_MS = 10_000;
 type InFlight = { promise: Promise<RefreshResult>; expiresAt: number };
 /** Keyed by a SHA-256 of the refresh token, never the token itself. Per server process. */
 const inFlight = new Map<string, InFlight>();
+/** Callers that have reached the in-flight lookup, ever. Only read by tests (renewalLookups). */
+let lookups = 0;
 
 async function tokenKey(refreshToken: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(refreshToken));
@@ -140,6 +142,7 @@ export async function refreshSessionOnce(refreshToken: string, request: NextRequ
   const key = await tokenKey(refreshToken);
   // No await between this lookup and the set below, so two callers cannot both start a call.
   const now = Date.now();
+  lookups += 1;
   const existing = inFlight.get(key);
   if (existing && existing.expiresAt > now) return existing.promise;
 
@@ -154,6 +157,8 @@ export async function refreshSessionOnce(refreshToken: string, request: NextRequ
 
 /** Test hook: how many renewals are in flight. */
 export const inFlightRenewals = () => inFlight.size;
+/** Test hook: how many callers have reached the in-flight lookup so far (it only grows). */
+export const renewalLookups = () => lookups;
 
 /** Best effort: the cookies are cleared regardless of the outcome. */
 export async function revokeSession(refreshToken: string): Promise<void> {
