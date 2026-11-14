@@ -140,6 +140,7 @@ jobs:
       - run: npm ci
       - name: Lint
         run: npm run lint
-      - name: Proxy tests (session renewal de-duplication)
-        run: npm test
+      # Build first: the Referrer-Policy tests start `next start` on this build (they fail without it when CI is set).
       - run: npm run build
+      - name: Tests (proxy session renewal, Referrer-Policy headers)
+        run: npm test
