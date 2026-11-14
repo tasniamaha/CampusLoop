@@ -9,21 +9,7 @@ import { ResourceFavorite } from '../src/resources/entities/resource-favorite.en
 import { BorrowRequest, BorrowStatus } from '../src/borrow-requests/entities/borrow-request.entity.js';
 import { LoanEvent } from '../src/borrow-requests/entities/loan-event.entity.js';
 import { Notification } from '../src/notifications/entities/notification.entity.js';
-import { AddEmailCanonical1792700000000 } from '../src/database/migrations/1792700000000-AddEmailCanonical.js';
-import { CreateUsers1791838335819 } from '../src/database/migrations/1791838335819-CreateUsers.js';
-import { CreateResourcesAndBorrowRequests1791900000000 } from '../src/database/migrations/1791900000000-CreateResourcesAndBorrowRequests.js';
-import { ResourceMarketplace1792000000000 } from '../src/database/migrations/1792000000000-ResourceMarketplace.js';
-import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
-import { CreateNotifications1792800000000 } from '../src/database/migrations/1792800000000-CreateNotifications.js';
-import { CreateReviews1792900000000 } from '../src/database/migrations/1792900000000-CreateReviews.js';
-import { ReviewsBothSides1793000000000 } from '../src/database/migrations/1793000000000-ReviewsBothSides.js';
-import { ReviewBlindAndModeration1793100000000 } from '../src/database/migrations/1793100000000-ReviewBlindAndModeration.js';
-import { CreateReports1793200000000 } from '../src/database/migrations/1793200000000-CreateReports.js';
-import { ReviewHalfStarRatings1793300000000 } from '../src/database/migrations/1793300000000-ReviewHalfStarRatings.js';
-import { CreateRefreshTokens1793400000000 } from '../src/database/migrations/1793400000000-CreateRefreshTokens.js';
-import { AddBorrowApprovedAt1793500000000 } from '../src/database/migrations/1793500000000-AddBorrowApprovedAt.js';
-import { CreateLostFoundPhotos1793600000000 } from '../src/database/migrations/1793600000000-CreateLostFoundPhotos.js';
-import { AddUserAndCategoryDeactivation1793700000000 } from '../src/database/migrations/1793700000000-AddUserAndCategoryDeactivation.js';
+import { MIGRATIONS_GLOB } from '../src/database/migrations-glob.js';
 import { randomUUID } from 'node:crypto';
 
 // Proves the two review migrations on a database that ALREADY holds reviews written by the
@@ -40,14 +26,6 @@ const conn = {
   username: process.env.TEST_DB_USER ?? 'root',
   password: process.env.TEST_DB_PASSWORD ?? 'root',
 };
-const BASE_MIGRATIONS = [
-  AddEmailCanonical1792700000000,
-  CreateUsers1791838335819,
-  CreateResourcesAndBorrowRequests1791900000000,
-  ResourceMarketplace1792000000000,
-  CreateLoanEvents1792100000000,
-  CreateNotifications1792800000000,
-];
 const ENTITIES = [User, Resource, ResourceCategory, ResourceImage, ResourceFavorite, BorrowRequest, LoanEvent, Notification];
 const NEW_COLUMNS = ['reviewerRole', 'revieweeId', 'isHidden', 'hiddenAt', 'hiddenById', 'hiddenReason', 'revealedAt', 'windowClosesAt'];
 
@@ -99,18 +77,7 @@ beforeAll(async () => {
     ...conn,
     database: SCHEMA,
     entities: ENTITIES,
-    migrations: [
-      ...BASE_MIGRATIONS,
-      CreateReviews1792900000000,
-      ReviewsBothSides1793000000000,
-      ReviewBlindAndModeration1793100000000,
-      CreateReports1793200000000,
-      ReviewHalfStarRatings1793300000000,
-      CreateRefreshTokens1793400000000,
-      AddBorrowApprovedAt1793500000000,
-      CreateLostFoundPhotos1793600000000,
-      AddUserAndCategoryDeactivation1793700000000,
-    ] as never,
+    migrations: [MIGRATIONS_GLOB],
     synchronize: false,
     dropSchema: false,
   });

@@ -2,18 +2,10 @@ import * as bcrypt from 'bcrypt';
 import { DataSource } from 'typeorm';
 import { User, UserRole } from '../../src/users/entities/user.entity.js';
 import { VerificationToken } from '../../src/verification/entities/verification-token.entity.js';
-import { CreateUsers1791838335819 } from '../../src/database/migrations/1791838335819-CreateUsers.js';
-import { CreateResourcesAndBorrowRequests1791900000000 } from '../../src/database/migrations/1791900000000-CreateResourcesAndBorrowRequests.js';
-import { ResourceMarketplace1792000000000 } from '../../src/database/migrations/1792000000000-ResourceMarketplace.js';
-import { CreateLoanEvents1792100000000 } from '../../src/database/migrations/1792100000000-CreateLoanEvents.js';
-import { CreateVerificationTokens1792200000000 } from '../../src/database/migrations/1792200000000-CreateVerificationTokens.js';
+import { MIGRATIONS_GLOB } from '../../src/database/migrations-glob.js';
 import { AuditLog } from '../../src/audit/entities/audit-log.entity.js';
-import { CreateAuditLogs1792300000000 } from '../../src/database/migrations/1792300000000-CreateAuditLogs.js';
-import { AddEmailCanonical1792700000000 } from '../../src/database/migrations/1792700000000-AddEmailCanonical.js';
-import { CreateNotifications1792800000000 } from '../../src/database/migrations/1792800000000-CreateNotifications.js';
 import { Notification } from '../../src/notifications/entities/notification.entity.js';
 import { RefreshToken } from '../../src/auth/entities/refresh-token.entity.js';
-import { CreateRefreshTokens1793400000000 } from '../../src/database/migrations/1793400000000-CreateRefreshTokens.js';
 const createdUserIds: string[] = [];
 export const rand = () => Math.random().toString(36).slice(2, 10);
 
@@ -26,16 +18,7 @@ export async function createTestDataSource(): Promise<DataSource> {
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
     entities: [User, VerificationToken, AuditLog, Notification, RefreshToken],
-    migrations: [AddEmailCanonical1792700000000,
-      CreateUsers1791838335819,
-      CreateResourcesAndBorrowRequests1791900000000,
-      ResourceMarketplace1792000000000,
-      CreateLoanEvents1792100000000,
-      CreateVerificationTokens1792200000000,
-      CreateAuditLogs1792300000000,
-      CreateNotifications1792800000000,
-      CreateRefreshTokens1793400000000,
-    ],
+    migrations: [MIGRATIONS_GLOB],
   });
   await ds.initialize();
   await ds.runMigrations(); // no-op when the migration step already ran

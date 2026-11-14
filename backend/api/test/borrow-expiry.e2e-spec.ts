@@ -14,13 +14,7 @@ import { Notification } from '../src/notifications/entities/notification.entity.
 import { BorrowRequestsService } from '../src/borrow-requests/borrow-requests.service.js';
 import { BorrowExpiryService } from '../src/borrow-requests/borrow-expiry.service.js';
 import type { NotificationsService } from '../src/notifications/notifications.service.js';
-import { AddEmailCanonical1792700000000 } from '../src/database/migrations/1792700000000-AddEmailCanonical.js';
-import { CreateUsers1791838335819 } from '../src/database/migrations/1791838335819-CreateUsers.js';
-import { CreateResourcesAndBorrowRequests1791900000000 } from '../src/database/migrations/1791900000000-CreateResourcesAndBorrowRequests.js';
-import { ResourceMarketplace1792000000000 } from '../src/database/migrations/1792000000000-ResourceMarketplace.js';
-import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
-import { CreateNotifications1792800000000 } from '../src/database/migrations/1792800000000-CreateNotifications.js';
-import { AddBorrowApprovedAt1793500000000 } from '../src/database/migrations/1793500000000-AddBorrowApprovedAt.js';
+import { MIGRATIONS_GLOB } from '../src/database/migrations-glob.js';
 
 const HOUR = 3_600_000;
 const EMAIL_DOMAIN = '@expiry.test.local';
@@ -83,11 +77,7 @@ beforeAll(async () => {
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
     entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent, Notification],
-    migrations: [
-      AddEmailCanonical1792700000000, CreateUsers1791838335819, CreateResourcesAndBorrowRequests1791900000000,
-      ResourceMarketplace1792000000000, CreateLoanEvents1792100000000, CreateNotifications1792800000000,
-      AddBorrowApprovedAt1793500000000,
-    ],
+    migrations: [MIGRATIONS_GLOB],
     extra: { connectionLimit: 30 },
   });
   await ds.initialize();

@@ -6,13 +6,7 @@ import { User, UserRole } from '../src/users/entities/user.entity.js';
 import { VerificationToken } from '../src/verification/entities/verification-token.entity.js';
 import { EmailVerificationService } from '../src/verification/email-verification.service.js';
 import type { MailService, MailMessage } from '../src/mail/mail.service.js';
-import { CreateUsers1791838335819 } from '../src/database/migrations/1791838335819-CreateUsers.js';
-import { CreateResourcesAndBorrowRequests1791900000000 } from '../src/database/migrations/1791900000000-CreateResourcesAndBorrowRequests.js';
-import { ResourceMarketplace1792000000000 } from '../src/database/migrations/1792000000000-ResourceMarketplace.js';
-import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
-import { CreateVerificationTokens1792200000000 } from '../src/database/migrations/1792200000000-CreateVerificationTokens.js';
-import { AddEmailCanonical1792700000000 } from '../src/database/migrations/1792700000000-AddEmailCanonical.js';
-import { CreateNotifications1792800000000 } from '../src/database/migrations/1792800000000-CreateNotifications.js';
+import { MIGRATIONS_GLOB } from '../src/database/migrations-glob.js';
 import { Notification } from '../src/notifications/entities/notification.entity.js';
 
 let ds: DataSource;
@@ -49,14 +43,7 @@ beforeAll(async () => {
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
     entities: [User, VerificationToken, Notification],
-    migrations: [AddEmailCanonical1792700000000,
-      CreateUsers1791838335819,
-      CreateResourcesAndBorrowRequests1791900000000,
-      ResourceMarketplace1792000000000,
-      CreateLoanEvents1792100000000,
-      CreateVerificationTokens1792200000000,
-      CreateNotifications1792800000000,
-    ],
+    migrations: [MIGRATIONS_GLOB],
   });
   await ds.initialize();
   await ds.runMigrations(); // no-op when the CI/CLI step already applied them

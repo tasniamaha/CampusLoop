@@ -15,17 +15,7 @@ import { Review } from '../src/reviews/entities/review.entity.js';
 import { REVIEW_WINDOW_DAYS, ReviewsService } from '../src/reviews/reviews.service.js';
 import { ReportsService } from '../src/reports/reports.service.js';
 import { Report } from '../src/reports/entities/report.entity.js';
-import { CreateUsers1791838335819 } from '../src/database/migrations/1791838335819-CreateUsers.js';
-import { CreateResourcesAndBorrowRequests1791900000000 } from '../src/database/migrations/1791900000000-CreateResourcesAndBorrowRequests.js';
-import { ResourceMarketplace1792000000000 } from '../src/database/migrations/1792000000000-ResourceMarketplace.js';
-import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
-import { AddEmailCanonical1792700000000 } from '../src/database/migrations/1792700000000-AddEmailCanonical.js';
-import { CreateNotifications1792800000000 } from '../src/database/migrations/1792800000000-CreateNotifications.js';
-import { CreateReviews1792900000000 } from '../src/database/migrations/1792900000000-CreateReviews.js';
-import { ReviewsBothSides1793000000000 } from '../src/database/migrations/1793000000000-ReviewsBothSides.js';
-import { ReviewBlindAndModeration1793100000000 } from '../src/database/migrations/1793100000000-ReviewBlindAndModeration.js';
-import { CreateReports1793200000000 } from '../src/database/migrations/1793200000000-CreateReports.js';
-import { ReviewHalfStarRatings1793300000000 } from '../src/database/migrations/1793300000000-ReviewHalfStarRatings.js';
+import { MIGRATIONS_GLOB } from '../src/database/migrations-glob.js';
 
 let ds: DataSource;
 let service: ReviewsService;
@@ -113,14 +103,7 @@ beforeAll(async () => {
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
     entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent, Notification, Review, Report],
-    migrations: [
-      AddEmailCanonical1792700000000, CreateUsers1791838335819,
-      CreateResourcesAndBorrowRequests1791900000000, ResourceMarketplace1792000000000,
-      CreateLoanEvents1792100000000, CreateNotifications1792800000000,
-      CreateReviews1792900000000, ReviewsBothSides1793000000000,
-      ReviewBlindAndModeration1793100000000, CreateReports1793200000000,
-      ReviewHalfStarRatings1793300000000,
-    ],
+    migrations: [MIGRATIONS_GLOB],
     synchronize: false, dropSchema: false, extra: { connectionLimit: 30 },
   });
   await ds.initialize();

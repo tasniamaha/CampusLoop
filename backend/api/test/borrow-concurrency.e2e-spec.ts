@@ -5,19 +5,13 @@ import { ConflictException, ForbiddenException } from '@nestjs/common';
 import { User, UserRole } from '../src/users/entities/user.entity.js';
 import { Resource } from '../src/resources/entities/resource.entity.js';
 import { BorrowRequest, BorrowStatus } from '../src/borrow-requests/entities/borrow-request.entity.js';
-import { CreateUsers1791838335819 } from '../src/database/migrations/1791838335819-CreateUsers.js';
-import { CreateResourcesAndBorrowRequests1791900000000 } from '../src/database/migrations/1791900000000-CreateResourcesAndBorrowRequests.js';
+import { MIGRATIONS_GLOB } from '../src/database/migrations-glob.js';
 import { BorrowRequestsService } from '../src/borrow-requests/borrow-requests.service.js';
 import { isDuplicateEntry } from '../src/common/db-errors.js';
 import { ResourceCategory } from '../src/resources/entities/resource-category.entity.js';
 import { ResourceImage } from '../src/resources/entities/resource-image.entity.js';
 import { ResourceFavorite } from '../src/resources/entities/resource-favorite.entity.js';
-import { ResourceMarketplace1792000000000 } from '../src/database/migrations/1792000000000-ResourceMarketplace.js';
 import { LoanEvent, LoanEventType } from '../src/borrow-requests/entities/loan-event.entity.js';
-import { CreateLoanEvents1792100000000 } from '../src/database/migrations/1792100000000-CreateLoanEvents.js';
-import { AddEmailCanonical1792700000000 } from '../src/database/migrations/1792700000000-AddEmailCanonical.js';
-import { CreateNotifications1792800000000 } from '../src/database/migrations/1792800000000-CreateNotifications.js';
-import { AddBorrowApprovedAt1793500000000 } from '../src/database/migrations/1793500000000-AddBorrowApprovedAt.js';
 import { Notification } from '../src/notifications/entities/notification.entity.js';
 import { ResourcesService } from '../src/resources/resources.service.js';
 import { ImageStorageService } from '../src/images/image-storage.service.js';
@@ -82,14 +76,7 @@ beforeAll(async () => {
     password: process.env.TEST_DB_PASSWORD ?? 'root',
     database: process.env.TEST_DB_NAME ?? 'campusloop_test',
     entities: [User, Resource, BorrowRequest, ResourceCategory, ResourceImage, ResourceFavorite, LoanEvent, Notification],
-    migrations: [AddEmailCanonical1792700000000,
-      CreateUsers1791838335819,
-      CreateResourcesAndBorrowRequests1791900000000,
-      ResourceMarketplace1792000000000,
-      CreateLoanEvents1792100000000,
-      CreateNotifications1792800000000,
-      AddBorrowApprovedAt1793500000000,
-    ],
+    migrations: [MIGRATIONS_GLOB],
     dropSchema: false,
     synchronize: false,
     extra: { connectionLimit: 30 },
