@@ -47,8 +47,20 @@ export class LostFoundReport {
   @Column({ type: 'varchar', length: 180 })
   location!: string;
 
+  /** The day the item was lost or found, or the start of the time window. */
   @Column({ type: 'date' })
   itemDate!: string;
+
+  /** The end of the time window, or null for a single day. */
+  @Column({ type: 'date', nullable: true })
+  itemDateTo!: string | null;
+
+  /** One of LOST_FOUND_COLORS, or null when not given. */
+  @Column({ type: 'varchar', length: 30, nullable: true })
+  color!: string | null;
+
+  @Column({ type: 'varchar', length: 60, nullable: true })
+  brand!: string | null;
 
   /**
    * @deprecated Retirement phase 1: no longer written; existing values are returned only under

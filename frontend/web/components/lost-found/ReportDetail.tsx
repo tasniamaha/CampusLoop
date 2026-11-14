@@ -8,6 +8,7 @@ import {
   CLAIM_STATUS_LABEL,
   getMatches,
   getReport,
+  reportMeta,
   listClaims,
   resolveReport,
   reviewClaim,
@@ -190,7 +191,7 @@ export default function ReportDetail({ id, submitted }: { id: string; submitted:
           </div>
         </div>
         <p className="mt-3 whitespace-pre-wrap text-sm text-slate-700">{report.description}</p>
-        <p className="mt-2 text-sm text-slate-500">{report.category} · {report.location} · {String(report.itemDate).slice(0, 10)}</p>
+        <p className="mt-2 text-sm text-slate-500">{reportMeta(report)}</p>
         <PhotoThumbnails photos={report.photos} title={report.title} size="h-32 w-32" />
         {report.imageUrl && <a href={report.imageUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm text-emerald-800 underline">View item image</a>}
         {report.type === 'found' && !report.isMine && report.photos.length === 0 && (
@@ -268,7 +269,7 @@ export default function ReportDetail({ id, submitted }: { id: string; submitted:
                     <Link href={`/lost-found/${match.report.id}`} className="hover:text-emerald-800 hover:underline">{match.report.title}</Link>
                     <span className="ml-2 text-xs text-slate-500">Match score: {match.score}/100</span>
                   </p>
-                  <p className="text-sm text-slate-600">{match.report.category} · {match.report.location} · {String(match.report.itemDate).slice(0, 10)}</p>
+                  <p className="text-sm text-slate-600">{reportMeta(match.report)}</p>
                   <p className="mt-1 text-xs text-slate-500">{match.reasons.join(' · ')}</p>
                   <PhotoThumbnails photos={match.report.photos} title={match.report.title} size="h-16 w-16" />
                 </li>

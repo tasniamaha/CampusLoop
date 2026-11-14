@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import PhotoThumbnails from './PhotoThumbnails';
-import { listHref, listReports, type ListParams, type LostFoundType, type Report } from '../../lib/lost-found-api';
+import { listHref, listReports, reportMeta, type ListParams, type LostFoundType, type Report } from '../../lib/lost-found-api';
 
 type Loaded = { reports: Report[]; total: number; pages: number };
 /** The last request that finished, successfully or not. */
@@ -104,7 +104,7 @@ export default function LostFoundList({ type, page }: ListParams) {
                 </div>
               </div>
               <p className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm text-slate-700">{report.description}</p>
-              <p className="mt-2 text-sm text-slate-500">{report.category} · {report.location} · {String(report.itemDate).slice(0, 10)}</p>
+              <p className="mt-2 text-sm text-slate-500">{reportMeta(report)}</p>
               <PhotoThumbnails photos={report.photos} title={report.title} size="h-16 w-16" />
               <Link href={`/lost-found/${report.id}`} className="mt-3 inline-block text-sm font-semibold text-emerald-800 hover:underline" aria-label={`View report: ${report.title}`}>
                 View report →

@@ -15,6 +15,7 @@ import { sanitizeImage, type SanitizedImage } from '../images/sanitize-image.js'
 import type { UploadedImageFile } from '../images/uploaded-file.js';
 import { LostFoundPhoto } from './entities/lost-found-photo.entity.js';
 import { canViewPhotos, canViewReport, type PhotoViewer } from './photo-access.js';
+import { ITEM_DATE_GRACE_DAYS, MAX_ITEM_WINDOW_DAYS } from './lost-found-attributes.js';
 import { User } from '../users/entities/user.entity.js';
 import { ReportsService } from '../reports/reports.service.js';
 import { ReportTarget } from '../reports/entities/report.entity.js';
@@ -34,6 +35,34 @@ export const MAX_PHOTOS_PER_REPORT = MAX_IMAGES_PER_ITEM;
 export const MY_LIST_LIMIT = 100;
 
 const cleanText = (value: string) => value.trim().replace(/\s+/g, ' ');
+
+const DAY_MS = 86_400_000;
+const isCalendarDate = (value: string) =>
+  /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`))
+  && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+
+/**
+ * Validates the item's time window: real calendar dates, no later than ITEM_DATE_GRACE_DAYS past
+ * today's UTC date, the end on or after the start and at most MAX_ITEM_WINDOW_DAYS later.
+ * An end equal to the start is stored as null (a single day).
+ */
+export function checkItemWindow(itemDate: string, itemDateTo?: string, now = new Date()): { itemDate: string; itemDateTo: string | null } {
+  if (!isCalendarDate(itemDate)) throw new BadRequestException('Item date must be a valid calendar date');
+  if (itemDateTo !== undefined && !isCalendarDate(itemDateTo)) {
+    throw new BadRequestException('Item end date must be a valid calendar date');
+  }
+  const latest = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) + ITEM_DATE_GRACE_DAYS * DAY_MS;
+  const start = Date.parse(`${itemDate}T00:00:00Z`);
+  if (start > latest) throw new BadRequestException('Item date cannot be in the future');
+  if (itemDateTo === undefined || itemDateTo === itemDate) return { itemDate, itemDateTo: null };
+  const end = Date.parse(`${itemDateTo}T00:00:00Z`);
+  if (end < start) throw new BadRequestException('Item end date cannot be before the item date');
+  if (end > latest) throw new BadRequestException('Item end date cannot be in the future');
+  if (end - start > MAX_ITEM_WINDOW_DAYS * DAY_MS) {
+    throw new BadRequestException(`The item date range can span at most ${MAX_ITEM_WINDOW_DAYS} days`);
+  }
+  return { itemDate, itemDateTo };
+}
 // Same shape as resource image URLs; the web app loads it through its authenticated proxy.
 const photoUrl = (reportId: string, photoId: string) => `/api/lost-found/${reportId}/photos/${photoId}`;
 
@@ -49,6 +78,9 @@ const publicReport = (report: LostFoundReport, photos: LostFoundPhoto[], photosV
   category: report.category,
   location: report.location,
   itemDate: report.itemDate,
+  itemDateTo: report.itemDateTo,
+  color: report.color,
+  brand: report.brand,
   /** @deprecated Read-only (phase 1 of retirement): no longer accepted on create. Use `photos`. */
   imageUrl: photosVisible ? report.imageUrl : null,
   photos: photosVisible ? photos.map((photo) => ({ id: photo.id, url: photoUrl(report.id, photo.id) })) : [],
@@ -136,16 +168,8 @@ export class LostFoundService {
   }
 
   async create(userId: string, dto: CreateLostFoundReportDto) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dto.itemDate) || Number.isNaN(Date.parse(`${dto.itemDate}T00:00:00Z`)) || new Date(`${dto.itemDate}T00:00:00Z`).toISOString().slice(0, 10) !== dto.itemDate) {
-      throw new BadRequestException('Item date must be a valid calendar date');
-    }
+    const { itemDate, itemDateTo } = checkItemWindow(dto.itemDate, dto.itemDateTo);
     const campus = await this.getCampus(userId);
-    const itemDateMs = Date.parse(`${dto.itemDate}T00:00:00Z`);
-    const todayUtc = new Date();
-    todayUtc.setUTCHours(0, 0, 0, 0);
-    if (itemDateMs > todayUtc.getTime()) {
-      throw new BadRequestException('Item date cannot be in the future');
-    }
     const report = this.reports.create({
       reporterId: userId,
       campus,
@@ -154,7 +178,10 @@ export class LostFoundService {
       description: dto.description.trim(),
       category: cleanText(dto.category),
       location: cleanText(dto.location),
-      itemDate: dto.itemDate,
+      itemDate,
+      itemDateTo,
+      color: dto.color ?? null,
+      brand: dto.brand ?? null,
       imageUrl: null, // retired: photos are uploaded to POST /lost-found/:id/photos
       status: LostFoundStatus.OPEN,
       resolvedAt: null,

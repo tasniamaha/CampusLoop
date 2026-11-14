@@ -14,7 +14,12 @@ export type Report = {
   description: string;
   category: string;
   location: string;
+  /** The day, or the first day of the time window. */
   itemDate: string;
+  /** The last day of the window, or null for a single day. */
+  itemDateTo: string | null;
+  color: string | null;
+  brand: string | null;
   /** Legacy link, read-only. Only returned to viewers who may see this report's photos. */
   imageUrl: string | null;
   /** Empty when the viewer may not see this report's photos (e.g. someone else's found item). */
@@ -53,7 +58,33 @@ export const CLAIM_STATUS_LABEL: Record<ClaimStatus, string> = {
 };
 export type Match = { report: Report; score: number; reasons: string[] };
 export type ReportList = { data: Report[]; pagination: { page: number; limit: number; total: number; pages: number } };
-export type NewReport = Pick<Report, 'type' | 'title' | 'description' | 'category' | 'location' | 'itemDate'>;
+export type NewReport = Pick<Report, 'type' | 'title' | 'description' | 'category' | 'location' | 'itemDate'> & {
+  itemDateTo?: string;
+  color?: string;
+  brand?: string;
+};
+
+/** The colours the API accepts (LOST_FOUND_COLORS in the backend). */
+export const COLORS = [
+  'black', 'white', 'grey', 'silver', 'gold', 'red', 'orange',
+  'yellow', 'green', 'blue', 'purple', 'pink', 'brown', 'other',
+] as const;
+export const MAX_WINDOW_DAYS = 30;
+
+const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+
+/** "2026-10-01", or "2026-10-01 to 2026-10-03" for a time window. */
+export function itemDates(report: Pick<Report, 'itemDate' | 'itemDateTo'>): string {
+  const from = String(report.itemDate).slice(0, 10);
+  return report.itemDateTo ? `${from} to ${String(report.itemDateTo).slice(0, 10)}` : from;
+}
+
+/** The short line under a report title: category, colour, brand, location and dates. */
+export function reportMeta(report: Pick<Report, 'category' | 'color' | 'brand' | 'location' | 'itemDate' | 'itemDateTo'>): string {
+  return [report.category, report.color && capitalise(report.color), report.brand, report.location, itemDates(report)]
+    .filter(Boolean)
+    .join(' · ');
+}
 
 /** API photo URLs start with /api/; the browser loads them through the authenticated proxy. */
 export const proxied = (url: string) => url.replace(/^\/api\//, '/api/backend/');

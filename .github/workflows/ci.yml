@@ -98,6 +98,8 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/lost-found-report-detail-http.e2e-spec.ts
       - name: Lost-and-found "My reports" tests (own reports and claims only)
         run: npx vitest run --config vitest.config.e2e.ts test/lost-found-mine-http.e2e-spec.ts
+      - name: Lost-and-found attribute tests (colour, brand, time window)
+        run: npx vitest run --config vitest.config.e2e.ts test/lost-found-attributes-http.e2e-spec.ts
       - name: Study group concurrency tests (INV-4 participant limit, real MySQL)
         run: npx vitest run --config vitest.config.e2e.ts test/study-groups-concurrency.e2e-spec.ts
       - name: Study group page tests (group and member visibility)
@@ -120,6 +122,8 @@ jobs:
         run: npx vitest run --config vitest.config.e2e.ts test/deactivation-migration.e2e-spec.ts
       - name: Lost-and-found photo migration tests (restores schema)
         run: npx vitest run --config vitest.config.e2e.ts test/lost-found-photos-migration.e2e-spec.ts
+      - name: Lost-and-found attribute migration tests (restores schema)
+        run: npx vitest run --config vitest.config.e2e.ts test/lost-found-attributes-migration.e2e-spec.ts
       - name: Review migration tests (runs last, restores schema)
         run: npx vitest run --config vitest.config.e2e.ts test/review-migrations.e2e-spec.ts
   frontend:

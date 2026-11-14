@@ -3,7 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from 'react';
 import PhotoDropzone, { preparePhotos, releasePhotos, type PendingPhoto } from '../PhotoDropzone';
-import { createReport, uploadPhoto, type LostFoundType } from '../../lib/lost-found-api';
+import { COLORS, createReport, MAX_WINDOW_DAYS, uploadPhoto, type LostFoundType } from '../../lib/lost-found-api';
+
+const addDays = (day: string, days: number) => {
+  const date = new Date(`${day}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+};
 
 const getToday = () => {
   const date = new Date();
@@ -29,6 +35,13 @@ export default function ReportForm() {
   const [itemDate, setItemDate] = useState('');
   const todayDate = useSyncExternalStore(subscribeNoop, getToday, getServerToday);
   const effectiveItemDate = itemDate || todayDate;
+  // Optional end of a time window; '' means a single day.
+  const [itemDateTo, setItemDateTo] = useState('');
+  const [color, setColor] = useState('');
+  const [brand, setBrand] = useState('');
+  const latestDateTo = effectiveItemDate && todayDate
+    ? [addDays(effectiveItemDate, MAX_WINDOW_DAYS), todayDate].sort()[0]
+    : undefined;
   const [photos, setPhotos] = useState<PendingPhoto[]>([]);
   const [photoErrors, setPhotoErrors] = useState<string[]>([]);
   // Set when the report was created but some photos failed: the form then only retries those photos.
@@ -80,7 +93,12 @@ export default function ReportForm() {
       // Step 1: create the report (skipped when retrying photos for a report that already exists).
       let reportId = savedReportId;
       if (!reportId) {
-        const created = await createReport({ type, title, description, category, location, itemDate: effectiveItemDate });
+        const created = await createReport({
+          type, title, description, category, location, itemDate: effectiveItemDate,
+          ...(itemDateTo && itemDateTo !== effectiveItemDate ? { itemDateTo } : {}),
+          ...(color ? { color } : {}),
+          ...(brand.trim() ? { brand: brand.trim() } : {}),
+        });
         if (!created.ok) {
           if (created.status === 401) { router.replace('/login'); return; }
           throw new Error(created.message);
@@ -143,12 +161,38 @@ export default function ReportForm() {
         <label className="text-sm font-medium">Location
           <input required minLength={2} maxLength={180} placeholder="General campus location; avoid private details" value={location} onChange={(e) => setLocation(e.target.value)} className="mt-1 block w-full rounded-lg border p-2" />
         </label>
-        <label className="text-sm font-medium">Date lost or found
-          <input required type="date" max={todayDate || undefined} value={effectiveItemDate} onChange={(e) => setItemDate(e.target.value)} className="mt-1 block w-full rounded-lg border p-2" />
+        <label className="text-sm font-medium">Colour (optional)
+          <select value={color} onChange={(e) => setColor(e.target.value)} className="mt-1 block w-full rounded-lg border p-2">
+            <option value="">Not sure</option>
+            {COLORS.map((c) => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+          </select>
+        </label>
+        <label className="text-sm font-medium">Brand (optional)
+          <input maxLength={60} placeholder="e.g. Casio, Milton, Samsung" value={brand} onChange={(e) => setBrand(e.target.value)} className="mt-1 block w-full rounded-lg border p-2" />
+        </label>
+        <label className="text-sm font-medium">{type === 'lost' ? 'Date lost (or first possible day)' : 'Date found'}
+          <input
+            required type="date" max={todayDate || undefined} value={effectiveItemDate}
+            onChange={(e) => { setItemDate(e.target.value); if (itemDateTo && itemDateTo < e.target.value) setItemDateTo(''); }}
+            className="mt-1 block w-full rounded-lg border p-2"
+          />
+        </label>
+        <label className="text-sm font-medium">Last possible day (optional)
+          <input
+            type="date" min={effectiveItemDate || undefined} max={latestDateTo} value={itemDateTo}
+            onChange={(e) => setItemDateTo(e.target.value)} aria-describedby="item-date-to-help"
+            className="mt-1 block w-full rounded-lg border p-2"
+          />
+          <span id="item-date-to-help" className="mt-1 block text-xs font-normal text-slate-500">
+            Not sure of the exact day? Give a range of up to {MAX_WINDOW_DAYS} days. Leave empty for a single day.
+          </span>
         </label>
         <label className="text-sm font-medium sm:col-span-2">Description
-          <textarea required minLength={5} maxLength={3000} rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe colour, brand, or distinguishing marks. Do not include passwords or sensitive ID details." className="mt-1 block w-full rounded-lg border p-2" />
+          <textarea required minLength={5} maxLength={3000} rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the item and where you last saw it." aria-describedby="private-details-hint" className="mt-1 block w-full rounded-lg border p-2" />
         </label>
+        <p id="private-details-hint" className="-mt-2 text-xs text-slate-500 sm:col-span-2">
+          Do not enter serial numbers or engravings; those belong in claim proof. Also leave out passwords and ID numbers.
+        </p>
       </fieldset>
       <div className="sm:col-span-2">
         <p className="text-sm font-medium">Photos (optional)</p>

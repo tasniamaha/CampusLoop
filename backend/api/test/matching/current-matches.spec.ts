@@ -21,7 +21,8 @@ const CAMPUS = 'North Campus';
 function entity(report: EvalReport, type: LostFoundType, reporterId: string): LostFoundReport {
   return {
     id: report.id, reporterId, campus: CAMPUS, type, title: report.title, description: report.description,
-    category: report.category, location: report.location, itemDate: report.itemDate, imageUrl: null,
+    category: report.category, location: report.location, itemDate: report.itemDate,
+    itemDateTo: report.itemDateTo, color: report.color, brand: report.brand, imageUrl: null,
     status: LostFoundStatus.OPEN, resolvedAt: null, createdAt: new Date(report.createdAt), updatedAt: new Date(report.createdAt),
   };
 }

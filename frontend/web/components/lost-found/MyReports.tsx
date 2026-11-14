@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import PhotoThumbnails from './PhotoThumbnails';
-import { CLAIM_STATUS_LABEL, getMine, MY_LIST_LIMIT, type MyActivity, type Report } from '../../lib/lost-found-api';
+import { CLAIM_STATUS_LABEL, getMine, MY_LIST_LIMIT, reportMeta, type MyActivity, type Report } from '../../lib/lost-found-api';
 
 type Settled = { key: number; ok: true; data: MyActivity } | { key: number; ok: false; message: string };
 
@@ -117,7 +117,7 @@ function ReportRow({ report, children }: { report: Report; children?: ReactNode 
           <span className={`rounded-full px-3 py-1 text-xs font-medium ${isOpen ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>{isOpen ? 'Open' : 'Resolved'}</span>
         </div>
       </div>
-      <p className="mt-1 text-sm text-slate-500">{report.category} · {report.location} · {String(report.itemDate).slice(0, 10)}</p>
+      <p className="mt-1 text-sm text-slate-500">{reportMeta(report)}</p>
       {children}
       <PhotoThumbnails photos={report.photos} title={report.title} size="h-14 w-14" />
     </article>

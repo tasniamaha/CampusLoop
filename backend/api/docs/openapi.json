@@ -3128,6 +3128,32 @@
           },
           "itemDate": {
             "type": "string"
+          },
+          "itemDateTo": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string",
+            "enum": [
+              "black",
+              "white",
+              "grey",
+              "silver",
+              "gold",
+              "red",
+              "orange",
+              "yellow",
+              "green",
+              "blue",
+              "purple",
+              "pink",
+              "brown",
+              "other"
+            ]
+          },
+          "brand": {
+            "type": "string",
+            "maxLength": 60
           }
         },
         "required": [
