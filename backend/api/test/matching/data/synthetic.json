@@ -1,0 +1,5732 @@
+{
+  "name": "synthetic",
+  "description": "Template-generated campus lost-and-found reports (seed 20261114). 80 LOST queries against 300 FOUND reports: relevant matches, hard negatives and distractors.",
+  "seed": 20261114,
+  "labelStatus": "Labels are true by construction: relevant means rendered from the same generated item.",
+  "pool": [
+    {
+      "id": "f-001",
+      "title": "Found a sweater",
+      "description": "Found a maroon sweater at ICT building lab 2. Handed it to the security desk.",
+      "category": "clothing",
+      "location": "ICT building lab 2",
+      "itemDate": "2026-10-23",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": "H&M",
+      "createdAt": "2026-10-24T17:43:16.000Z"
+    },
+    {
+      "id": "f-002",
+      "title": "ID badge found at the auditorium",
+      "description": "Found a jet black ID badge with a clip at auditorium hall. Handed it to the security desk.",
+      "category": "ID card",
+      "location": "auditorium hall",
+      "itemDate": "2026-08-22",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-08-23T07:36:53.000Z"
+    },
+    {
+      "id": "f-003",
+      "title": "Found gold shades",
+      "description": "Gold shades. Found at Admin Building reception.",
+      "category": "accessories",
+      "location": "admin block lobby",
+      "itemDate": "2026-09-30",
+      "itemDateTo": null,
+      "color": "gold",
+      "brand": null,
+      "createdAt": "2026-09-30T11:09:29.000Z"
+    },
+    {
+      "id": "f-004",
+      "title": "Found black USB drive",
+      "description": "Picked up a USB drive at dorm common room (North Hall) around lunchtime.",
+      "category": "Electronics",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-10-20",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-10-21T12:20:17.000Z"
+    },
+    {
+      "id": "f-005",
+      "title": "Money bag found at the cafeteria",
+      "description": "Picked up a money bag at cafeteria. With a few cards inside.",
+      "category": "Personal items",
+      "location": "cafeteria",
+      "itemDate": "2026-09-12",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": "Tommy",
+      "createdAt": "2026-09-12T14:56:47.000Z"
+    },
+    {
+      "id": "f-006",
+      "title": "Black bag left behind",
+      "description": "Picked up a bag at Eng building lab 2 on Monday.",
+      "category": "Personal items",
+      "location": "Eng building lab 2",
+      "itemDate": "2026-10-28",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "Adidas",
+      "createdAt": "2026-10-28T09:27:44.000Z"
+    },
+    {
+      "id": "f-007",
+      "title": "Silver spectacles left behind",
+      "description": "Found a silveer spectacles at library entrance. Handed it to the security desk.",
+      "category": "Accessories",
+      "location": "Libary reading room",
+      "itemDate": "2026-10-06",
+      "itemDateTo": null,
+      "color": null,
+      "brand": "LENSKART",
+      "createdAt": "2026-10-06T14:03:38.000Z"
+    },
+    {
+      "id": "f-008",
+      "title": "White eyeglasses left behind",
+      "description": "Someone left this eyeglasses at auditorium hall. white. Message me with details to claim.",
+      "category": "glasses",
+      "location": "auditorium hall",
+      "itemDate": "2026-08-30",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-08-30T18:06:45.000Z"
+    },
+    {
+      "id": "f-009",
+      "title": "Found a shhoulder bag",
+      "description": "Picked up a shoulder bag at Letcure Hall B.",
+      "category": "Personal items",
+      "location": "Lecture Hall B",
+      "itemDate": "2026-08-28",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-08-29T15:47:53.000Z"
+    },
+    {
+      "id": "f-010",
+      "title": "Found: tiffin box",
+      "description": "Red tiffin box. Found at dorm common room (North Hall).",
+      "category": "Personal items",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-09-14",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-09-14T11:15:00.000Z"
+    },
+    {
+      "id": "f-011",
+      "title": "Shades found at the Admin Building",
+      "description": "Picked up a shades at Admin Building reception. With aviator frames.",
+      "category": "Glasses",
+      "location": "Admin Building reception",
+      "itemDate": "2026-08-30",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Rayban",
+      "createdAt": "2026-08-31T11:05:12.000Z"
+    },
+    {
+      "id": "f-012",
+      "title": "Cream phone charger left behind",
+      "description": "Cream phone charger, looks like Anker. Found at prayer room, ground floor.",
+      "category": "Charger",
+      "location": "prayer room, ground floor",
+      "itemDate": "2026-10-25",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "Anker",
+      "createdAt": "2026-10-25T10:47:25.000Z"
+    },
+    {
+      "id": "f-013",
+      "title": "Found silver smartphone",
+      "description": "Silver smartphone, looks like Xiaomi. Found at prayer hall.",
+      "category": "Phone",
+      "location": "prayer hall",
+      "itemDate": "2026-08-21",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-08-22T13:08:33.000Z"
+    },
+    {
+      "id": "f-014",
+      "title": "Found: smartphone",
+      "description": "Found a purple smartphone at library entrance. Handed it to the security desk.",
+      "category": "Phone",
+      "location": "Central Library",
+      "itemDate": "2026-08-31",
+      "itemDateTo": null,
+      "color": "purple",
+      "brand": "Realme",
+      "createdAt": "2026-09-01T12:04:08.000Z"
+    },
+    {
+      "id": "f-015",
+      "title": "Chrome flask left behind",
+      "description": "Picked up a flask at prayer room, ground floor around lunchtime.",
+      "category": "Bottle",
+      "location": "prayer room, ground floor",
+      "itemDate": "2026-11-01",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Nalgene",
+      "createdAt": "2026-11-01T21:52:22.000Z"
+    },
+    {
+      "id": "f-016",
+      "title": "ID badge found at North Hall",
+      "description": "Maroon ID badge. Found at North Hall common room.",
+      "category": "ID card",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-11-04",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-11-05T14:26:38.000Z"
+    },
+    {
+      "id": "f-017",
+      "title": "Found dark grey smartphone",
+      "description": "Someone left this smartphone at CSE computer lab. dark grey. Message me with details to claim.",
+      "category": "electronics",
+      "location": "ICT building lab 2",
+      "itemDate": "2026-08-22",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": null,
+      "createdAt": "2026-08-23T21:54:59.000Z"
+    },
+    {
+      "id": "f-018",
+      "title": "Blue bottle left behind",
+      "description": "Picked up a bottle at admin block lobby on Monday. With a dent near the bottom.",
+      "category": "Bottle",
+      "location": "admin block lobby",
+      "itemDate": "2026-09-04",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-09-04T17:48:32.000Z"
+    },
+    {
+      "id": "f-019",
+      "title": "Found: flash drive",
+      "description": "Found a blue flash drive at Lecture Hall A. Handed it to the security desk.",
+      "category": "Accessories",
+      "location": "LH-A",
+      "itemDate": "2026-10-21",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-10-22T21:37:04.000Z"
+    },
+    {
+      "id": "f-020",
+      "title": "Found a course book",
+      "description": "Someoone left this course book at Main Auditorium. navy blue. Message me with details to claim.",
+      "category": "books",
+      "location": "Main Auditorium",
+      "itemDate": "2026-09-30",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-10-01T19:15:24.000Z"
+    },
+    {
+      "id": "f-021",
+      "title": "Exercise book found at the auditorium",
+      "description": "Found a mint green exercise book half used at Main Auditorium. Handed it to the security desk.",
+      "category": "Stationery",
+      "location": "main auditorium seats near the stage",
+      "itemDate": "2026-10-31",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-11-01T08:25:26.000Z"
+    },
+    {
+      "id": "f-022",
+      "title": "Found a wireless earbuds",
+      "description": "Picked up a wireless earbuds at Engineering Building room 304 after the 10am class. In the charging case.",
+      "category": "Accessories",
+      "location": "Engineering Building room 304",
+      "itemDate": "2026-10-15",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-10-16T15:46:30.000Z"
+    },
+    {
+      "id": "f-023",
+      "title": "Found sky blue textbook",
+      "description": "Someone left this textbook at Admin Building parking. sky blue. Message me with details to claim.",
+      "category": "Stationery",
+      "location": "Admin Building parking",
+      "itemDate": "2026-08-29",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-08-30T09:47:32.000Z"
+    },
+    {
+      "id": "f-024",
+      "title": "Found: umbrella",
+      "description": "Navy blue umbrella. Found at dorm common room (North Hall).",
+      "category": "Personal items",
+      "location": "North Hall common room",
+      "itemDate": "2026-10-28",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-10-28T13:48:40.000Z"
+    },
+    {
+      "id": "f-025",
+      "title": "Patternde set of keys left behind",
+      "description": "Someoe left this set of keys at Administration Building, accounts office queue. patterned. Message me with details to claim.",
+      "category": "Personal items",
+      "location": "Admin Building reception",
+      "itemDate": "2026-10-30",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-10-31T12:19:27.000Z"
+    },
+    {
+      "id": "f-026",
+      "title": "Bunch of keys found at North Hall",
+      "description": "Picked up a buunch of keys at Nortth Hall common room. With a rubber duck keychain.",
+      "category": "Keys",
+      "location": "North Hall common room",
+      "itemDate": "2026-10-31",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-10-31T07:41:40.000Z"
+    },
+    {
+      "id": "f-027",
+      "title": "Found: shoulder bag",
+      "description": "Picked up a shoulder bag at bus stop outside Main Gate.",
+      "category": "Bag",
+      "location": "bus stop outside Main Gate",
+      "itemDate": "2026-10-11",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-10-12T15:51:55.000Z"
+    },
+    {
+      "id": "f-028",
+      "title": "Red bunch of keys left behind",
+      "description": "Red bunch of keys. Found at mosque wudu area.",
+      "category": "keys",
+      "location": "mosque wudu area",
+      "itemDate": "2026-09-13",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-09-14T17:20:32.000Z"
+    },
+    {
+      "id": "f-029",
+      "title": "Found a exercise book",
+      "description": "Found a camo exercise book with sticky notes at dorm common room (North Hall). Handed it to the security desk.",
+      "category": "Books",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-10-02",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-10-03T20:51:03.000Z"
+    },
+    {
+      "id": "f-030",
+      "title": "Found a mobile",
+      "description": "Someone left this mobile at mosque wudu area. lavender. Message me with details to claim.",
+      "category": "Phone",
+      "location": "mosque wudu area",
+      "itemDate": "2026-08-26",
+      "itemDateTo": null,
+      "color": "purple",
+      "brand": "Redmi",
+      "createdAt": "2026-08-27T13:25:56.000Z"
+    },
+    {
+      "id": "f-031",
+      "title": "Found dark brown sunnies",
+      "description": "Dark brown sunnies, looks like Oakley. Found at sports complex basketball court.",
+      "category": "accessories",
+      "location": "sports complex basketball court",
+      "itemDate": "2026-09-15",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": null,
+      "createdAt": "2026-09-15T14:34:28.000Z"
+    },
+    {
+      "id": "f-032",
+      "title": "Found a pen drive",
+      "description": "Picked up a pen drive at canteen near the juice counter. Metal body.",
+      "category": "Electronics",
+      "location": "canteen near the juice counter",
+      "itemDate": "2026-09-09",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-09-09T15:59:24.000Z"
+    },
+    {
+      "id": "f-033",
+      "title": "Found a cellphone",
+      "description": "Black cellphone. Found at Main Gate.",
+      "category": "electronic devices",
+      "location": "Main Gate",
+      "itemDate": "2026-09-14",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-09-15T21:25:28.000Z"
+    },
+    {
+      "id": "f-034",
+      "title": "Folding umbrella found at the gym",
+      "description": "Picked up a folding umbrella at Sports Complex changing room. With a hook handle.",
+      "category": "Personal items",
+      "location": "Gymnasium",
+      "itemDate": "2026-08-28",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-08-29T20:06:42.000Z"
+    },
+    {
+      "id": "f-035",
+      "title": "Found a water bottle",
+      "description": "Found a white water bottle at mosque wudu area. Handed it to the security desk.",
+      "category": "Personal items",
+      "location": "mosque wudu area",
+      "itemDate": "2026-10-23",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-10-23T11:47:10.000Z"
+    },
+    {
+      "id": "f-036",
+      "title": "Found jet black set of keys",
+      "description": "Someone left this set of keys at dorm common room (North Hall). jet black. Message me with details to claim.",
+      "category": "Keys",
+      "location": "North Hall common room",
+      "itemDate": "2026-10-07",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-10-08T11:49:33.000Z"
+    },
+    {
+      "id": "f-037",
+      "title": "Dark grey laptop computer left behind",
+      "description": "Picked up a laptop computer at Sports Complex changing room during the exam. In a padded sleeve.",
+      "category": "laptop",
+      "location": "gym changing room",
+      "itemDate": "2026-08-21",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "HP",
+      "createdAt": "2026-08-22T14:23:52.000Z"
+    },
+    {
+      "id": "f-038",
+      "title": "Found: CLASSMATE notebook",
+      "description": "Dark red notebook, looks like CLASSMATE. Found at Central Library ground floor near the printers.",
+      "category": "Notebook",
+      "location": "Central Library",
+      "itemDate": "2026-07-18",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": "CLASSMATE",
+      "createdAt": "2026-07-19T09:25:04.000Z"
+    },
+    {
+      "id": "f-039",
+      "title": "Found a pen drive",
+      "description": "Found a metallic silver pen drive with a missing cap at Administration Building, accounts office queue. Handed it to the security desk.",
+      "category": "electronics",
+      "location": "Administration Building, accounts office queue",
+      "itemDate": "2026-09-07",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-09-07T16:42:53.000Z"
+    },
+    {
+      "id": "f-040",
+      "title": "Found a textbook",
+      "description": "Found a mint green textbook Physics, with nootes in the margins at auditorium hall. Handed it to the security desk.",
+      "category": "books",
+      "location": "auditorium hall",
+      "itemDate": "2026-11-06",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-11-06T21:10:46.000Z"
+    },
+    {
+      "id": "f-041",
+      "title": "Found mint green ID card",
+      "description": "Someone left this ID card at shuttle stop near the main gate. mint green. Message me with details to claim.",
+      "category": "ID card",
+      "location": "shuttle stop near the main gate",
+      "itemDate": "2026-09-11",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-09-11T08:32:54.000Z"
+    },
+    {
+      "id": "f-042",
+      "title": "Found a course book",
+      "description": "Picked up a course book at near the main gate yesterday afternoon. Organic Chemistry, with a brown paper cover.",
+      "category": "Books",
+      "location": "near the main gate",
+      "itemDate": "2026-10-28",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-10-28T13:20:34.000Z"
+    },
+    {
+      "id": "f-043",
+      "title": "Found a lunch box",
+      "description": "Someone left this lunh box at car park. Message me with detaills to claim.",
+      "category": "kitchen",
+      "location": "car park",
+      "itemDate": "2026-10-29",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-10-30T11:14:54.000Z"
+    },
+    {
+      "id": "f-044",
+      "title": "Found a windbreaker",
+      "description": "Picked up a windbreakre at mosque wudu area.",
+      "category": "Clothing",
+      "location": "prayer hall",
+      "itemDate": "2026-10-07",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "Uniqlo",
+      "createdAt": "2026-10-07T11:39:44.000Z"
+    },
+    {
+      "id": "f-045",
+      "title": "Found: laptop computer",
+      "description": "Picked up a laptop computer at shuttle stop near the main gate. With a worn keyboard.",
+      "category": "Electronics",
+      "location": "shuttle stop near the main gate",
+      "itemDate": "2026-09-14",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-09-15T21:16:57.000Z"
+    },
+    {
+      "id": "f-046",
+      "title": "Dark red purse left behind",
+      "description": "Found a dark red pusre with a few cards inside at North Hall common room. Handed it to the security desk.",
+      "category": "Wallet",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-11-02",
+      "itemDateTo": null,
+      "color": null,
+      "brand": "Tommy Hilfiger",
+      "createdAt": "2026-11-02T20:53:17.000Z"
+    },
+    {
+      "id": "f-047",
+      "title": "Found silver keychain",
+      "description": "Silver keychain. Found at prayer hall.",
+      "category": "Keys",
+      "location": "prayer hall",
+      "itemDate": "2026-11-03",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-11-04T18:50:05.000Z"
+    },
+    {
+      "id": "f-048",
+      "title": "Found a flash drive",
+      "description": "Found a maroon flash drive at canteen near the juice counter. Handed it to the security desk.",
+      "category": "Electronics",
+      "location": "canteen near the juice counter",
+      "itemDate": "2026-09-10",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-09-10T18:13:12.000Z"
+    },
+    {
+      "id": "f-049",
+      "title": "Found: purse",
+      "description": "Picked up a purse at Lecture Hall A.",
+      "category": "Accessories",
+      "location": "Lecture Hall A",
+      "itemDate": "2026-09-23",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": null,
+      "createdAt": "2026-09-23T12:25:06.000Z"
+    },
+    {
+      "id": "f-050",
+      "title": "Burgundy notebook left behind",
+      "description": "Burgundy notebook. Found at library entrance.",
+      "category": "Notebook",
+      "location": "library entrance",
+      "itemDate": "2026-08-26",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-08-26T19:41:44.000Z"
+    },
+    {
+      "id": "f-051",
+      "title": "Patterned stationery pouch left behind",
+      "description": "Patterned stationery pouch. Found at CSE computer lab.",
+      "category": "Stationery",
+      "location": "Computer Lab 2",
+      "itemDate": "2026-10-21",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": "Deli",
+      "createdAt": "2026-10-21T20:11:58.000Z"
+    },
+    {
+      "id": "f-052",
+      "title": "Found a cellphone",
+      "description": "Metallic silver cellphone. Found at Library, 2nd floor reading room.",
+      "category": "Electronics",
+      "location": "library entrance",
+      "itemDate": "2026-07-24",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-07-24T18:24:26.000Z"
+    },
+    {
+      "id": "f-053",
+      "title": "Sunnies found at the parking lot",
+      "description": "Picked up a sunnies at Admin Building parking.",
+      "category": "Accessories",
+      "location": "car park",
+      "itemDate": "2026-09-22",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-09-23T18:37:22.000Z"
+    },
+    {
+      "id": "f-054",
+      "title": "Sunglasses found at the computer lab",
+      "description": "Someone left this sunglasses at computer lab, ICT building. tan. Message me with details to claim.",
+      "category": "Eyewear",
+      "location": "Computer Lab 2",
+      "itemDate": "2026-10-25",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": null,
+      "createdAt": "2026-10-26T14:31:06.000Z"
+    },
+    {
+      "id": "f-055",
+      "title": "Sweater found at the computer lab",
+      "description": "Navy blue sweater. Found at Computer Lab 2.",
+      "category": "Clothing",
+      "location": "Computer Lab 2",
+      "itemDate": "2026-10-26",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-10-27T09:43:18.000Z"
+    },
+    {
+      "id": "f-056",
+      "title": "Founnd golden sunnies",
+      "description": "Found a goolden sunnies at North Hall TV room. Haned it to the security desk.",
+      "category": "accessories",
+      "location": "North Hall TV room",
+      "itemDate": "2026-09-14",
+      "itemDateTo": null,
+      "color": "gold",
+      "brand": "oakley",
+      "createdAt": "2026-09-15T17:37:36.000Z"
+    },
+    {
+      "id": "f-057",
+      "title": "Found pen case",
+      "description": "Someone left this pen case at LH-B. Deli. Message me with dettails to claim.",
+      "category": "Stationery",
+      "location": "Lecture Hall B, front seats",
+      "itemDate": "2026-10-24",
+      "itemDateTo": null,
+      "color": null,
+      "brand": "Deli",
+      "createdAt": "2026-10-24T14:30:32.000Z"
+    },
+    {
+      "id": "f-058",
+      "title": "Foound a steel bottle",
+      "description": "Cream setel bottle, looks like Nalgene. Found at mosqe wudu area.",
+      "category": "Personal items",
+      "location": "prayer hall",
+      "itemDate": "2026-10-26",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "Nalgene",
+      "createdAt": "2026-10-27T15:22:58.000Z"
+    },
+    {
+      "id": "f-059",
+      "title": "Flash drive found at Lecture Hall A",
+      "description": "Someone left this flash drive at Lecture Hall A. navy. Message me with details to claim.",
+      "category": "Storage",
+      "location": "Lecture Hall A",
+      "itemDate": "2026-09-21",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Transcend",
+      "createdAt": "2026-09-21T10:20:59.000Z"
+    },
+    {
+      "id": "f-060",
+      "title": "Green ID badge left behind",
+      "description": "Picked up a ID badge at North Hall common room. On a lanyard.",
+      "category": "ID card",
+      "location": "North Hall common room",
+      "itemDate": "2026-11-02",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-11-02T07:15:19.000Z"
+    },
+    {
+      "id": "f-061",
+      "title": "Power bank found at the prayer room",
+      "description": "Someone left this power bank at prayer hall. blue, Mi. Message me with details to claim.",
+      "category": "Electronics",
+      "location": "mosque wudu area",
+      "itemDate": "2026-10-12",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Mi",
+      "createdAt": "2026-10-13T08:38:03.000Z"
+    },
+    {
+      "id": "f-062",
+      "title": "Card holder found at the bus stop",
+      "description": "Someone left this card holder at campus bus stop. light pink. Message me with details to claim.",
+      "category": "Wallet",
+      "location": "campus bus stop",
+      "itemDate": "2026-10-17",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": null,
+      "createdAt": "2026-10-17T14:58:18.000Z"
+    },
+    {
+      "id": "f-063",
+      "title": "Found: bottle",
+      "description": "Found a violet bottle with a carry loop at lecture theatre A. Handed it to the security desk.",
+      "category": "Others",
+      "location": "lecture theatre A",
+      "itemDate": "2026-10-05",
+      "itemDateTo": null,
+      "color": "purple",
+      "brand": null,
+      "createdAt": "2026-10-05T09:02:47.000Z"
+    },
+    {
+      "id": "f-064",
+      "title": "Found silver mobile",
+      "description": "Silver mobile. Found at Libary reading room.",
+      "category": "Electronic devices",
+      "location": "Libary reading room",
+      "itemDate": "2026-08-23",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Realme",
+      "createdAt": "2026-08-23T16:10:28.000Z"
+    },
+    {
+      "id": "f-065",
+      "title": "Found dark red flash drive",
+      "description": "Picked up a flash drive at Main Auditorium.",
+      "category": "Electronics",
+      "location": "Main Auditorium",
+      "itemDate": "2026-08-26",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": "Kingston",
+      "createdAt": "2026-08-27T07:45:29.000Z"
+    },
+    {
+      "id": "f-066",
+      "title": "Over-ear headphones found at the prayer room",
+      "description": "Someone left this over-ear headphones at prayyer room, ground floor. purple, SONY. Message me with details to claim.",
+      "category": "audio",
+      "location": "prayer room, ground floor",
+      "itemDate": "2026-09-16",
+      "itemDateTo": null,
+      "color": "purple",
+      "brand": "SONY",
+      "createdAt": "2026-09-16T11:46:46.000Z"
+    },
+    {
+      "id": "f-067",
+      "title": "Gold watch left behind",
+      "description": "Found a gold watch at lecture theatre A. Handed it to the security desk.",
+      "category": "Accessories",
+      "location": "LH-A",
+      "itemDate": "2026-08-26",
+      "itemDateTo": null,
+      "color": "gold",
+      "brand": null,
+      "createdAt": "2026-08-26T14:33:46.000Z"
+    },
+    {
+      "id": "f-068",
+      "title": "Found a calculator",
+      "description": "Found a dark green calulator at Library study carrels, 3rd floor. Handed it to the security desk.",
+      "category": "Stationery",
+      "location": "Library study carrels, 3rd floor",
+      "itemDate": "2026-10-18",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-10-19T21:16:30.000Z"
+    },
+    {
+      "id": "f-069",
+      "title": "Earphones found at the bus stop",
+      "description": "Jet black earphones. Found at shuttle stop near the main gate.",
+      "category": "Accessories",
+      "location": "shuttle stop near the main gate",
+      "itemDate": "2026-10-17",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-10-17T13:49:16.000Z"
+    },
+    {
+      "id": "f-070",
+      "title": "Found gray earbuds case",
+      "description": "Gray earbuds case, looks like Sony. Found at near the main gate.",
+      "category": "electronics",
+      "location": "Main Gate",
+      "itemDate": "2026-10-18",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "Sony",
+      "createdAt": "2026-10-19T09:06:30.000Z"
+    },
+    {
+      "id": "f-071",
+      "title": "Found a tumbler",
+      "description": "Someone left this tumbler at lecture theatre B. off-white. Message me with details to claim.",
+      "category": "Others",
+      "location": "Lecture Hall B, front seats",
+      "itemDate": "2026-10-06",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-10-07T09:47:16.000Z"
+    },
+    {
+      "id": "f-072",
+      "title": "Found dark grey mobile",
+      "description": "Found a dark grey mobile at Libary reading room. Handed it to the security desk.",
+      "category": "Electronics",
+      "location": "Libary reading room",
+      "itemDate": "2026-10-08",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "Vivo",
+      "createdAt": "2026-10-09T16:08:52.000Z"
+    },
+    {
+      "id": "f-073",
+      "title": "Found a calculator",
+      "description": "Picked up a calculator at Lecutre Hall B, front seats. With a crakced cover.",
+      "category": "electronics",
+      "location": "LH-B",
+      "itemDate": "2026-08-24",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-08-24T21:12:56.000Z"
+    },
+    {
+      "id": "f-074",
+      "title": "Red money bag left behind",
+      "description": "Someone left this money bag at Student Centre cafeteria. red, Tommy Hilfiger. Message me with details to claim.",
+      "category": "Wallet",
+      "location": "cafeteria",
+      "itemDate": "2026-10-09",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-10-09T11:39:59.000Z"
+    },
+    {
+      "id": "f-075",
+      "title": "Found yellow set of keys",
+      "description": "Yellow set of keys. Found at Sports Complex changing room.",
+      "category": "personal items",
+      "location": "Sports Complex changing room",
+      "itemDate": "2026-10-26",
+      "itemDateTo": null,
+      "color": "yellow",
+      "brand": null,
+      "createdAt": "2026-10-26T13:00:42.000Z"
+    },
+    {
+      "id": "f-076",
+      "title": "Found dark blue backpack",
+      "description": "Picked up a backpack at Admin Building parking.",
+      "category": "Bag",
+      "location": "parking lot behind Admin Building",
+      "itemDate": "2026-10-10",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-10-10T20:17:24.000Z"
+    },
+    {
+      "id": "f-077",
+      "title": "Dark red student card left behind",
+      "description": "Someone left this student card at bus stop outside Main Gate. dark red. Message me with details to claim.",
+      "category": "id card",
+      "location": "bus stop outside Main Gate",
+      "itemDate": "2026-09-13",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-09-14T08:42:49.000Z"
+    },
+    {
+      "id": "f-078",
+      "title": "Found a fitness band",
+      "description": "Found a blue fitness band at Main Auditorium. Handed it to the security desk.",
+      "category": "accessories",
+      "location": "auditorium hall",
+      "itemDate": "2026-10-23",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "casio",
+      "createdAt": "2026-10-23T09:25:27.000Z"
+    },
+    {
+      "id": "f-079",
+      "title": "Found a charger",
+      "description": "Someone left this chrager at Main Gate. black. Message me with detaills to claim.",
+      "category": "Accessories",
+      "location": "near the main gate",
+      "itemDate": "2026-08-22",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-08-23T17:20:55.000Z"
+    },
+    {
+      "id": "f-080",
+      "title": "Smartphone found at Lecture Hall A",
+      "description": "White smartphone. Found at LH-A.",
+      "category": "Phone",
+      "location": "Lecture Hall A",
+      "itemDate": "2026-10-13",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-10-13T07:11:52.000Z"
+    },
+    {
+      "id": "f-081",
+      "title": "Found cream power adapter",
+      "description": "Found a cream power adapter with a long braided cable at main auditorium seats near the stage. Handed it to the security desk.",
+      "category": "Charger",
+      "location": "main auditorium seats near the stage",
+      "itemDate": "2026-10-03",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "SAMSUNG",
+      "createdAt": "2026-10-04T11:18:44.000Z"
+    },
+    {
+      "id": "f-082",
+      "title": "Navy laptop computer left behind",
+      "description": "Navy laptop computer. Found at Gymnasium.",
+      "category": "Electronics",
+      "location": "Gymnasium",
+      "itemDate": "2026-10-01",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-10-01T16:56:34.000Z"
+    },
+    {
+      "id": "f-083",
+      "title": "Found: reference book",
+      "description": "Off-white reference book. Found at auditorium hall.",
+      "category": "Books",
+      "location": "auditorium hall",
+      "itemDate": "2026-10-29",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-10-30T13:44:02.000Z"
+    },
+    {
+      "id": "f-084",
+      "title": "Hot pink pen case left behind",
+      "description": "Hot pink pen case. Found at North Hall TV room.",
+      "category": "Stationery",
+      "location": "North Hall TV room",
+      "itemDate": "2026-09-28",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": "Faber Castell",
+      "createdAt": "2026-09-28T11:06:58.000Z"
+    },
+    {
+      "id": "f-085",
+      "title": "Found white over-ear headphones",
+      "description": "Someone left this over-ear headphones at Science Building room 112. white. Message me with details to claim.",
+      "category": "Audio",
+      "location": "Science Building room 112",
+      "itemDate": "2026-07-27",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-07-28T15:44:03.000Z"
+    },
+    {
+      "id": "f-086",
+      "title": "Found: sweatshirt",
+      "description": "Someoen left this sweatshirt at Science Building chemistry lab. black. Mssage me with details to claim.",
+      "category": "Clothing",
+      "location": "Science Building chemistry lab",
+      "itemDate": "2026-09-18",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "Uniqlo",
+      "createdAt": "2026-09-19T21:29:31.000Z"
+    },
+    {
+      "id": "f-087",
+      "title": "Found white wristwatch",
+      "description": "Picked up a wristwatch at North Hall TV room yesterday afternoon.",
+      "category": "Electronics",
+      "location": "North Hall TV room",
+      "itemDate": "2026-10-08",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-10-08T17:01:44.000Z"
+    },
+    {
+      "id": "f-088",
+      "title": "Violet flask left behind",
+      "description": "Found a violet flask at mosque wudu area. Handed it to the security desk.",
+      "category": "Others",
+      "location": "mosque wudu area",
+      "itemDate": "2026-10-24",
+      "itemDateTo": null,
+      "color": "purple",
+      "brand": null,
+      "createdAt": "2026-10-24T20:09:15.000Z"
+    },
+    {
+      "id": "f-089",
+      "title": "Set of keys found at the Admin Building",
+      "description": "Someone left this set of keys at Administration Building, accounts office queue. black. Message me with details to claim.",
+      "category": "Keys",
+      "location": "Administration Building, accounts office queue",
+      "itemDate": "2026-08-31",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-08-31T08:31:53.000Z"
+    },
+    {
+      "id": "f-090",
+      "title": "Found: keychain",
+      "description": "Someone left this keychain at Main Gate. maroon. Message me with details to claim.",
+      "category": "Keys",
+      "location": "main gate security booth",
+      "itemDate": "2026-09-27",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-09-28T20:29:52.000Z"
+    },
+    {
+      "id": "f-091",
+      "title": "Multicoloured notebook left behind",
+      "description": "Multicoloured notebook, looks like CLASSMATE. Found at canteen near the juice counter.",
+      "category": "Stationery",
+      "location": "Student Center canteen",
+      "itemDate": "2026-10-04",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": "CLASSMATE",
+      "createdAt": "2026-10-04T16:49:42.000Z"
+    },
+    {
+      "id": "f-092",
+      "title": "Found: couurse book",
+      "description": "Found a course book at Main Gate. Handed it to the securiyt desk.",
+      "category": "Books",
+      "location": "Main Gate",
+      "itemDate": "2026-08-28",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-08-29T10:18:06.000Z"
+    },
+    {
+      "id": "f-093",
+      "title": "Money bag found at the Science Building",
+      "description": "Found a hot pink money bag with a coin pocket at chem lab, Science Building. Handed it to the security desk.",
+      "category": "personal items",
+      "location": "chem lab, Science Building",
+      "itemDate": "2026-09-29",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": null,
+      "createdAt": "2026-09-29T13:50:45.000Z"
+    },
+    {
+      "id": "f-094",
+      "title": "Found blue headphones",
+      "description": "Blue headphones, looks like SONY. Found at engineering block lobby.",
+      "category": "electronics",
+      "location": "engineering block lobby",
+      "itemDate": "2026-10-17",
+      "itemDateTo": null,
+      "color": null,
+      "brand": "SONY",
+      "createdAt": "2026-10-17T19:19:55.000Z"
+    },
+    {
+      "id": "f-095",
+      "title": "Stationery pouch found at the main gate",
+      "description": "Someone left this stationery pouch at near the main gate. gray. Message me with detils to claim.",
+      "category": "Stationery",
+      "location": "Main Gate",
+      "itemDate": "2026-11-05",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": null,
+      "createdAt": "2026-11-06T19:54:46.000Z"
+    },
+    {
+      "id": "f-096",
+      "title": "Hoodie found at the Engineering Building",
+      "description": "Soemone left this hoodie at engineering blocck lobby. off-white, ADIDAS. Message me with details to claim.",
+      "category": "Others",
+      "location": "Eng building lab 2",
+      "itemDate": "2026-09-20",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "ADIDAS",
+      "createdAt": "2026-09-20T08:52:46.000Z"
+    },
+    {
+      "id": "f-097",
+      "title": "Found: pen drive",
+      "description": "Someone left this pen drive at admin block lobby. burgundy. Message me with details to claim.",
+      "category": "Electronics",
+      "location": "admin block lobby",
+      "itemDate": "2026-09-08",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-09-09T21:22:55.000Z"
+    },
+    {
+      "id": "f-098",
+      "title": "Chrome sunglasses left behind",
+      "description": "Someone left this sunglasses at Central Library ground floor near the printers. chrome. Message me with details to claim.",
+      "category": "Eyewear",
+      "location": "Central Library ground floor near the printers",
+      "itemDate": "2026-10-07",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-10-07T13:34:17.000Z"
+    },
+    {
+      "id": "f-099",
+      "title": "Found gray notebook computer",
+      "description": "Someone left this notebook copmuter at admin block lobby. gray, HP. Message me with dteails to claim.",
+      "category": "Electronics",
+      "location": "admin block lobby",
+      "itemDate": "2026-08-25",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "HP",
+      "createdAt": "2026-08-25T21:27:51.000Z"
+    },
+    {
+      "id": "f-100",
+      "title": "Found: ASUS laptop",
+      "description": "Someone left this laptop at gym changing room. charcoal, ASUS. Message me with details to claim.",
+      "category": "electronics",
+      "location": "gym changing room",
+      "itemDate": "2026-10-01",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "ASUS",
+      "createdAt": "2026-10-01T14:08:35.000Z"
+    },
+    {
+      "id": "f-101",
+      "title": "Found gold sunnies",
+      "description": "Picked up a sunnies at prayer hall. With a scratched lens.",
+      "category": "Accessories",
+      "location": "prayer hall",
+      "itemDate": "2026-08-04",
+      "itemDateTo": null,
+      "color": "gold",
+      "brand": null,
+      "createdAt": "2026-08-05T07:22:43.000Z"
+    },
+    {
+      "id": "f-102",
+      "title": "Set of keys found at the Science Building",
+      "description": "Someone left this set of keys at Science Building chemistry lab. rose gold. Message me with details to claim.",
+      "category": "Keys",
+      "location": "Science Building chemistry lab",
+      "itemDate": "2026-09-11",
+      "itemDateTo": null,
+      "color": "gold",
+      "brand": null,
+      "createdAt": "2026-09-12T13:40:11.000Z"
+    },
+    {
+      "id": "f-103",
+      "title": "Found: battery pack",
+      "description": "Picked up a battery pack at chem lab, Science Building before the lab session. With a scratched case.",
+      "category": "Electronics",
+      "location": "chem lab, Science Building",
+      "itemDate": "2026-08-22",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-08-23T09:30:41.000Z"
+    },
+    {
+      "id": "f-104",
+      "title": "Found light blue portable charger",
+      "description": "Found a light blue portable charger with an LED display at North Hall TV room. Handed it to the security desk.",
+      "category": "Electronics",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-09-12",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Baseus",
+      "createdAt": "2026-09-12T19:36:51.000Z"
+    },
+    {
+      "id": "f-105",
+      "title": "Metallic silver sunnies left behind",
+      "description": "Picked up a sunnies at auditorium hall. With tinted lenses.",
+      "category": "Eyewear",
+      "location": "auditorium hall",
+      "itemDate": "2026-08-23",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Oakley",
+      "createdAt": "2026-08-24T14:22:32.000Z"
+    },
+    {
+      "id": "f-106",
+      "title": "Found: TWS earbuds",
+      "description": "Picked up a TWS earbuds at admin block lobby this morning. With one bud missing.",
+      "category": "Electronics",
+      "location": "admin block lobby",
+      "itemDate": "2026-09-02",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-09-02T10:49:46.000Z"
+    },
+    {
+      "id": "f-107",
+      "title": "Jet black wristwatch left behind",
+      "description": "Found a jet black wristwatch with a leather strap at Admin Building reception. Handed it to the security desk.",
+      "category": "electronics",
+      "location": "Administration Building, accounts office queue",
+      "itemDate": "2026-10-10",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "Casio",
+      "createdAt": "2026-10-11T19:45:53.000Z"
+    },
+    {
+      "id": "f-108",
+      "title": "Burgundy exercise book left behind",
+      "description": "Someone left this exercise book at gym changing room. burgundy. Message me with details to claim.",
+      "category": "Notebook",
+      "location": "Sports Complex changing room",
+      "itemDate": "2026-10-12",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-10-12T10:19:12.000Z"
+    },
+    {
+      "id": "f-109",
+      "title": "Food container found at Lecture Hall A",
+      "description": "Found a burgundy food container at lecture theatre A. Handed it to the security desk.",
+      "category": "personal items",
+      "location": "lecture theatre A",
+      "itemDate": "2026-10-07",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": "Tupperware",
+      "createdAt": "2026-10-08T11:44:13.000Z"
+    },
+    {
+      "id": "f-110",
+      "title": "Multicoloured book left behind",
+      "description": "Picked up a book at Main Gate during the exam. Organic Chemistry, with a brown paper cover.",
+      "category": "Book",
+      "location": "Main Gate",
+      "itemDate": "2026-10-29",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-10-30T12:21:05.000Z"
+    },
+    {
+      "id": "f-111",
+      "title": "Pink purse left beihnd",
+      "description": "Found a pink pruse at chem lab, Sciencce Building. Handed it to the security desk.",
+      "category": "wallet",
+      "location": "chem lab, Science Building",
+      "itemDate": "2026-09-30",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": null,
+      "createdAt": "2026-10-01T20:23:54.000Z"
+    },
+    {
+      "id": "f-112",
+      "title": "Found jet black flask",
+      "description": "Someone left this flask at sports complex basketball court. jet black, Nalgene. Message me with details to claim.",
+      "category": "Bottle",
+      "location": "sports complex basketball court",
+      "itemDate": "2026-09-15",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-09-15T14:11:03.000Z"
+    },
+    {
+      "id": "f-113",
+      "title": "Dark grey wireless earbuds left behind",
+      "description": "Found a dark grey wireless earbuds with a silicone cover on the case at North Hall common room. Handed it to the security desk.",
+      "category": "accessories",
+      "location": "North Hall common room",
+      "itemDate": "2026-10-29",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "apple",
+      "createdAt": "2026-10-30T21:42:40.000Z"
+    },
+    {
+      "id": "f-114",
+      "title": "Pencil case found at the parking lot",
+      "description": "Picked up a pencil case at Admin Building parking during the exam.",
+      "category": "stationery",
+      "location": "parking lot behind Admin Building",
+      "itemDate": "2026-10-02",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Deli",
+      "createdAt": "2026-10-02T21:38:36.000Z"
+    },
+    {
+      "id": "f-115",
+      "title": "Found: mobile phone",
+      "description": "Picked up a mobile phone at Lecture Hall B, front seats. With a cracked screen protector.",
+      "category": "Electronics",
+      "location": "Lecture Hall B, front seats",
+      "itemDate": "2026-11-02",
+      "itemDateTo": null,
+      "color": "gold",
+      "brand": "Vivo",
+      "createdAt": "2026-11-03T16:58:22.000Z"
+    },
+    {
+      "id": "f-116",
+      "title": "Burgundy backpack left behind",
+      "description": "Someone left this backpack at sports complex basketball court. burgundy, puma. Message me with details to claim.",
+      "category": "Personal items",
+      "location": "sports complex basketball court",
+      "itemDate": "2026-10-26",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": "puma",
+      "createdAt": "2026-10-27T16:55:08.000Z"
+    },
+    {
+      "id": "f-117",
+      "title": "Laptop found at the library",
+      "description": "Someone left this laptop at Libary reading room. matte black. Message me with details to claim.",
+      "category": "electronics",
+      "location": "Libary reading room",
+      "itemDate": "2026-08-23",
+      "itemDateTo": null,
+      "color": null,
+      "brand": "ACER",
+      "createdAt": "2026-08-23T19:36:46.000Z"
+    },
+    {
+      "id": "f-118",
+      "title": "Earbuds found at the cafeteria",
+      "description": "Chrome earbuds, looks like Soundcore. Found at canteen near the juice counter.",
+      "category": "Electronics",
+      "location": "Student Center canteen",
+      "itemDate": "2026-09-22",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Soundcore",
+      "createdAt": "2026-09-22T17:48:00.000Z"
+    },
+    {
+      "id": "f-119",
+      "title": "Pen case found at the auditorium",
+      "description": "Found a hot pink pen case transparent front at Main Auditorium. Handed it to the security desk.",
+      "category": "Stationery",
+      "location": "Main Auditorium",
+      "itemDate": "2026-10-14",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": null,
+      "createdAt": "2026-10-15T10:56:37.000Z"
+    },
+    {
+      "id": "f-120",
+      "title": "Smartwatch found at the gym",
+      "description": "Found a tan smartwatch at gym changing room. Handed it to the security desk.",
+      "category": "Electronics",
+      "location": "gym changing room",
+      "itemDate": "2026-08-24",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": "XIAOMI",
+      "createdAt": "2026-08-24T08:42:16.000Z"
+    },
+    {
+      "id": "f-121",
+      "title": "Silver laptop left behind",
+      "description": "Silver laptop. Found at near the main gate.",
+      "category": "laptop",
+      "location": "Main Gate",
+      "itemDate": "2026-09-18",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-09-18T10:56:01.000Z"
+    },
+    {
+      "id": "f-122",
+      "title": "Found black shoulder bag",
+      "description": "Picked up a shoulder bag at Lecture Hall A, back row. With long straps.",
+      "category": "bag",
+      "location": "Lecture Hall A, back row",
+      "itemDate": "2026-09-29",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-09-29T13:13:01.000Z"
+    },
+    {
+      "id": "f-123",
+      "title": "Found chrome spectacles",
+      "description": "Chromme spectacles. Found at gym changig room.",
+      "category": "Accessories",
+      "location": "gym changing room",
+      "itemDate": "2026-11-02",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-11-03T13:18:16.000Z"
+    },
+    {
+      "id": "f-124",
+      "title": "Found a textbook",
+      "description": "Camo textbook. Found at car park.",
+      "category": "books",
+      "location": "parking lot behind Admin Building",
+      "itemDate": "2026-10-07",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-10-07T18:05:17.000Z"
+    },
+    {
+      "id": "f-125",
+      "title": "Blue course book left behind",
+      "description": "Blue course book. Found at Engineering Building room 304.",
+      "category": "Stationery",
+      "location": "Engineering Building room 304",
+      "itemDate": "2026-08-21",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-08-21T08:13:59.000Z"
+    },
+    {
+      "id": "f-126",
+      "title": "Found olive reference book",
+      "description": "Found a olive reference book at bus stop outside Main Gate. Handed it to the security desk.",
+      "category": "books",
+      "location": "bus stop outside Main Gate",
+      "itemDate": "2026-08-30",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-08-31T18:21:49.000Z"
+    },
+    {
+      "id": "f-127",
+      "title": "Fond a laptop computer",
+      "description": "Found a matte black laptop computer in a padded sleee at paking lot behind Admin Building. Handed it to the security desk.",
+      "category": "Electronics",
+      "location": "parking lot behind Admin Building",
+      "itemDate": "2026-09-02",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "HP",
+      "createdAt": "2026-09-02T15:59:47.000Z"
+    },
+    {
+      "id": "f-128",
+      "title": "Tiffin carrier found at Lecture Hall B",
+      "description": "Picked up a tiffin carrier at Lecture Hall B.",
+      "category": "personal items",
+      "location": "lecture theatre B",
+      "itemDate": "2026-10-11",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Tupperware",
+      "createdAt": "2026-10-12T20:19:44.000Z"
+    },
+    {
+      "id": "f-129",
+      "title": "Found: notebook computer",
+      "description": "Picked up a notebook computer at near the main gate.",
+      "category": "Electronics",
+      "location": "near the main gate",
+      "itemDate": "2026-08-12",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-08-13T16:49:56.000Z"
+    },
+    {
+      "id": "f-130",
+      "title": "Dark grreen campus card left behind",
+      "description": "Sommeone left this camus card at bus stop outside Main Gate. dark green. Message me with details to claim.",
+      "category": "id card",
+      "location": "bus stop outside Main Gate",
+      "itemDate": "2026-08-09",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-08-10T18:15:03.000Z"
+    },
+    {
+      "id": "f-131",
+      "title": "Found jet black pen case",
+      "description": "Found a jet black pen case at gym changing room. Handed it to the security desk.",
+      "category": "stationery",
+      "location": "gym changing room",
+      "itemDate": "2026-10-14",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "Deli",
+      "createdAt": "2026-10-14T10:48:31.000Z"
+    },
+    {
+      "id": "f-132",
+      "title": "Copy found at the gym",
+      "description": "Found a dark green copy half used at Gymnasium. Handed it to the security desk.",
+      "category": "Stationery",
+      "location": "Gymnasium",
+      "itemDate": "2026-09-04",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": "Classmate",
+      "createdAt": "2026-09-05T17:11:28.000Z"
+    },
+    {
+      "id": "f-133",
+      "title": "Found: student ID",
+      "description": "Found a dark red student ID on a lanyard at canteen near the juice counter. Handed it to the security desk.",
+      "category": "Cards",
+      "location": "canteen near the juice counter",
+      "itemDate": "2026-10-08",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-10-09T19:13:15.000Z"
+    },
+    {
+      "id": "f-134",
+      "title": "Pencil case found at the library",
+      "description": "Picked up a pencil case at Central Library ground floor near the printers during the exam. With a zip pull charm.",
+      "category": "Stationery",
+      "location": "Central Library ground floor near the printers",
+      "itemDate": "2026-09-17",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-09-18T18:54:09.000Z"
+    },
+    {
+      "id": "f-135",
+      "title": "Cream earbuds left behind",
+      "description": "Someone left this earbuds at cafeteria. cream, Soundcore. Message me with details to claim.",
+      "category": "Accessories",
+      "location": "food court, Student Centre",
+      "itemDate": "2026-08-30",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "Soundcore",
+      "createdAt": "2026-08-31T21:46:11.000Z"
+    },
+    {
+      "id": "f-136",
+      "title": "Found red student card",
+      "description": "Someone left this student card at bus stop outside Main Gate. red. Message me with details to claim.",
+      "category": "Documents",
+      "location": "bus stop outside Main Gate",
+      "itemDate": "2026-09-29",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-09-30T07:49:34.000Z"
+    },
+    {
+      "id": "f-137",
+      "title": "Found dark grey notebook computer",
+      "description": "Picked up a notebook computer at near the main gate. With stickers on the lid.",
+      "category": "laptop",
+      "location": "Main Gate",
+      "itemDate": "2026-09-09",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": null,
+      "createdAt": "2026-09-09T18:51:56.000Z"
+    },
+    {
+      "id": "f-138",
+      "title": "Card holder found at the Engineering Building",
+      "description": "Picked up a card holder at Engineering Building room 304. With a coin pocket.",
+      "category": "Wallet",
+      "location": "Engineering Building room 304",
+      "itemDate": "2026-08-26",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-08-27T11:36:41.000Z"
+    },
+    {
+      "id": "f-139",
+      "title": "Found pen drive",
+      "description": "Someone left this pen drive at cafeteria. Message me with details to claim.",
+      "category": "Storage",
+      "location": "cafeteria",
+      "itemDate": "2026-10-19",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-10-19T11:58:01.000Z"
+    },
+    {
+      "id": "f-140",
+      "title": "Found a clculator",
+      "description": "Picked up a calculator at lecture theare A during the exam.",
+      "category": "Electronics",
+      "location": "LH-A",
+      "itemDate": "2026-10-01",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "sharp",
+      "createdAt": "2026-10-02T16:48:38.000Z"
+    },
+    {
+      "id": "f-141",
+      "title": "Keychain found at the Admin Building",
+      "description": "Matte black keychain. Found at admin block lobby.",
+      "category": "Personal items",
+      "location": "admin block lobby",
+      "itemDate": "2026-08-31",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-08-31T14:01:12.000Z"
+    },
+    {
+      "id": "f-142",
+      "title": "Matte black pencil case left behind",
+      "description": "Matte black pencil case. Found at Main Auditorium.",
+      "category": "Stationery",
+      "location": "auditorium hall",
+      "itemDate": "2026-10-14",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-10-14T18:11:41.000Z"
+    },
+    {
+      "id": "f-143",
+      "title": "Found a ID badge",
+      "description": "Picked up a ID badge at Main Gate during the exam.",
+      "category": "ID card",
+      "location": "main gate security booth",
+      "itemDate": "2026-09-28",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-09-29T20:22:18.000Z"
+    },
+    {
+      "id": "f-144",
+      "title": "Found: tote bag",
+      "description": "Pattrened tote bag. Found at Main Auditorium.",
+      "category": "Bag",
+      "location": "auditorium hall",
+      "itemDate": "2026-09-15",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-09-16T09:44:41.000Z"
+    },
+    {
+      "id": "f-145",
+      "title": "Found: keys",
+      "description": "Picked up a keys at Student Center canteen before the lab session.",
+      "category": "Keys",
+      "location": "cafeteria",
+      "itemDate": "2026-10-10",
+      "itemDateTo": null,
+      "color": "gold",
+      "brand": null,
+      "createdAt": "2026-10-10T12:27:42.000Z"
+    },
+    {
+      "id": "f-146",
+      "title": "Found a headphones",
+      "description": "Found a cream headphones at Student Center canteen. Handed it to the security desk.",
+      "category": "Electronics",
+      "location": "Student Center canteen",
+      "itemDate": "2026-09-21",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "LOGITECH",
+      "createdAt": "2026-09-21T13:51:40.000Z"
+    },
+    {
+      "id": "f-147",
+      "title": "Found pink lunch box",
+      "description": "Someone left this lunch box at Main Auditorium. pink, Tupperware. Message me with details to claim.",
+      "category": "Others",
+      "location": "Main Auditorium",
+      "itemDate": "2026-09-24",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": "Tupperware",
+      "createdAt": "2026-09-24T18:29:58.000Z"
+    },
+    {
+      "id": "f-148",
+      "title": "White sweatshirt left behind",
+      "description": "White sweatshirt. Found at engineering block lobby.",
+      "category": "Clothes",
+      "location": "engineering block lobby",
+      "itemDate": "2026-09-18",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-09-18T14:10:18.000Z"
+    },
+    {
+      "id": "f-149",
+      "title": "Found matte black laptop charger",
+      "description": "Found a matte black laptop charger with a two-pin plug at science block stairs. Handed it to the security desk.",
+      "category": "Accessories",
+      "location": "chem lab, Science Building",
+      "itemDate": "2026-10-18",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "Baseus",
+      "createdAt": "2026-10-19T16:35:09.000Z"
+    },
+    {
+      "id": "f-150",
+      "title": "Found a shoulder bag",
+      "description": "Someone left this shoulder bag at Central Library ground floor near the printers. light pink. Message me with details to claim.",
+      "category": "Bag",
+      "location": "Central Library ground floor near the printers",
+      "itemDate": "2026-10-04",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": null,
+      "createdAt": "2026-10-04T12:51:50.000Z"
+    },
+    {
+      "id": "f-151",
+      "title": "Found: notebook computer",
+      "description": "Someone left this notebook computeer at chem lab, Science Building. chrome. Message me with detaisl to claim.",
+      "category": "laptop",
+      "location": "chem lab, Science Building",
+      "itemDate": "2026-09-06",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-09-07T10:32:39.000Z"
+    },
+    {
+      "id": "f-152",
+      "title": "Found: ID card",
+      "description": "Someone left this ID card at science block stairs. jet black. Message me with details to claim.",
+      "category": "Documents",
+      "location": "Science Building chemistry lab",
+      "itemDate": "2026-08-23",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-08-24T14:48:40.000Z"
+    },
+    {
+      "id": "f-153",
+      "title": "Found: reference book",
+      "description": "Pcked up a reference book at North Hall common room.",
+      "category": "Stationery",
+      "location": "North Hall common room",
+      "itemDate": "2026-08-26",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-08-26T14:38:35.000Z"
+    },
+    {
+      "id": "f-154",
+      "title": "ID card found at the prayer room",
+      "description": "Found a mint green ID card at mosque wudu area. Handed it to the security desk.",
+      "category": "Documents",
+      "location": "prayer room, ground floor",
+      "itemDate": "2026-10-08",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-10-08T18:39:30.000Z"
+    },
+    {
+      "id": "f-155",
+      "title": "Multicoloured stationery pouch left behind",
+      "description": "Someone left this stationery pouch at parking lot behind Admin Building. multicoloured. Message me with details to claim.",
+      "category": "Personal items",
+      "location": "car park",
+      "itemDate": "2026-09-08",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": "Faber-Castell",
+      "createdAt": "2026-09-09T15:02:19.000Z"
+    },
+    {
+      "id": "f-156",
+      "title": "Found a smartwatch",
+      "description": "Someone left this smartwatch at dorm common room (North Hall). rose gold. Message me with details to claim.",
+      "category": "accessories",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-09-29",
+      "itemDateTo": null,
+      "color": "gold",
+      "brand": "Fossil",
+      "createdAt": "2026-09-30T19:16:56.000Z"
+    },
+    {
+      "id": "f-157",
+      "title": "Found dark green money bag",
+      "description": "Picked up a money bag at car park. Leather, with a zip.",
+      "category": "Wallet",
+      "location": "car park",
+      "itemDate": "2026-10-16",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": "Tommy",
+      "createdAt": "2026-10-16T07:33:31.000Z"
+    },
+    {
+      "id": "f-158",
+      "title": "Found sky blue cellphone",
+      "description": "Sky blue cellphone. Found at prayer room, ground floor.",
+      "category": "phone",
+      "location": "prayer hall",
+      "itemDate": "2026-10-09",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Samsung Galaxy",
+      "createdAt": "2026-10-10T11:36:57.000Z"
+    },
+    {
+      "id": "f-159",
+      "title": "Found a stationery pouch",
+      "description": "Picked up a stationery pouch at Main Auditorium around lunchtime. Transparent front.",
+      "category": "stationery",
+      "location": "Main Auditorium",
+      "itemDate": "2026-10-29",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": "deli",
+      "createdAt": "2026-10-29T20:25:57.000Z"
+    },
+    {
+      "id": "f-160",
+      "title": "Found: notebook",
+      "description": "Dark green notebook. Found at Main Auditorium.",
+      "category": "Stationery",
+      "location": "Main Auditorium",
+      "itemDate": "2026-09-03",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": "Matador",
+      "createdAt": "2026-09-03T20:26:17.000Z"
+    },
+    {
+      "id": "f-161",
+      "title": "Laptop computer found at the main gate",
+      "description": "Someone left this laptop computer at near the main gate. navy blue, Asus. Message me with details to claim.",
+      "category": "Electronics",
+      "location": "near the main gate",
+      "itemDate": "2026-09-11",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Asus",
+      "createdAt": "2026-09-11T20:22:09.000Z"
+    },
+    {
+      "id": "f-162",
+      "title": "Headphones found at North Hall",
+      "description": "Picked up a headphones at North Hall TV room. With a detachable cable.",
+      "category": "Audio",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-10-30",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-10-31T19:49:09.000Z"
+    },
+    {
+      "id": "f-163",
+      "title": "Found matte black wristwatch",
+      "description": "Someone left this wristwatch at North Hall TV room. matte black, Apple. Message me with details to claim.",
+      "category": "Accessories",
+      "location": "North Hall TV room",
+      "itemDate": "2026-10-09",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "Apple",
+      "createdAt": "2026-10-09T17:46:00.000Z"
+    },
+    {
+      "id": "f-164",
+      "title": "Jacket found at the library",
+      "description": "Found a jacket at Library, 2nd floor reading room. Handed it to the security desk.",
+      "category": "clothing",
+      "location": "Library, 2nd floor reading room",
+      "itemDate": "2026-08-20",
+      "itemDateTo": null,
+      "color": null,
+      "brand": "puma",
+      "createdAt": "2026-08-21T18:55:59.000Z"
+    },
+    {
+      "id": "f-165",
+      "title": "Found: sunnies",
+      "description": "Someone left this sunnies at admin block lobby. chrome. Message me with details to claim.",
+      "category": "Eyewear",
+      "location": "Admin Building reception",
+      "itemDate": "2026-10-12",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Rayban",
+      "createdAt": "2026-10-12T13:07:44.000Z"
+    },
+    {
+      "id": "f-166",
+      "title": "Handbag founnd at the prayer room",
+      "description": "Off-white handbag. Found at paryer room, ground floor.",
+      "category": "Personal items",
+      "location": "prayer hall",
+      "itemDate": "2026-10-04",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-10-05T14:43:36.000Z"
+    },
+    {
+      "id": "f-167",
+      "title": "Found: bunch of keys",
+      "description": "Chrome bunch of keys. Found at parking lot behind Admin Building.",
+      "category": "Keys",
+      "location": "Admin Building parking",
+      "itemDate": "2026-08-31",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-08-31T11:35:17.000Z"
+    },
+    {
+      "id": "f-168",
+      "title": "Textbook founnd at the bus stop",
+      "description": "Someoe left this textbok at bus stop outside Main Gate. white. Message me with details to claim.",
+      "category": "Books",
+      "location": "bus stop outside Main Gate",
+      "itemDate": "2026-10-29",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-10-30T12:16:56.000Z"
+    },
+    {
+      "id": "f-169",
+      "title": "Found: sunglasses",
+      "description": "Found a dark brown sunglasses with a scratched lens at Gymnasium. Handed it to the security desk.",
+      "category": "Accessories",
+      "location": "Gymnasium",
+      "itemDate": "2026-11-04",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": "OAKLEY",
+      "createdAt": "2026-11-05T19:52:12.000Z"
+    },
+    {
+      "id": "f-170",
+      "title": "Sunglasses found at the Admin Building",
+      "description": "Found a black sunglasses with tinted lenses at Administration Building, accounts office queue. Handed it to the security desk.",
+      "category": "Glasses",
+      "location": "Admin Building reception",
+      "itemDate": "2026-09-23",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "Titan",
+      "createdAt": "2026-09-23T18:51:00.000Z"
+    },
+    {
+      "id": "f-171",
+      "title": "Tan wallet left behind",
+      "description": "Picked up a wallet at LH-A.",
+      "category": "Personal items",
+      "location": "LH-A",
+      "itemDate": "2026-08-27",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": null,
+      "createdAt": "2026-08-28T08:49:59.000Z"
+    },
+    {
+      "id": "f-172",
+      "title": "Found: steel bottle",
+      "description": "Chrome steel bottle. Found at main auditorium seats near the stage.",
+      "category": "personal items",
+      "location": "main auditorium seats near the stage",
+      "itemDate": "2026-10-29",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Hydro Flask",
+      "createdAt": "2026-10-29T09:25:15.000Z"
+    },
+    {
+      "id": "f-173",
+      "title": "Found a sunnies",
+      "description": "Golden sunnies, looks like Titan. Found at Libary reading room.",
+      "category": "glasses",
+      "location": "Central Library",
+      "itemDate": "2026-10-21",
+      "itemDateTo": null,
+      "color": null,
+      "brand": "Titan",
+      "createdAt": "2026-10-22T17:25:56.000Z"
+    },
+    {
+      "id": "f-174",
+      "title": "Sweater found at the Engineering Building",
+      "description": "Fonud a white sweater at Engineering Bulding room 304. Handed it to the security desk.",
+      "category": "clothing",
+      "location": "Eng building lab 2",
+      "itemDate": "2026-10-26",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "H&M",
+      "createdAt": "2026-10-27T12:43:26.000Z"
+    },
+    {
+      "id": "f-175",
+      "title": "Chrome laptop left behind",
+      "description": "Someone left this laptop at Student Centre cafeteria. chrome, Lenovo. Message me with details to claim.",
+      "category": "Electronics",
+      "location": "Student Centre cafeteria",
+      "itemDate": "2026-11-03",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-11-04T18:35:09.000Z"
+    },
+    {
+      "id": "f-176",
+      "title": "Light blue flash drive left behind",
+      "description": "Light blue flash drive. Found at Student Centre cafeteria.",
+      "category": "Accessories",
+      "location": "Student Centre cafeteria",
+      "itemDate": "2026-09-01",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "SanDisk",
+      "createdAt": "2026-09-02T21:13:26.000Z"
+    },
+    {
+      "id": "f-177",
+      "title": "Headset found at the Admin Building",
+      "description": "Picked up a headset at admin block lobby. With a scratch on the headband.",
+      "category": "audio",
+      "location": "admin block lobby",
+      "itemDate": "2026-09-22",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-09-22T11:38:16.000Z"
+    },
+    {
+      "id": "f-178",
+      "title": "Found a student ID",
+      "description": "Picked up a student ID at near the main gate. On a retractable reel.",
+      "category": "cards",
+      "location": "near the main gate",
+      "itemDate": "2026-11-01",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-11-02T13:21:48.000Z"
+    },
+    {
+      "id": "f-179",
+      "title": "Found a sunglasses",
+      "description": "Someone left this sunglasses at sports complex basketball court. cream. Message me with details to claim.",
+      "category": "Accessories",
+      "location": "gym changing room",
+      "itemDate": "2026-11-02",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-11-03T16:41:52.000Z"
+    },
+    {
+      "id": "f-180",
+      "title": "Found: handbag",
+      "description": "Soeone left this handbag at near the main gate. dark brown. Message me with details to claim.",
+      "category": "Bag",
+      "location": "near the main gate",
+      "itemDate": "2026-10-19",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": null,
+      "createdAt": "2026-10-20T10:27:25.000Z"
+    },
+    {
+      "id": "f-181",
+      "title": "Metallic silver key ring left behind",
+      "description": "Metallic silver key ring. Found at car park.",
+      "category": "Keys",
+      "location": "car park",
+      "itemDate": "2026-08-23",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-08-24T21:49:49.000Z"
+    },
+    {
+      "id": "f-182",
+      "title": "Navy headphones left behind",
+      "description": "Someone left this headphones at Eng building lab 2. navy. Message me with details to claim.",
+      "category": "audio",
+      "location": "Engineering Building room 304",
+      "itemDate": "2026-09-06",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-09-07T15:38:28.000Z"
+    },
+    {
+      "id": "f-183",
+      "title": "Found grey over-ear headphones",
+      "description": "Picked up a over-ear headphones at chem lab, Science Building. Folded flat.",
+      "category": "Audio",
+      "location": "chem lab, Science Building",
+      "itemDate": "2026-09-06",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "Sony",
+      "createdAt": "2026-09-06T15:21:14.000Z"
+    },
+    {
+      "id": "f-184",
+      "title": "Shades found at the computer lab",
+      "description": "Picked up a shades at Computer Lab 2.",
+      "category": "Eyewear",
+      "location": "Computer Lab 2",
+      "itemDate": "2026-09-19",
+      "itemDateTo": null,
+      "color": "gold",
+      "brand": null,
+      "createdAt": "2026-09-20T21:33:57.000Z"
+    },
+    {
+      "id": "f-185",
+      "title": "Matte black powerbank left behind",
+      "description": "Picked up a powerbank at CSE computer lab. With a short cable attached.",
+      "category": "Accessories",
+      "location": "CSE computer lab",
+      "itemDate": "2026-08-29",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "Anker",
+      "createdAt": "2026-08-30T16:12:50.000Z"
+    },
+    {
+      "id": "f-186",
+      "title": "Found: ADIDAS sweatshirt",
+      "description": "Picked up a sweatshirt at CSE computer lab. With a university logo.",
+      "category": "Clothes",
+      "location": "CSE computer lab",
+      "itemDate": "2026-10-24",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": "ADIDAS",
+      "createdAt": "2026-10-25T13:02:25.000Z"
+    },
+    {
+      "id": "f-187",
+      "title": "Found a laptop charger",
+      "description": "Found a off-white laptop charger at cafeteria. Handed it to the security desk.",
+      "category": "Electronics",
+      "location": "Student Center canteen",
+      "itemDate": "2026-10-07",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "APPLE",
+      "createdAt": "2026-10-07T09:12:49.000Z"
+    },
+    {
+      "id": "f-188",
+      "title": "Wallet found at the Admin Building",
+      "description": "Someone left this wallet at admin block lobby. burgundy. Message me with details to claim.",
+      "category": "Wallet",
+      "location": "admin block lobby",
+      "itemDate": "2026-10-17",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-10-18T18:06:35.000Z"
+    },
+    {
+      "id": "f-189",
+      "title": "Found: Faber-Castell pen case",
+      "description": "Found a multicoloured pen case transparent front at Admin Building parking. Handed it to the security desk.",
+      "category": "Stationery",
+      "location": "Admin Building parking",
+      "itemDate": "2026-10-21",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": "Faber-Castell",
+      "createdAt": "2026-10-22T10:25:21.000Z"
+    },
+    {
+      "id": "f-190",
+      "title": "Wireless headphones found at the Science Building",
+      "description": "Cream wireless headphones, looks like sony. Found at chem lab, Science Building.",
+      "category": "Electronics",
+      "location": "chem lab, Science Building",
+      "itemDate": "2026-09-05",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "sony",
+      "createdAt": "2026-09-05T17:05:51.000Z"
+    },
+    {
+      "id": "f-191",
+      "title": "Found silver spectacles",
+      "description": "Silver spectacles, looks like Titan. Found at sports complex basketball court.",
+      "category": "Eyewear",
+      "location": "sports complex basketball court",
+      "itemDate": "2026-11-03",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Titan",
+      "createdAt": "2026-11-03T13:02:00.000Z"
+    },
+    {
+      "id": "f-192",
+      "title": "Violet cellphone left behind",
+      "description": "Found a violet cellphone in a flip cover at Administration Building, accounts office queue. Handed it to the security desk.",
+      "category": "Phone",
+      "location": "Administration Building, accounts office queue",
+      "itemDate": "2026-10-22",
+      "itemDateTo": null,
+      "color": "purple",
+      "brand": "Xiaomi",
+      "createdAt": "2026-10-23T07:39:57.000Z"
+    },
+    {
+      "id": "f-193",
+      "title": "Found a purse",
+      "description": "Someone left this purse at lecture theatre B. burgundy, Tommy Hilfiger. Message me with details to claim.",
+      "category": "Personal items",
+      "location": "lecture theatre B",
+      "itemDate": "2026-09-20",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": "Tommy Hilfiger",
+      "createdAt": "2026-09-20T07:36:08.000Z"
+    },
+    {
+      "id": "f-194",
+      "title": "Copy found at North Hall",
+      "description": "Found a camo copy at North Hall TV room. Handed it to the security desk.",
+      "category": "Stationery",
+      "location": "North Hall TV room",
+      "itemDate": "2026-08-30",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-08-30T09:50:52.000Z"
+    },
+    {
+      "id": "f-195",
+      "title": "Keychain found at the Science Building",
+      "description": "Found a yellow keychain three keys on a ring at Science Building room 112. Handed it to the security desk.",
+      "category": "keys",
+      "location": "science block stairs",
+      "itemDate": "2026-09-09",
+      "itemDateTo": null,
+      "color": "yellow",
+      "brand": null,
+      "createdAt": "2026-09-09T11:51:03.000Z"
+    },
+    {
+      "id": "f-196",
+      "title": "Jet black sunglasses left behind",
+      "description": "Someone left this sunglasses at parking lot behind Admin Building. jet black. Message me with details to claim.",
+      "category": "Accessories",
+      "location": "parking lot behind Admin Building",
+      "itemDate": "2026-11-09",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-11-10T19:37:31.000Z"
+    },
+    {
+      "id": "f-197",
+      "title": "Found: wallet",
+      "description": "Matte black wallet. Found at dorm common room (North Hall).",
+      "category": "Wallet",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-09-28",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-09-28T14:22:51.000Z"
+    },
+    {
+      "id": "f-198",
+      "title": "Found: umbrella",
+      "description": "Picked up a umbrella at car park. With a hook handle.",
+      "category": "Others",
+      "location": "car park",
+      "itemDate": "2026-11-05",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-11-06T16:10:21.000Z"
+    },
+    {
+      "id": "f-199",
+      "title": "Maroon jacket left behind",
+      "description": "Maroon jacket. Found at CSE computer lab.",
+      "category": "Clothes",
+      "location": "CSE computer lab",
+      "itemDate": "2026-10-25",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-10-26T17:00:32.000Z"
+    },
+    {
+      "id": "f-200",
+      "title": "Found silver flash drive",
+      "description": "Picked up a flash drive at sports complex basketball court. Metal body.",
+      "category": "electronics",
+      "location": "sports complex basketball court",
+      "itemDate": "2026-08-20",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-08-20T19:09:16.000Z"
+    },
+    {
+      "id": "f-201",
+      "title": "Found a student ID",
+      "description": "Dark green student ID. Found at Main Gate.",
+      "category": "id card",
+      "location": "Main Gate",
+      "itemDate": "2026-09-21",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-09-21T11:03:54.000Z"
+    },
+    {
+      "id": "f-202",
+      "title": "Tote bag found at the main gate",
+      "description": "Pink tote bag. Found at Main Gate.",
+      "category": "Personal items",
+      "location": "Main Gate",
+      "itemDate": "2026-10-13",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": null,
+      "createdAt": "2026-10-14T21:36:45.000Z"
+    },
+    {
+      "id": "f-203",
+      "title": "Found silver sunglasses",
+      "description": "Picked up a sunglasses at Administration Building, accounts office queue before the lab session.",
+      "category": "accessories",
+      "location": "Administration Building, accounts office queue",
+      "itemDate": "2026-09-09",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-09-09T18:10:06.000Z"
+    },
+    {
+      "id": "f-204",
+      "title": "Found: Tommy purse",
+      "description": "Found a purple purse with a few cards inside at near the main gate. Handed it to the security desk.",
+      "category": "wallet",
+      "location": "near the main gate",
+      "itemDate": "2026-09-21",
+      "itemDateTo": null,
+      "color": null,
+      "brand": "Tommy",
+      "createdAt": "2026-09-22T08:52:16.000Z"
+    },
+    {
+      "id": "f-205",
+      "title": "Found: folding umbrella",
+      "description": "Red folding umbrella. Found at lecture theatre A.",
+      "category": "Others",
+      "location": "lecture theatre A",
+      "itemDate": "2026-10-12",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-10-13T18:05:31.000Z"
+    },
+    {
+      "id": "f-206",
+      "title": "Found: keychain",
+      "description": "Camo keychain. Fond at Adin Building reception.",
+      "category": "personal items",
+      "location": "Admin Building reception",
+      "itemDate": "2026-08-31",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-09-01T16:56:59.000Z"
+    },
+    {
+      "id": "f-207",
+      "title": "Chrome eyeglasses left behind",
+      "description": "Picked up a eyeglasses at Central Library.",
+      "category": "accessories",
+      "location": "Central Library",
+      "itemDate": "2026-08-22",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "titan",
+      "createdAt": "2026-08-22T20:42:38.000Z"
+    },
+    {
+      "id": "f-208",
+      "title": "Found tan eyeglasses",
+      "description": "Picked up a eyeglasses at Gymnasium. With a cleaniing cloth.",
+      "category": "Glasses",
+      "location": "sports complex basketball court",
+      "itemDate": "2026-10-30",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": null,
+      "createdAt": "2026-10-31T09:05:57.000Z"
+    },
+    {
+      "id": "f-209",
+      "title": "Fouund cream flask",
+      "description": "Cream flask. Found at lcture theatrre B.",
+      "category": "Bottle",
+      "location": "lecture theatre B",
+      "itemDate": "2026-10-03",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-10-04T19:57:54.000Z"
+    },
+    {
+      "id": "f-210",
+      "title": "Found a tiffin carrier",
+      "description": "Someone left this tiffin carrier at lecture theatre A. sky blue. Messsage me with details to claim.",
+      "category": "Others",
+      "location": "Lecture Hall A, back row",
+      "itemDate": "2026-10-07",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-10-08T10:15:02.000Z"
+    },
+    {
+      "id": "f-211",
+      "title": "Found a water bottle",
+      "description": "Found a sky blue water bottle at LH-B. Handed it to the securiity desk.",
+      "category": "Personal items",
+      "location": "LH-B",
+      "itemDate": "2026-08-20",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Nalgene",
+      "createdAt": "2026-08-21T17:27:02.000Z"
+    },
+    {
+      "id": "f-212",
+      "title": "Found a shades",
+      "description": "Someone left this shades at prayer hall. dark brown. Message me with details to claim.",
+      "category": "Accessories",
+      "location": "prayer hall",
+      "itemDate": "2026-09-13",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": null,
+      "createdAt": "2026-09-13T14:01:45.000Z"
+    },
+    {
+      "id": "f-213",
+      "title": "Found: steel bottle",
+      "description": "Light pink seel bottle. Found at lecture theatre A.",
+      "category": "Personal items",
+      "location": "lecture theatre A",
+      "itemDate": "2026-10-08",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": null,
+      "createdAt": "2026-10-08T15:39:20.000Z"
+    },
+    {
+      "id": "f-214",
+      "title": "Metallic sillver shades left behind",
+      "description": "Found a mtallic silver shades at North Hall common room. Handed it to the secuirty desk.",
+      "category": "Glasses",
+      "location": "North Hall TV room",
+      "itemDate": "2026-10-23",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Oakley",
+      "createdAt": "2026-10-23T16:50:34.000Z"
+    },
+    {
+      "id": "f-215",
+      "title": "Wristwatch found at the main gate",
+      "description": "Bron wristwatch. Found at near the main gate.",
+      "category": "Watch",
+      "location": "near the main gate",
+      "itemDate": "2026-08-28",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": null,
+      "createdAt": "2026-08-29T20:59:37.000Z"
+    },
+    {
+      "id": "f-216",
+      "title": "Found burgundy student ID",
+      "description": "Pickeed up a studet ID at Main Gate.",
+      "category": "Cards",
+      "location": "Main Gate",
+      "itemDate": "2026-09-11",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-09-11T21:55:39.000Z"
+    },
+    {
+      "id": "f-217",
+      "title": "Found a laptop bag",
+      "description": "Found a charcoal latop bag at LH-A. Handed it to the seucrity desk.",
+      "category": "personal items",
+      "location": "LH-A",
+      "itemDate": "2026-09-14",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": null,
+      "createdAt": "2026-09-14T09:58:05.000Z"
+    },
+    {
+      "id": "f-218",
+      "title": "Calculator found at Lecture Hall B",
+      "description": "Navy blue calculator. Found at Lecture Hall B.",
+      "category": "Stationery",
+      "location": "Lecture Hall B",
+      "itemDate": "2026-10-19",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Casio",
+      "createdAt": "2026-10-19T09:59:23.000Z"
+    },
+    {
+      "id": "f-219",
+      "title": "Found: student card",
+      "description": "Burgundy student card. Found at dorm common room (North Hall).",
+      "category": "ID card",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-09-18",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-09-19T19:04:55.000Z"
+    },
+    {
+      "id": "f-220",
+      "title": "Sky blue purse left behind",
+      "description": "Picked up a purse at shutttle stop near the main gate aftr the 10am class.",
+      "category": "wallet",
+      "location": "shuttle stop near the main gate",
+      "itemDate": "2026-09-29",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "fossil",
+      "createdAt": "2026-09-30T19:08:08.000Z"
+    },
+    {
+      "id": "f-221",
+      "title": "Found a shades",
+      "description": "Someone left this shades at Admin Building reception. cream. Message me with details to claim.",
+      "category": "Eyewear",
+      "location": "Admin Building reception",
+      "itemDate": "2026-09-15",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "OAKLEY",
+      "createdAt": "2026-09-15T13:34:53.000Z"
+    },
+    {
+      "id": "f-222",
+      "title": "Found metallic silver wireless earbuds",
+      "description": "Someone left this wireless earbuds at North Hall common room. metallic silver. Message me with details to claim.",
+      "category": "Audio",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-10-28",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-10-29T18:10:38.000Z"
+    },
+    {
+      "id": "f-223",
+      "title": "Exercise book found at North Hall",
+      "description": "Black exercise book. Found at North Hall common room.",
+      "category": "Books",
+      "location": "North Hall common room",
+      "itemDate": "2026-10-03",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-10-03T14:42:21.000Z"
+    },
+    {
+      "id": "f-224",
+      "title": "Found gray earphones",
+      "description": "Someone left this earphones at campus bus stop. gray, Samsung. Message me with details to claim.",
+      "category": "Accessories",
+      "location": "campus bus stop",
+      "itemDate": "2026-09-05",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "Samsung",
+      "createdAt": "2026-09-05T07:49:18.000Z"
+    },
+    {
+      "id": "f-225",
+      "title": "Found: jumper",
+      "description": "Picked up a jumper at Science Building room 112 during the exam.",
+      "category": "clothing",
+      "location": "Science Building chemistry lab",
+      "itemDate": "2026-09-29",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": null,
+      "createdAt": "2026-09-29T21:19:03.000Z"
+    },
+    {
+      "id": "f-226",
+      "title": "Jacket found at the library",
+      "description": "Picked up a jacket at Libary reading room. With a torn pocket.",
+      "category": "Clothing",
+      "location": "Central Library ground floor near the printers",
+      "itemDate": "2026-10-19",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-10-20T13:28:26.000Z"
+    },
+    {
+      "id": "f-227",
+      "title": "Smartwatch found at North Hall",
+      "description": "Picked up a smartwatch at North Hall cmmon room yeesterday afternoon.",
+      "category": "accessories",
+      "location": "North Hall common room",
+      "itemDate": "2026-09-12",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-09-13T15:52:03.000Z"
+    },
+    {
+      "id": "f-228",
+      "title": "Grey TWS earbuds left behind",
+      "description": "Found a grey TWS earbuds at Lecture Hall A. Handed it to the security desk.",
+      "category": "electronics",
+      "location": "lecture theatre A",
+      "itemDate": "2026-09-22",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": null,
+      "createdAt": "2026-09-22T16:21:47.000Z"
+    },
+    {
+      "id": "f-229",
+      "title": "Dark grey laptop computer left behind",
+      "description": "Someone left this laptop computer at campus bus stop. dark grey. Message me with details to claim.",
+      "category": "Electronics",
+      "location": "campus bus stop",
+      "itemDate": "2026-09-14",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "acer",
+      "createdAt": "2026-09-14T18:32:25.000Z"
+    },
+    {
+      "id": "f-230",
+      "title": "Found: campus card",
+      "description": "Someone left this campus card at LH-B. navy. Message me with details to claim.",
+      "category": "Documents",
+      "location": "LH-B",
+      "itemDate": "2026-09-01",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-09-01T21:45:59.000Z"
+    },
+    {
+      "id": "f-231",
+      "title": "Found blue wallet",
+      "description": "Someone left this wallet at campus bus stop. blue, Tommy Hilfiger. Message me with details to claim.",
+      "category": "wallet",
+      "location": "campus bus stop",
+      "itemDate": "2026-09-21",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Tommy Hilfiger",
+      "createdAt": "2026-09-21T18:10:18.000Z"
+    },
+    {
+      "id": "f-232",
+      "title": "Found: glasses",
+      "description": "Chrome glasses. Found at North Hall TV room.",
+      "category": "Eyewear",
+      "location": "dorm common room (North Hall)",
+      "itemDate": "2026-09-02",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-09-02T21:04:15.000Z"
+    },
+    {
+      "id": "f-233",
+      "title": "Found: scientific calculator",
+      "description": "Picked up a scientific calculator at Main Gate.",
+      "category": "Stationery",
+      "location": "Main Gate",
+      "itemDate": "2026-09-26",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-09-26T18:40:28.000Z"
+    },
+    {
+      "id": "f-234",
+      "title": "Found: Casio smartwatch",
+      "description": "Somene left this smrtwatch at car park. jet black, Casio. Message me with details to claim.",
+      "category": "Watch",
+      "location": "car park",
+      "itemDate": "2026-10-06",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "Casio",
+      "createdAt": "2026-10-07T17:26:23.000Z"
+    },
+    {
+      "id": "f-235",
+      "title": "Earbuds case found at the computer lab",
+      "description": "Found a white earbuds case with a keychain loop on the case at Computer Lab 2. Handed it to the security desk.",
+      "category": "electronics",
+      "location": "Computer Lab 2",
+      "itemDate": "2026-08-22",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-08-22T10:22:11.000Z"
+    },
+    {
+      "id": "f-236",
+      "title": "Found pink tifffin box",
+      "description": "Someone left this tiffin box at Letcure Hall B, front seats. pink. Message me with details to claim.",
+      "category": "Others",
+      "location": "LH-B",
+      "itemDate": "2026-09-14",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": null,
+      "createdAt": "2026-09-15T11:38:29.000Z"
+    },
+    {
+      "id": "f-237",
+      "title": "Student ID found at the main gate",
+      "description": "Someeone left this student ID at near the main gate. green. Message me with details to claim.",
+      "category": "documents",
+      "location": "main gate security booth",
+      "itemDate": "2026-10-01",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-10-02T08:44:49.000Z"
+    },
+    {
+      "id": "f-238",
+      "title": "Found a laptop computer",
+      "description": "Silver laptop computer. Found at admin block lobby.",
+      "category": "Laptop",
+      "location": "admin block lobby",
+      "itemDate": "2026-09-18",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-09-18T21:40:13.000Z"
+    },
+    {
+      "id": "f-239",
+      "title": "Black scientific calculator left behind",
+      "description": "Someone left this scientific calculator at campus bus stop. black. Message me with details to claim.",
+      "category": "Calculator",
+      "location": "campus bus stop",
+      "itemDate": "2026-10-04",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "CASIO",
+      "createdAt": "2026-10-04T21:51:14.000Z"
+    },
+    {
+      "id": "f-240",
+      "title": "Found a food containner",
+      "description": "Someone left this food container at Sports Complex changinng room. chrome, MILTON. Message me with deatils to claim.",
+      "category": "Personal items",
+      "location": "Sports Complex changing room",
+      "itemDate": "2026-09-14",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "MILTON",
+      "createdAt": "2026-09-14T20:13:15.000Z"
+    },
+    {
+      "id": "f-241",
+      "title": "Metallic silver powerbank left behind",
+      "description": "Someone left this powerbank at Eng building lab 2. metallic silver, Anker. Message me with details to claim.",
+      "category": "Electronics",
+      "location": "Eng building lab 2",
+      "itemDate": "2026-09-04",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Anker",
+      "createdAt": "2026-09-05T18:59:49.000Z"
+    },
+    {
+      "id": "f-242",
+      "title": "Cloth bag found at the main gate",
+      "description": "Someone left this cloth bag at main gate security booth. brown. Message me with details to claim.",
+      "category": "Bags",
+      "location": "main gate security booth",
+      "itemDate": "2026-09-16",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": null,
+      "createdAt": "2026-09-16T17:51:50.000Z"
+    },
+    {
+      "id": "f-243",
+      "title": "Notepad found at the gym",
+      "description": "Found a burgundy notepad with a torn cover at gym changing room. Handed it to the security desk.",
+      "category": "Notebook",
+      "location": "gym changing room",
+      "itemDate": "2026-08-20",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-08-20T19:17:26.000Z"
+    },
+    {
+      "id": "f-244",
+      "title": "USB drive found at the parking lot",
+      "description": "Picked up a USB drive at car park.",
+      "category": "Electronics",
+      "location": "car park",
+      "itemDate": "2026-09-17",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Transcend",
+      "createdAt": "2026-09-18T07:51:25.000Z"
+    },
+    {
+      "id": "f-245",
+      "title": "Pen case found at the auditorium",
+      "description": "Picked up a pen case at auditorium hall. With pens and a ruler inside.",
+      "category": "Stationery",
+      "location": "auditorium hall",
+      "itemDate": "2026-10-13",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": null,
+      "createdAt": "2026-10-13T12:15:01.000Z"
+    },
+    {
+      "id": "f-246",
+      "title": "Found a reference book",
+      "description": "Red reference book. Found at near the main gate.",
+      "category": "Book",
+      "location": "near the main gate",
+      "itemDate": "2026-08-05",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-08-05T17:35:05.000Z"
+    },
+    {
+      "id": "f-247",
+      "title": "Navy tiffin carrier left behind",
+      "description": "Someone left this tiffin carrier at Administration Building, accounts office queue. navy, Tupperware. Message me with details to claim.",
+      "category": "Personal items",
+      "location": "Administration Building, accounts office queue",
+      "itemDate": "2026-09-03",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Tupperware",
+      "createdAt": "2026-09-04T07:00:23.000Z"
+    },
+    {
+      "id": "f-248",
+      "title": "Found: stationery puoch",
+      "description": "Camo stationery pouch. Found at Libarry study carrels, 3rd floor.",
+      "category": "Stationery",
+      "location": "Libary reading room",
+      "itemDate": "2026-10-23",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-10-24T12:12:46.000Z"
+    },
+    {
+      "id": "f-249",
+      "title": "Glasses found at the computer lab",
+      "description": "Chrome glasses. Found at ICT building lab 2.",
+      "category": "Eyewear",
+      "location": "ICT building lab 2",
+      "itemDate": "2026-10-07",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-10-08T10:38:57.000Z"
+    },
+    {
+      "id": "f-250",
+      "title": "Found: Tommy money bag",
+      "description": "Mint green money bag, looks like Tommy. Found at Library study carrels, 3rd floor.",
+      "category": "wallet",
+      "location": "Library study carrels, 3rd floor",
+      "itemDate": "2026-09-12",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": "Tommy",
+      "createdAt": "2026-09-13T07:22:34.000Z"
+    },
+    {
+      "id": "f-251",
+      "title": "Found mint green jumper",
+      "description": "Found a mint green juper at Lecture Hall A. Hadned it to the security desk.",
+      "category": "Clothing",
+      "location": "Lecture Hall A",
+      "itemDate": "2026-10-27",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": "ADIDAS",
+      "createdAt": "2026-10-27T16:37:15.000Z"
+    },
+    {
+      "id": "f-252",
+      "title": "Found orange jmper",
+      "description": "Someone left this jumper at enginereing block lobby. orange, Nike. Message me with detais to claim.",
+      "category": "Clothing",
+      "location": "engineering block lobby",
+      "itemDate": "2026-08-30",
+      "itemDateTo": null,
+      "color": "orange",
+      "brand": "Nike",
+      "createdAt": "2026-08-31T20:49:24.000Z"
+    },
+    {
+      "id": "f-253",
+      "title": "Tiffin box found at Lecture Hall B",
+      "description": "Someone left this tiffin box at Lecture Hall B, front seats. mint green. Message me with details to claim.",
+      "category": "Others",
+      "location": "Lecture Hall B, front seats",
+      "itemDate": "2026-10-09",
+      "itemDateTo": null,
+      "color": "green",
+      "brand": null,
+      "createdAt": "2026-10-09T15:39:07.000Z"
+    },
+    {
+      "id": "f-254",
+      "title": "Found a earbuds",
+      "description": "White earbuds. Found at Engineering Building room 304.",
+      "category": "Electronics",
+      "location": "Engineering Building room 304",
+      "itemDate": "2026-10-17",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "Anker",
+      "createdAt": "2026-10-17T14:57:18.000Z"
+    },
+    {
+      "id": "f-255",
+      "title": "Found: Texas Instruments scientific calculator",
+      "description": "Matte black scientific calculator, looks like Texas Instruments. Found at admin block lobby.",
+      "category": "Calculator",
+      "location": "admin block lobby",
+      "itemDate": "2026-10-16",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-10-16T16:58:44.000Z"
+    },
+    {
+      "id": "f-256",
+      "title": "Jet black sunnies left behind",
+      "description": "Jet black sunnies. Found at LH-A.",
+      "category": "Accessories",
+      "location": "LH-A",
+      "itemDate": "2026-11-05",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "Titan",
+      "createdAt": "2026-11-06T16:38:50.000Z"
+    },
+    {
+      "id": "f-257",
+      "title": "Exercise book found at the Engineering Building",
+      "description": "Found a black exercise book with a torn cover at Engineering Building room 304. Handed it to the security desk.",
+      "category": "Stationery",
+      "location": "Engineering Building room 304",
+      "itemDate": "2026-09-06",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": "MOLESKINE",
+      "createdAt": "2026-09-07T17:54:32.000Z"
+    },
+    {
+      "id": "f-258",
+      "title": "Wristwatch found at the parking lot",
+      "description": "Picked up a wristwatch at car park around lunchtime. With a leather strap.",
+      "category": "Electronics",
+      "location": "car park",
+      "itemDate": "2026-08-30",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": null,
+      "createdAt": "2026-08-31T12:56:21.000Z"
+    },
+    {
+      "id": "f-259",
+      "title": "Gray pencil case left behind",
+      "description": "Someone left this pencil case at Library, 2nd floor reading room. gray. Message me with details to claim.",
+      "category": "Stationery",
+      "location": "Library, 2nd floor reading room",
+      "itemDate": "2026-09-14",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": null,
+      "createdAt": "2026-09-15T16:40:24.000Z"
+    },
+    {
+      "id": "f-260",
+      "title": "Found: TWS earbuds",
+      "description": "Picked up a TWS earbuds at Engineering Building room 304 after the 10am class. With a silicone cover on the case.",
+      "category": "Electronics",
+      "location": "Engineering Building room 304",
+      "itemDate": "2026-09-23",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "ANKER",
+      "createdAt": "2026-09-23T16:39:54.000Z"
+    },
+    {
+      "id": "f-261",
+      "title": "Dark blue sweater left behind",
+      "description": "Found a dark blue sweater at computer lab, ICT building. Handd it to the security desk.",
+      "category": "clothing",
+      "location": "CSE computer lab",
+      "itemDate": "2026-10-26",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-10-26T18:38:30.000Z"
+    },
+    {
+      "id": "f-262",
+      "title": "Found a school bag",
+      "description": "Somene left this school bag at Main Auditorium. silver. Message me with details to claim.",
+      "category": "Personal items",
+      "location": "auditorium hall",
+      "itemDate": "2026-09-01",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-09-01T17:45:43.000Z"
+    },
+    {
+      "id": "f-263",
+      "title": "Found a flash drive",
+      "description": "Navy flash drive. Found at car park.",
+      "category": "electronics",
+      "location": "Admin Building parking",
+      "itemDate": "2026-09-07",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "KINGSTON",
+      "createdAt": "2026-09-08T14:31:32.000Z"
+    },
+    {
+      "id": "f-264",
+      "title": "Found brown smartwatch",
+      "description": "Picked up a smartwatch at Science Building chemistry lab. With a metal strap.",
+      "category": "Accessories",
+      "location": "science block stairs",
+      "itemDate": "2026-10-24",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": null,
+      "createdAt": "2026-10-25T13:09:14.000Z"
+    },
+    {
+      "id": "f-265",
+      "title": "Laptop computer found at the cafeteria",
+      "description": "Chrome laptop computer. Found at food court, Student Centre.",
+      "category": "Laptop",
+      "location": "food court, Student Centre",
+      "itemDate": "2026-10-07",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-10-07T18:29:58.000Z"
+    },
+    {
+      "id": "f-266",
+      "title": "Found red food container",
+      "description": "Picked up a food container at North Hall common room. In an insulated bag.",
+      "category": "Others",
+      "location": "North Hall common room",
+      "itemDate": "2026-08-16",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-08-16T11:55:57.000Z"
+    },
+    {
+      "id": "f-267",
+      "title": "Found: Vivo phone",
+      "description": "Lavender phone, looks like Vivo. Found at chem lab, Science Building.",
+      "category": "Electronics",
+      "location": "Science Building chemistry lab",
+      "itemDate": "2026-08-20",
+      "itemDateTo": null,
+      "color": "purple",
+      "brand": null,
+      "createdAt": "2026-08-20T21:25:15.000Z"
+    },
+    {
+      "id": "f-268",
+      "title": "Fitness band found at the main gate",
+      "description": "Found a light blue finess band at Main Gate. Handed it to the seccurity desk.",
+      "category": "Watch",
+      "location": "Main Gate",
+      "itemDate": "2026-09-25",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-09-26T10:33:43.000Z"
+    },
+    {
+      "id": "f-269",
+      "title": "Found: Hydro Flask bottle",
+      "description": "Someone left this bottle at Admin Building reception. navy, Hydro Flask. Message me with details to claim.",
+      "category": "Personal items",
+      "location": "Admin Building reception",
+      "itemDate": "2026-07-27",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Hydro Flask",
+      "createdAt": "2026-07-28T19:53:10.000Z"
+    },
+    {
+      "id": "f-270",
+      "title": "Dark blue USB drive left behind",
+      "description": "Picked up a USB drive at main auditorium seats near the stage. With a missing cap.",
+      "category": "Accessories",
+      "location": "main auditorium seats near the stage",
+      "itemDate": "2026-08-30",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": "Transcend",
+      "createdAt": "2026-08-31T21:46:08.000Z"
+    },
+    {
+      "id": "f-271",
+      "title": "Found: water bottle",
+      "description": "Picked up a water bottle at lecture theatre B before the lab session. With stickers on it.",
+      "category": "personal items",
+      "location": "lecture theatre B",
+      "itemDate": "2026-08-30",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-08-31T20:46:39.000Z"
+    },
+    {
+      "id": "f-272",
+      "title": "Found: sunglasses",
+      "description": "Found a brown sunglasses in a soft pouch at Library, 2nd floor reading room. Handed it to the security desk.",
+      "category": "Glasses",
+      "location": "Library, 2nd floor reading room",
+      "itemDate": "2026-09-02",
+      "itemDateTo": null,
+      "color": "brown",
+      "brand": null,
+      "createdAt": "2026-09-03T16:42:34.000Z"
+    },
+    {
+      "id": "f-273",
+      "title": "Windbreaker found at the prayer room",
+      "description": "Piced up a windbreaker at mosque wudu area on Monday.",
+      "category": "Clothing",
+      "location": "mosque wudu area",
+      "itemDate": "2026-08-23",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-08-23T14:12:50.000Z"
+    },
+    {
+      "id": "f-274",
+      "title": "Laptop charger found at the computer lab",
+      "description": "Found a off-white laptop charger at ICT building lab 2. Handed it to the security desk.",
+      "category": "Accessories",
+      "location": "ICT building lab 2",
+      "itemDate": "2026-09-26",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-09-27T21:59:38.000Z"
+    },
+    {
+      "id": "f-275",
+      "title": "Found camo reference book",
+      "description": "Picked up a reference book at dorm common room (North Hall).",
+      "category": "Books",
+      "location": "North Hall common room",
+      "itemDate": "2026-10-02",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-10-03T15:38:52.000Z"
+    },
+    {
+      "id": "f-276",
+      "title": "Found a laptop",
+      "description": "Someone left this laptop at shuttle stop near the main gate. light blue. Message me with details to claim.",
+      "category": "Electronics",
+      "location": "shuttle stop near the main gate",
+      "itemDate": "2026-10-03",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-10-03T19:02:14.000Z"
+    },
+    {
+      "id": "f-277",
+      "title": "Found: student card",
+      "description": "Maroon student card. Found at Administration Building, accounts office queue.",
+      "category": "ID card",
+      "location": "admin block lobby",
+      "itemDate": "2026-09-27",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-09-28T17:55:21.000Z"
+    },
+    {
+      "id": "f-278",
+      "title": "Found a denim jacket",
+      "description": "Someone left this denim jacket at Computer Lab 2. matte black. Message me with details to claim.",
+      "category": "Clothing",
+      "location": "ICT building lab 2",
+      "itemDate": "2026-09-07",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-09-08T15:12:41.000Z"
+    },
+    {
+      "id": "f-279",
+      "title": "Found: tote bag",
+      "description": "Someone left this tote bag at Science Building room 112. multicoloured. Message me with details to claim.",
+      "category": "bag",
+      "location": "chem lab, Science Building",
+      "itemDate": "2026-10-28",
+      "itemDateTo": null,
+      "color": "other",
+      "brand": null,
+      "createdAt": "2026-10-29T19:57:44.000Z"
+    },
+    {
+      "id": "f-280",
+      "title": "Found a jacket",
+      "description": "Red jacket, looks like adidas. Found at chem lab, Science Building.",
+      "category": "others",
+      "location": "chem lab, Science Building",
+      "itemDate": "2026-08-23",
+      "itemDateTo": null,
+      "color": null,
+      "brand": "adidas",
+      "createdAt": "2026-08-23T18:01:15.000Z"
+    },
+    {
+      "id": "f-281",
+      "title": "Found: cellphone",
+      "description": "Violet cellphone. Found at Admin Building parking.",
+      "category": "Phone",
+      "location": "parking lot behind Admin Building",
+      "itemDate": "2026-08-23",
+      "itemDateTo": null,
+      "color": "purple",
+      "brand": null,
+      "createdAt": "2026-08-23T19:25:19.000Z"
+    },
+    {
+      "id": "f-282",
+      "title": "Found a pen case",
+      "description": "Picked up a pen case at Admin Building reception.",
+      "category": "Personal items",
+      "location": "Administration Building, accounts office queue",
+      "itemDate": "2026-09-07",
+      "itemDateTo": null,
+      "color": "grey",
+      "brand": "Faber Castell",
+      "createdAt": "2026-09-07T19:32:41.000Z"
+    },
+    {
+      "id": "f-283",
+      "title": "Found food container",
+      "description": "Picked up a food container at Lecture Hall A, back row. With a cracked lid.",
+      "category": "Others",
+      "location": "lecture theatre A",
+      "itemDate": "2026-10-07",
+      "itemDateTo": null,
+      "color": null,
+      "brand": "Tupperware",
+      "createdAt": "2026-10-07T18:23:10.000Z"
+    },
+    {
+      "id": "f-284",
+      "title": "Found gold smartwatch",
+      "description": "Found a gold smartwatch with a rubber strap at Administration Building, accounts office queue. Handed it to the security desk.",
+      "category": "accessories",
+      "location": "Administration Building, accounts office queue",
+      "itemDate": "2026-11-01",
+      "itemDateTo": null,
+      "color": "gold",
+      "brand": "Casio",
+      "createdAt": "2026-11-02T10:33:41.000Z"
+    },
+    {
+      "id": "f-285",
+      "title": "Found a stationery pouch",
+      "description": "Someone left this stationery pouch at lecture theatre A. black. Message me with details to claim.",
+      "category": "Stationery",
+      "location": "Lecture Hall A",
+      "itemDate": "2026-10-16",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-10-16T10:52:21.000Z"
+    },
+    {
+      "id": "f-286",
+      "title": "Spiral notebook found at the main gate",
+      "description": "Picked up a spiral notebook at main gate security booth. With lecture notes inside.",
+      "category": "Stationery",
+      "location": "Main Gate",
+      "itemDate": "2026-09-30",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-09-30T21:56:39.000Z"
+    },
+    {
+      "id": "f-287",
+      "title": "Found navy blue pen drive",
+      "description": "Picked up a pen drive at sports complex basketball court.",
+      "category": "Electronics",
+      "location": "Gymnasium",
+      "itemDate": "2026-09-23",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-09-23T19:51:03.000Z"
+    },
+    {
+      "id": "f-288",
+      "title": "Found a card holder",
+      "description": "Pink card holder. Found at chem lab, Science Building.",
+      "category": "Personal items",
+      "location": "Science Building chemistry lab",
+      "itemDate": "2026-08-15",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": null,
+      "createdAt": "2026-08-16T08:13:41.000Z"
+    },
+    {
+      "id": "f-289",
+      "title": "Found black campus card",
+      "description": "Someone left this campus card at Admin Building parking. black. Message me with details to claim.",
+      "category": "documents",
+      "location": "Admin Building parking",
+      "itemDate": "2026-10-15",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-10-15T08:19:14.000Z"
+    },
+    {
+      "id": "f-290",
+      "title": "Found cream tote bag",
+      "description": "Cream tote bag. Found at Scinece Building cheimstry lab.",
+      "category": "Bag",
+      "location": "Science Building chemistry lab",
+      "itemDate": "2026-10-26",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": null,
+      "createdAt": "2026-10-27T18:01:22.000Z"
+    },
+    {
+      "id": "f-291",
+      "title": "Foud a power bank",
+      "description": "Someone left this power bank at Engineering Building, 3rd floor corridor. BASEUS. Mesasge me with details to claim.",
+      "category": "Electronics",
+      "location": "Engineering Building, 3rd floor corridor",
+      "itemDate": "2026-10-14",
+      "itemDateTo": null,
+      "color": null,
+      "brand": "BASEUS",
+      "createdAt": "2026-10-15T10:10:59.000Z"
+    },
+    {
+      "id": "f-292",
+      "title": "Found: Xiaomi smartwatch",
+      "description": "Found a silver smartwatch at main gate security booth. Handed it to the security desk.",
+      "category": "Accessories",
+      "location": "Main Gate",
+      "itemDate": "2026-09-17",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": "Xiaomi",
+      "createdAt": "2026-09-18T09:06:25.000Z"
+    },
+    {
+      "id": "f-293",
+      "title": "Found matte black stationeyr pouch",
+      "description": "Picked up a stationery pouch at campus bus stop afteer the 10am class.",
+      "category": "stationery",
+      "location": "campus bus stop",
+      "itemDate": "2026-11-01",
+      "itemDateTo": null,
+      "color": null,
+      "brand": null,
+      "createdAt": "2026-11-02T12:45:09.000Z"
+    },
+    {
+      "id": "f-294",
+      "title": "Lunch box found at North Hall",
+      "description": "Light pink lunch box, looks like Milton. Found at North Hall common room.",
+      "category": "kitchen",
+      "location": "North Hall common room",
+      "itemDate": "2026-09-28",
+      "itemDateTo": null,
+      "color": "pink",
+      "brand": null,
+      "createdAt": "2026-09-28T09:47:46.000Z"
+    },
+    {
+      "id": "f-295",
+      "title": "Found dark red keychain",
+      "description": "Someone left this keychain at food court, Student Centre. dark red. Message me with details to claim.",
+      "category": "Personal items",
+      "location": "food court, Student Centre",
+      "itemDate": "2026-10-10",
+      "itemDateTo": null,
+      "color": "red",
+      "brand": null,
+      "createdAt": "2026-10-10T18:26:38.000Z"
+    },
+    {
+      "id": "f-296",
+      "title": "Found off-white powerbank",
+      "description": "Someone left this powerbank at Lecture Hall A, back row. off-white. Mesage me with details to claim.",
+      "category": "Accessories",
+      "location": "Lecture Hall A, back row",
+      "itemDate": "2026-10-13",
+      "itemDateTo": null,
+      "color": "white",
+      "brand": "Mi",
+      "createdAt": "2026-10-13T11:15:42.000Z"
+    },
+    {
+      "id": "f-297",
+      "title": "Set of keys found at the parking lot",
+      "description": "Someone left this set of keys at car park. jet black. Message me with details to claim.",
+      "category": "Keys",
+      "location": "parking lot behind Admin Building",
+      "itemDate": "2026-09-03",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-09-04T17:02:45.000Z"
+    },
+    {
+      "id": "f-298",
+      "title": "Found silver wristwatch",
+      "description": "Someone left this wristwatch at main gate security booth. silver. Message me with details to claim.",
+      "category": "Electronics",
+      "location": "main gate security booth",
+      "itemDate": "2026-09-20",
+      "itemDateTo": null,
+      "color": "silver",
+      "brand": null,
+      "createdAt": "2026-09-21T18:26:34.000Z"
+    },
+    {
+      "id": "f-299",
+      "title": "Found a ID badge",
+      "description": "Picked up a ID badge at Administration Building, accounts office queue. On a lanyard.",
+      "category": "ID card",
+      "location": "Administration Building, accounts office queue",
+      "itemDate": "2026-09-28",
+      "itemDateTo": null,
+      "color": "blue",
+      "brand": null,
+      "createdAt": "2026-09-29T19:07:25.000Z"
+    },
+    {
+      "id": "f-300",
+      "title": "Found a shoulder bag",
+      "description": "Picked up a shoulder bag at Engineering Building room 304. With a printed design.",
+      "category": "Personal items",
+      "location": "Engineering Building room 304",
+      "itemDate": "2026-10-26",
+      "itemDateTo": null,
+      "color": "black",
+      "brand": null,
+      "createdAt": "2026-10-27T19:27:09.000Z"
+    }
+  ],
+  "queries": [
+    {
+      "id": "q-001",
+      "split": "tuning",
+      "report": {
+        "id": "l-001",
+        "title": "Missing headphones",
+        "description": "Lost a headphones.",
+        "category": "Electronics",
+        "location": "Science Building chemistry lab",
+        "itemDate": "2026-09-05",
+        "itemDateTo": null,
+        "color": null,
+        "brand": "Sony",
+        "createdAt": "2026-09-05T09:48:50.000Z"
+      },
+      "relevant": [
+        "f-183",
+        "f-190"
+      ],
+      "tags": [
+        "category-differs",
+        "colour-missing",
+        "hard-negatives",
+        "location-wording-differs",
+        "multi-relevant",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-002",
+      "split": "tuning",
+      "report": {
+        "id": "l-002",
+        "title": "Keychain lost",
+        "description": "Left my keychain somewhere on campus. With a rubber duck keychain.",
+        "category": "Personal items",
+        "location": "somewhere between North Hall and the library",
+        "itemDate": "2026-10-30",
+        "itemDateTo": null,
+        "color": null,
+        "brand": null,
+        "createdAt": "2026-10-31T18:15:25.000Z"
+      },
+      "relevant": [
+        "f-026"
+      ],
+      "tags": [
+        "category-differs",
+        "colour-missing",
+        "location-wording-differs",
+        "noun-synonym",
+        "typo",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-003",
+      "split": "test",
+      "report": {
+        "id": "l-003",
+        "title": "Missing shades",
+        "description": "I lost my metallic silver Ray-Ban shades. I last had it at Admin Building reception.",
+        "category": "Eyewear",
+        "location": "Admin Building reception",
+        "itemDate": "2026-09-09",
+        "itemDateTo": null,
+        "color": "silver",
+        "brand": "Ray-Ban",
+        "createdAt": "2026-09-11T10:59:15.000Z"
+      },
+      "relevant": [
+        "f-203"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-004",
+      "split": "tuning",
+      "report": {
+        "id": "l-004",
+        "title": "Lost light pink money bag",
+        "description": "My money bag went missing. It is light pink. Please message me if you find it.",
+        "category": "Wallet",
+        "location": "somewhere between the main gate and the auditorium",
+        "itemDate": "2026-09-21",
+        "itemDateTo": null,
+        "color": "pink",
+        "brand": null,
+        "createdAt": "2026-09-23T12:06:16.000Z"
+      },
+      "relevant": [
+        "f-204"
+      ],
+      "tags": [
+        "brand-missing",
+        "colour-missing",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-005",
+      "split": "test",
+      "report": {
+        "id": "l-005",
+        "title": "Shades lost",
+        "description": "My shades went missing yesterday afternoon. It is gold, with tinted lenses. Please message me if you find it.",
+        "category": "Accessories",
+        "location": "mosque wudu area",
+        "itemDate": "2026-09-11",
+        "itemDateTo": "2026-09-14",
+        "color": "gold",
+        "brand": null,
+        "createdAt": "2026-09-16T15:07:53.000Z"
+      },
+      "relevant": [
+        "f-212"
+      ],
+      "tags": [
+        "brand-missing",
+        "colour-conflict",
+        "hard-negatives",
+        "location-wording-differs",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-006",
+      "split": "test",
+      "report": {
+        "id": "l-006",
+        "title": "Lost dark red copy",
+        "description": "My copy went missing. It is dark red, with a torn cover. Please message me if you find it.",
+        "category": "Notebook",
+        "location": "Central Library ground floor near the printers",
+        "itemDate": "2026-08-27",
+        "itemDateTo": null,
+        "color": "red",
+        "brand": "Classmate",
+        "createdAt": "2026-08-29T11:35:44.000Z"
+      },
+      "relevant": [
+        "f-050"
+      ],
+      "tags": [
+        "brand-missing",
+        "found-before-window",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-007",
+      "split": "tuning",
+      "report": {
+        "id": "l-007",
+        "title": "Has anyone seen my jet black ID badge?",
+        "description": "I lost my jet black ID badge. on Monday.",
+        "category": "cards",
+        "location": "Admin Building parking",
+        "itemDate": "2026-10-12",
+        "itemDateTo": "2026-10-17",
+        "color": "black",
+        "brand": null,
+        "createdAt": "2026-10-18T14:05:23.000Z"
+      },
+      "relevant": [
+        "f-289"
+      ],
+      "tags": [
+        "category-differs",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-008",
+      "split": "test",
+      "report": {
+        "id": "l-008",
+        "title": "Lost chrome eyeglasses",
+        "description": "Lost a eyeglasses (Lenskart, chrome) in a hard case.",
+        "category": "Accessories",
+        "location": "somewhere between the auditorium and the computer lab",
+        "itemDate": "2026-08-22",
+        "itemDateTo": null,
+        "color": "silver",
+        "brand": null,
+        "createdAt": "2026-08-23T12:35:19.000Z"
+      },
+      "relevant": [
+        "f-008"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-conflict",
+        "found-late",
+        "hard-negatives",
+        "location-wording-differs",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-009",
+      "split": "test",
+      "report": {
+        "id": "l-009",
+        "title": "Lost shades at the computer lab",
+        "description": "Lost a shdaes with a scratched lens.",
+        "category": "Glasses",
+        "location": "Computer Lab 2",
+        "itemDate": "2026-09-18",
+        "itemDateTo": null,
+        "color": null,
+        "brand": null,
+        "createdAt": "2026-09-18T07:23:08.000Z"
+      },
+      "relevant": [
+        "f-184"
+      ],
+      "tags": [
+        "category-differs",
+        "colour-missing",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-010",
+      "split": "tuning",
+      "report": {
+        "id": "l-010",
+        "title": "Lost chrome shades",
+        "description": "My shades went missing this morning. It is chrome. Please message me if you find it.",
+        "category": "Accessories",
+        "location": "North Hall common room",
+        "itemDate": "2026-10-23",
+        "itemDateTo": null,
+        "color": "silver",
+        "brand": "OAKLEY",
+        "createdAt": "2026-10-24T21:43:17.000Z"
+      },
+      "relevant": [
+        "f-214"
+      ],
+      "tags": [
+        "category-differs",
+        "location-wording-differs",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-011",
+      "split": "tuning",
+      "report": {
+        "id": "l-011",
+        "title": "Lost portable charger at Lecture Hall A",
+        "description": "Lost a portable charger (cream) with a shorrt cable attached.",
+        "category": "Electronics",
+        "location": "Lecture Hall A",
+        "itemDate": "2026-10-12",
+        "itemDateTo": null,
+        "color": null,
+        "brand": null,
+        "createdAt": "2026-10-14T09:03:48.000Z"
+      },
+      "relevant": [
+        "f-296"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-missing",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-012",
+      "split": "test",
+      "report": {
+        "id": "l-012",
+        "title": "Money bag lost",
+        "description": "Left my money bag at chem lab, Science Building. With a coin pocket. Colour: hot pink.",
+        "category": "Wallet",
+        "location": "chem lab, Science Building",
+        "itemDate": "2026-09-22",
+        "itemDateTo": "2026-09-27",
+        "color": "pink",
+        "brand": null,
+        "createdAt": "2026-09-28T19:18:19.000Z"
+      },
+      "relevant": [
+        "f-093",
+        "f-111"
+      ],
+      "tags": [
+        "category-differs",
+        "hard-negatives",
+        "multi-relevant",
+        "noun-synonym",
+        "time-window",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-013",
+      "split": "tuning",
+      "report": {
+        "id": "l-013",
+        "title": "Lost pencil pouch at the parking lot",
+        "description": "Lost a pencil pouh (Faber Castell, camo) transparent front. Probably left it at car park.",
+        "category": "stationery",
+        "location": "car park",
+        "itemDate": "2026-10-21",
+        "itemDateTo": null,
+        "color": "other",
+        "brand": "Faber Castell",
+        "createdAt": "2026-10-23T19:04:18.000Z"
+      },
+      "relevant": [
+        "f-189"
+      ],
+      "tags": [
+        "brand-alias",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-014",
+      "split": "test",
+      "report": {
+        "id": "l-014",
+        "title": "Lost wallte at North Hall",
+        "description": "Lost a walllet (black).",
+        "category": "Personal items",
+        "location": "North Hall TV room",
+        "itemDate": "2026-09-25",
+        "itemDateTo": "2026-09-30",
+        "color": "black",
+        "brand": "Tommy",
+        "createdAt": "2026-10-01T20:21:06.000Z"
+      },
+      "relevant": [
+        "f-197"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "hard-negatives",
+        "location-wording-differs",
+        "time-window",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-015",
+      "split": "tuning",
+      "report": {
+        "id": "l-015",
+        "title": "Has anyone seen my green ID badge?",
+        "description": "I lost my green ID badge in a plastic holder. I last had it at main gate security booth.",
+        "category": "ID card",
+        "location": "near the main gate",
+        "itemDate": "2026-09-25",
+        "itemDateTo": "2026-09-29",
+        "color": "green",
+        "brand": null,
+        "createdAt": "2026-09-29T14:41:47.000Z"
+      },
+      "relevant": [
+        "f-143",
+        "f-237"
+      ],
+      "tags": [
+        "category-differs",
+        "hard-negatives",
+        "location-wording-differs",
+        "multi-relevant",
+        "noun-synonym",
+        "time-window",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-016",
+      "split": "tuning",
+      "report": {
+        "id": "l-016",
+        "title": "Lost fitness band at North Hall",
+        "description": "I lost my silver fitness band. I last had it at Noth Hall TV room this morning.",
+        "category": "accessories",
+        "location": "North Hall TV room",
+        "itemDate": "2026-10-07",
+        "itemDateTo": null,
+        "color": "silver",
+        "brand": null,
+        "createdAt": "2026-10-08T20:49:22.000Z"
+      },
+      "relevant": [
+        "f-087"
+      ],
+      "tags": [
+        "category-differs",
+        "colour-conflict",
+        "hard-negatives",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-017",
+      "split": "test",
+      "report": {
+        "id": "l-017",
+        "title": "Keys lost",
+        "description": "I lost my golden keys three keys on a ring. I last had it somewhere between the Science Building and the bus stop.",
+        "category": "Personal items",
+        "location": "somewhere between the Science Building and the bus stop",
+        "itemDate": "2026-09-10",
+        "itemDateTo": null,
+        "color": "gold",
+        "brand": null,
+        "createdAt": "2026-09-10T08:01:17.000Z"
+      },
+      "relevant": [
+        "f-102",
+        "f-195"
+      ],
+      "tags": [
+        "category-differs",
+        "colour-conflict",
+        "found-before-window",
+        "location-wording-differs",
+        "multi-relevant",
+        "noun-synonym",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-018",
+      "split": "test",
+      "report": {
+        "id": "l-018",
+        "title": "Missing tote bag",
+        "description": "My tote bag went missing this morning. It is jet black. Please message me if you find it.",
+        "category": "Bags",
+        "location": "somewhere between the Engineering Building and Lecture Hall B",
+        "itemDate": "2026-10-24",
+        "itemDateTo": "2026-10-28",
+        "color": "black",
+        "brand": null,
+        "createdAt": "2026-10-29T09:03:26.000Z"
+      },
+      "relevant": [
+        "f-300"
+      ],
+      "tags": [
+        "category-differs",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-019",
+      "split": "tuning",
+      "report": {
+        "id": "l-019",
+        "title": "Missing money bag",
+        "description": "Left my Tommy Hilfiger money bag somewhere between the parking lot and the bus stop. Leather, with a zip.",
+        "category": "Personal items",
+        "location": "somewhere between the parking lot and the bus stop",
+        "itemDate": "2026-10-15",
+        "itemDateTo": null,
+        "color": null,
+        "brand": "Tommy Hilfiger",
+        "createdAt": "2026-10-15T20:56:05.000Z"
+      },
+      "relevant": [
+        "f-157"
+      ],
+      "tags": [
+        "brand-alias",
+        "category-differs",
+        "colour-missing",
+        "hard-negatives",
+        "location-wording-differs",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-020",
+      "split": "tuning",
+      "report": {
+        "id": "l-020",
+        "title": "Shdes lost",
+        "description": "Left my shadse at car park. With avitor frames. Colour: jet black.",
+        "category": "Eyewear",
+        "location": "parking lot behind Admin Building",
+        "itemDate": "2026-11-05",
+        "itemDateTo": null,
+        "color": "black",
+        "brand": "OAKLEY",
+        "createdAt": "2026-11-06T07:19:39.000Z"
+      },
+      "relevant": [
+        "f-196"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "found-late",
+        "hard-negatives",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-021",
+      "split": "test",
+      "report": {
+        "id": "l-021",
+        "title": "Lost metallic silver laptop",
+        "description": "Lost a laptop (metallic silver).",
+        "category": "Electronics",
+        "location": "main gate security booth",
+        "itemDate": "2026-09-17",
+        "itemDateTo": null,
+        "color": "silver",
+        "brand": "ThinkPad",
+        "createdAt": "2026-09-18T08:42:30.000Z"
+      },
+      "relevant": [
+        "f-121"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "hard-negatives",
+        "location-wording-differs"
+      ]
+    },
+    {
+      "id": "q-022",
+      "split": "test",
+      "report": {
+        "id": "l-022",
+        "title": "Lost shades at the Admin Building",
+        "description": "I lost my metallic silver Ray-Ban shades with a scratched lens..",
+        "category": "Accessories",
+        "location": "Administration Building, accounts office queue",
+        "itemDate": "2026-10-08",
+        "itemDateTo": "2026-10-11",
+        "color": "silver",
+        "brand": "Ray-Ban",
+        "createdAt": "2026-10-11T12:06:35.000Z"
+      },
+      "relevant": [
+        "f-165"
+      ],
+      "tags": [
+        "brand-alias",
+        "category-differs",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-023",
+      "split": "tuning",
+      "report": {
+        "id": "l-023",
+        "title": "Lost gold sunglasses",
+        "description": "Left my sunglasses at Administration Building, accounts office queue. With aviator frames. Colour: gold.",
+        "category": "Accessories",
+        "location": "Admin Building reception",
+        "itemDate": "2026-09-20",
+        "itemDateTo": "2026-09-22",
+        "color": "gold",
+        "brand": null,
+        "createdAt": "2026-09-23T19:52:44.000Z"
+      },
+      "relevant": [
+        "f-003"
+      ],
+      "tags": [
+        "found-late",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-024",
+      "split": "tuning",
+      "report": {
+        "id": "l-024",
+        "title": "Lost sky blue book",
+        "description": "My book went missing on Monday. It is sky blue. Please message me if you find it.",
+        "category": "Books",
+        "location": "main auditorium seats near the stage",
+        "itemDate": "2026-09-24",
+        "itemDateTo": "2026-09-27",
+        "color": "blue",
+        "brand": null,
+        "createdAt": "2026-09-27T08:47:47.000Z"
+      },
+      "relevant": [
+        "f-020"
+      ],
+      "tags": [
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-025",
+      "split": "test",
+      "report": {
+        "id": "l-025",
+        "title": "Lost silver bunch of keys",
+        "description": "Left my bunch of keys somewhere on campus. With a bottle opener. Colour: silver.",
+        "category": "Keys",
+        "location": "prayer hall",
+        "itemDate": "2026-11-01",
+        "itemDateTo": null,
+        "color": "silver",
+        "brand": null,
+        "createdAt": "2026-11-03T19:18:29.000Z"
+      },
+      "relevant": [
+        "f-047"
+      ],
+      "tags": [
+        "colour-missing",
+        "hard-negatives",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-026",
+      "split": "test",
+      "report": {
+        "id": "l-026",
+        "title": "Has anyone seen my grey earbuds?",
+        "description": "Lost a earbuds (Apple, grey) with a silicone cover on the case.",
+        "category": "Electronics",
+        "location": "North Hall common room",
+        "itemDate": "2026-10-29",
+        "itemDateTo": null,
+        "color": "grey",
+        "brand": null,
+        "createdAt": "2026-10-30T07:22:06.000Z"
+      },
+      "relevant": [
+        "f-113",
+        "f-222"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-conflict",
+        "found-before-window",
+        "hard-negatives",
+        "location-wording-differs",
+        "multi-relevant",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-027",
+      "split": "tuning",
+      "report": {
+        "id": "l-027",
+        "title": "Lost patterned exercise book",
+        "description": "Left my exercise book at North Hall common room. With sticky notes. Colour: patterned.",
+        "category": "Stationery",
+        "location": "North Hall TV room",
+        "itemDate": "2026-10-02",
+        "itemDateTo": null,
+        "color": "other",
+        "brand": null,
+        "createdAt": "2026-10-04T07:42:15.000Z"
+      },
+      "relevant": [
+        "f-029",
+        "f-223"
+      ],
+      "tags": [
+        "category-differs",
+        "colour-conflict",
+        "hard-negatives",
+        "location-wording-differs",
+        "multi-relevant"
+      ]
+    },
+    {
+      "id": "q-028",
+      "split": "tuning",
+      "report": {
+        "id": "l-028",
+        "title": "Flash drive lost",
+        "description": "Lost a fllash drive (sky blue) with a lanyard. Proably left it somewhere between Lecture Hall A and the gym.",
+        "category": "electronics",
+        "location": "somewhere between Lecture Hall A and the gym",
+        "itemDate": "2026-10-21",
+        "itemDateTo": null,
+        "color": "blue",
+        "brand": null,
+        "createdAt": "2026-10-22T12:01:29.000Z"
+      },
+      "relevant": [
+        "f-019"
+      ],
+      "tags": [
+        "category-differs",
+        "location-wording-differs",
+        "typo",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-029",
+      "split": "test",
+      "report": {
+        "id": "l-029",
+        "title": "Transcend flash drive lost",
+        "description": "I lost my metallic silver Transcend flash drive..",
+        "category": "Electronics",
+        "location": "Admin Building parking",
+        "itemDate": "2026-09-16",
+        "itemDateTo": "2026-09-19",
+        "color": "silver",
+        "brand": "Transcend",
+        "createdAt": "2026-09-19T13:18:55.000Z"
+      },
+      "relevant": [
+        "f-244"
+      ],
+      "tags": [
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-030",
+      "split": "tuning",
+      "report": {
+        "id": "l-030",
+        "title": "Missing jumper",
+        "description": "Lost a jumper (olive) with a university logo. Probably left it at Lecture Hall A, back row.",
+        "category": "Clothing",
+        "location": "Lecture Hall A, back row",
+        "itemDate": "2026-10-22",
+        "itemDateTo": "2026-10-27",
+        "color": "green",
+        "brand": "adidas",
+        "createdAt": "2026-10-28T19:58:00.000Z"
+      },
+      "relevant": [
+        "f-251"
+      ],
+      "tags": [
+        "location-wording-differs",
+        "time-window",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-031",
+      "split": "tuning",
+      "report": {
+        "id": "l-031",
+        "title": "Lost dark brown card holder",
+        "description": "Lost a card holder (dark brown) leather, with a zip. Probably left it at LH-A.",
+        "category": "Wallet",
+        "location": "Lecture Hall A, back row",
+        "itemDate": "2026-08-25",
+        "itemDateTo": "2026-08-26",
+        "color": "brown",
+        "brand": "Fossil",
+        "createdAt": "2026-08-28T19:29:55.000Z"
+      },
+      "relevant": [
+        "f-171"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-032",
+      "split": "test",
+      "report": {
+        "id": "l-032",
+        "title": "Sweatshirt lost",
+        "description": "Left my sweatshirt somewhere on campus. With a university logo. Colour: cream.",
+        "category": "Clothing",
+        "location": "Eng building lab 2",
+        "itemDate": "2026-09-17",
+        "itemDateTo": null,
+        "color": "white",
+        "brand": "Adidas",
+        "createdAt": "2026-09-19T10:26:53.000Z"
+      },
+      "relevant": [
+        "f-096",
+        "f-148"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "location-wording-differs",
+        "multi-relevant",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-033",
+      "split": "test",
+      "report": {
+        "id": "l-033",
+        "title": "Msising wallet",
+        "description": "Left my TOMYM HILFIGER wlalet at Central Library. With a few cards inside. Colour: dark blue.",
+        "category": "Wallet",
+        "location": "Libary reading room",
+        "itemDate": "2026-09-11",
+        "itemDateTo": null,
+        "color": null,
+        "brand": "TOMMY HILFIGER",
+        "createdAt": "2026-09-11T12:36:41.000Z"
+      },
+      "relevant": [
+        "f-250"
+      ],
+      "tags": [
+        "brand-alias",
+        "colour-missing",
+        "location-wording-differs",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-034",
+      "split": "test",
+      "report": {
+        "id": "l-034",
+        "title": "Lost gold key ring",
+        "description": "My key ring went missing. It is gold, with a rubber duck keychain. Please message me if you find it.",
+        "category": "Keys",
+        "location": "Student Centre cafeteria",
+        "itemDate": "2026-10-10",
+        "itemDateTo": null,
+        "color": "gold",
+        "brand": null,
+        "createdAt": "2026-10-12T16:57:51.000Z"
+      },
+      "relevant": [
+        "f-145"
+      ],
+      "tags": [
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-035",
+      "split": "test",
+      "report": {
+        "id": "l-035",
+        "title": "Missing bunch of keys",
+        "description": "My bunch of keys went missing this morning. It is matte black, three keys on a ring. Please message me if you find it.",
+        "category": "Keys",
+        "location": "Admin Building parking",
+        "itemDate": "2026-08-28",
+        "itemDateTo": "2026-09-01",
+        "color": "black",
+        "brand": null,
+        "createdAt": "2026-09-02T14:14:02.000Z"
+      },
+      "relevant": [
+        "f-297"
+      ],
+      "tags": [
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-036",
+      "split": "tuning",
+      "report": {
+        "id": "l-036",
+        "title": "Has anyone seen my metallic silver reading glasses?",
+        "description": "My reading glasses went missing. It is metallic silver, with a cleaning cloth. Please message me if you find it.",
+        "category": "Eyewear",
+        "location": "somewhere between the library and the Science Building",
+        "itemDate": "2026-10-06",
+        "itemDateTo": null,
+        "color": "silver",
+        "brand": "Lenskart",
+        "createdAt": "2026-10-08T08:10:13.000Z"
+      },
+      "relevant": [
+        "f-007"
+      ],
+      "tags": [
+        "category-differs",
+        "colour-missing",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "typo",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-037",
+      "split": "tuning",
+      "report": {
+        "id": "l-037",
+        "title": "Has anyone seen my flash drive?",
+        "description": "Left my flash drive somewhere on campus. With a missing cap.",
+        "category": "Accessories",
+        "location": "Admin Building reception",
+        "itemDate": "2026-09-06",
+        "itemDateTo": "2026-09-07",
+        "color": null,
+        "brand": null,
+        "createdAt": "2026-09-07T17:09:03.000Z"
+      },
+      "relevant": [
+        "f-039"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-missing",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-038",
+      "split": "tuning",
+      "report": {
+        "id": "l-038",
+        "title": "Lost matte black pen case",
+        "description": "Lost a pen case (matte black) with pens and a ruler inside. Probably left it somewhere between the auditorium and the prayer room.",
+        "category": "stationery",
+        "location": "somewhere between the auditorium and the prayer room",
+        "itemDate": "2026-10-10",
+        "itemDateTo": "2026-10-13",
+        "color": "black",
+        "brand": null,
+        "createdAt": "2026-10-13T20:34:22.000Z"
+      },
+      "relevant": [
+        "f-142",
+        "f-245"
+      ],
+      "tags": [
+        "brand-missing",
+        "colour-conflict",
+        "hard-negatives",
+        "location-wording-differs",
+        "multi-relevant",
+        "noun-synonym",
+        "time-window",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-039",
+      "split": "test",
+      "report": {
+        "id": "l-039",
+        "title": "Has anyone seen my red sweater?",
+        "description": "My sweater went missing on Monday. It is red. Please message me if you find it.",
+        "category": "clothing",
+        "location": "somewhere between the computer lab and Lecture Hall A",
+        "itemDate": "2026-10-23",
+        "itemDateTo": null,
+        "color": "red",
+        "brand": "ADIDAS",
+        "createdAt": "2026-10-23T12:10:29.000Z"
+      },
+      "relevant": [
+        "f-186"
+      ],
+      "tags": [
+        "category-differs",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-040",
+      "split": "test",
+      "report": {
+        "id": "l-040",
+        "title": "Lost dark red card holder",
+        "description": "I lost my dark red card holder with a coin pocket. I last had it at canteen near the juice counter yesterday afternoon.",
+        "category": "Accessories",
+        "location": "Student Center canteen",
+        "itemDate": "2026-10-07",
+        "itemDateTo": null,
+        "color": "red",
+        "brand": null,
+        "createdAt": "2026-10-07T17:12:11.000Z"
+      },
+      "relevant": [
+        "f-074"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-041",
+      "split": "tuning",
+      "report": {
+        "id": "l-041",
+        "title": "Has anyone seen my flash drive?",
+        "description": "My flash drive went missing. Please message me if you find it.",
+        "category": "Electronics",
+        "location": "auditorium hall",
+        "itemDate": "2026-08-28",
+        "itemDateTo": "2026-08-29",
+        "color": null,
+        "brand": "Transcend",
+        "createdAt": "2026-08-30T11:20:30.000Z"
+      },
+      "relevant": [
+        "f-270"
+      ],
+      "tags": [
+        "category-differs",
+        "colour-missing",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-042",
+      "split": "tuning",
+      "report": {
+        "id": "l-042",
+        "title": "Lost phone at the library",
+        "description": "Lost a phone in a clear silicone case.",
+        "category": "Mobile phone",
+        "location": "Library, 2nd floor reading room",
+        "itemDate": "2026-10-08",
+        "itemDateTo": null,
+        "color": null,
+        "brand": null,
+        "createdAt": "2026-10-09T18:35:09.000Z"
+      },
+      "relevant": [
+        "f-072"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-missing",
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-043",
+      "split": "test",
+      "report": {
+        "id": "l-043",
+        "title": "Lost scientific calculator at the Admin Building",
+        "description": "Left my scientific calculator at Administration Building, accounts office queue. With a slide-on cover. Colour: matte black.",
+        "category": "Electronics",
+        "location": "Administration Building, accounts office queue",
+        "itemDate": "2026-10-18",
+        "itemDateTo": "2026-10-19",
+        "color": "black",
+        "brand": null,
+        "createdAt": "2026-10-19T16:23:36.000Z"
+      },
+      "relevant": [
+        "f-255"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "found-before-window",
+        "location-wording-differs",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-044",
+      "split": "tuning",
+      "report": {
+        "id": "l-044",
+        "title": "HP laptop computer lost",
+        "description": "I lost my dark grey HP laptop computer with stickers on the lid. I last had it at near the main gate before the lab session.",
+        "category": "Electronics",
+        "location": "main gate security booth",
+        "itemDate": "2026-09-09",
+        "itemDateTo": null,
+        "color": "grey",
+        "brand": "HP",
+        "createdAt": "2026-09-11T16:18:01.000Z"
+      },
+      "relevant": [
+        "f-137"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-045",
+      "split": "tuning",
+      "report": {
+        "id": "l-045",
+        "title": "Missing fitness band",
+        "description": "Lost a fitness band (Xiaomi, tan) with a metal strap.",
+        "category": "watch",
+        "location": "Science Building room 112",
+        "itemDate": "2026-10-23",
+        "itemDateTo": null,
+        "color": "brown",
+        "brand": "Xiaomi",
+        "createdAt": "2026-10-25T07:26:34.000Z"
+      },
+      "relevant": [
+        "f-264"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-046",
+      "split": "test",
+      "report": {
+        "id": "l-046",
+        "title": "Lost jacket",
+        "description": "I lost my jacket. I last had it somewhere between the library and Lecture Hall A during the exam.",
+        "category": "Others",
+        "location": "somewhere between the library and Lecture Hall A",
+        "itemDate": "2026-08-17",
+        "itemDateTo": "2026-08-22",
+        "color": null,
+        "brand": null,
+        "createdAt": "2026-08-24T20:10:05.000Z"
+      },
+      "relevant": [
+        "f-164"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-missing",
+        "location-wording-differs",
+        "time-window",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-047",
+      "split": "tuning",
+      "report": {
+        "id": "l-047",
+        "title": "Missing earbuds",
+        "description": "My eabruds went missing during the exam. It is charcoal, with a silicone cover on the case. Please messge me if you find it.",
+        "category": "Accessories",
+        "location": "campus bus stop",
+        "itemDate": "2026-10-17",
+        "itemDateTo": null,
+        "color": "grey",
+        "brand": null,
+        "createdAt": "2026-10-17T10:25:13.000Z"
+      },
+      "relevant": [
+        "f-069"
+      ],
+      "tags": [
+        "brand-missing",
+        "colour-conflict",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-048",
+      "split": "tuning",
+      "report": {
+        "id": "l-048",
+        "title": "Lost dark grey wireless earbuds",
+        "description": "Left my Soundcore wireless earbuds somewhere on campus. In the charging case. Colour: dark grey.",
+        "category": "Electronics",
+        "location": "Eng building lab 2",
+        "itemDate": "2026-10-15",
+        "itemDateTo": null,
+        "color": "grey",
+        "brand": "Soundcore",
+        "createdAt": "2026-10-15T20:32:33.000Z"
+      },
+      "relevant": [
+        "f-022"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-missing",
+        "hard-negatives",
+        "location-wording-differs"
+      ]
+    },
+    {
+      "id": "q-049",
+      "split": "test",
+      "report": {
+        "id": "l-049",
+        "title": "Lost umbrella at the gym",
+        "description": "My umbrella went missing. It is light blue, with a hook handle. Please message me if you find it.",
+        "category": "Umbrella",
+        "location": "Sports Complex changing room",
+        "itemDate": "2026-08-19",
+        "itemDateTo": "2026-08-20",
+        "color": "blue",
+        "brand": null,
+        "createdAt": "2026-08-21T13:28:46.000Z"
+      },
+      "relevant": [
+        "f-034"
+      ],
+      "tags": [
+        "category-differs",
+        "colour-conflict",
+        "found-late",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-050",
+      "split": "tuning",
+      "report": {
+        "id": "l-050",
+        "title": "ANKER wirelesss earbuds lost",
+        "description": "Lost a wireless earbuds (ANKER, cream). Probably left it at cnateen near the juice counter.",
+        "category": "Accessories",
+        "location": "Student Center canteen",
+        "itemDate": "2026-09-21",
+        "itemDateTo": "2026-09-22",
+        "color": "white",
+        "brand": "ANKER",
+        "createdAt": "2026-09-22T12:29:51.000Z"
+      },
+      "relevant": [
+        "f-118"
+      ],
+      "tags": [
+        "brand-alias",
+        "category-differs",
+        "colour-conflict",
+        "hard-negatives",
+        "noun-synonym",
+        "time-window",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-051",
+      "split": "test",
+      "report": {
+        "id": "l-051",
+        "title": "Missing flask",
+        "description": "My flask went missing around lunchtime. It is white, with a carry loop. Please message me if you find it.",
+        "category": "Bottle",
+        "location": "Lecture Hall B, front seats",
+        "itemDate": "2026-10-03",
+        "itemDateTo": null,
+        "color": "white",
+        "brand": null,
+        "createdAt": "2026-10-04T08:06:01.000Z"
+      },
+      "relevant": [
+        "f-071",
+        "f-209"
+      ],
+      "tags": [
+        "category-differs",
+        "hard-negatives",
+        "location-wording-differs",
+        "multi-relevant",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-052",
+      "split": "tuning",
+      "report": {
+        "id": "l-052",
+        "title": "Has anyone seen my metallic silver cellphone?",
+        "description": "Lost a cellphone (metallic silver) with a pop socket. Probably left it at Library, 2nd floor reading room.",
+        "category": "Electronics",
+        "location": "Central Library",
+        "itemDate": "2026-08-23",
+        "itemDateTo": null,
+        "color": "silver",
+        "brand": "Realme",
+        "createdAt": "2026-08-25T21:18:20.000Z"
+      },
+      "relevant": [
+        "f-064"
+      ],
+      "tags": [
+        "category-differs",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-053",
+      "split": "test",
+      "report": {
+        "id": "l-053",
+        "title": "Lost beige cloth bag",
+        "description": "Lost a cloth bag (beige). Probably left it at main gate security booth.",
+        "category": "Bags",
+        "location": "main gate security booth",
+        "itemDate": "2026-10-11",
+        "itemDateTo": null,
+        "color": "brown",
+        "brand": null,
+        "createdAt": "2026-10-13T16:53:00.000Z"
+      },
+      "relevant": [
+        "f-180"
+      ],
+      "tags": [
+        "category-differs",
+        "found-late",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-054",
+      "split": "tuning",
+      "report": {
+        "id": "l-054",
+        "title": "Student ID lost",
+        "description": "My student ID went missing. It is red, on a retractable reel. Please message me if you find it.",
+        "category": "ID card",
+        "location": "North Hall TV room",
+        "itemDate": "2026-10-31",
+        "itemDateTo": null,
+        "color": "red",
+        "brand": null,
+        "createdAt": "2026-11-02T13:40:39.000Z"
+      },
+      "relevant": [
+        "f-016"
+      ],
+      "tags": [
+        "found-late",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-055",
+      "split": "tuning",
+      "report": {
+        "id": "l-055",
+        "title": "Lost pen case at the library",
+        "description": "My pen case went missing last evening. It is multicoloured, with a geometry set. Please message me if you find it.",
+        "category": "Stationery",
+        "location": "somewhere between the library and the main gate",
+        "itemDate": "2026-10-18",
+        "itemDateTo": "2026-10-20",
+        "color": "other",
+        "brand": "Deli",
+        "createdAt": "2026-10-22T10:04:19.000Z"
+      },
+      "relevant": [
+        "f-248"
+      ],
+      "tags": [
+        "brand-missing",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window",
+        "typo",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-056",
+      "split": "test",
+      "report": {
+        "id": "l-056",
+        "title": "Lost headphones at the Admin Building",
+        "description": "Lost a headphones (dark blue) with a scratch on the headband. Probably left it at Admin Building reception.",
+        "category": "audio",
+        "location": "Admin Building reception",
+        "itemDate": "2026-09-22",
+        "itemDateTo": null,
+        "color": "blue",
+        "brand": null,
+        "createdAt": "2026-09-22T18:05:15.000Z"
+      },
+      "relevant": [
+        "f-177"
+      ],
+      "tags": [
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-057",
+      "split": "tuning",
+      "report": {
+        "id": "l-057",
+        "title": "Has anyone seen my pink food container?",
+        "description": "Lost a food container (pink). Probbly left it at LH-A.",
+        "category": "Personal items",
+        "location": "Lecture Hall A, back row",
+        "itemDate": "2026-10-07",
+        "itemDateTo": null,
+        "color": "pink",
+        "brand": null,
+        "createdAt": "2026-10-09T10:37:02.000Z"
+      },
+      "relevant": [
+        "f-109",
+        "f-283"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-conflict",
+        "colour-missing",
+        "hard-negatives",
+        "location-wording-differs",
+        "multi-relevant",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-058",
+      "split": "tuning",
+      "report": {
+        "id": "l-058",
+        "title": "Miissing USB drive",
+        "description": "Lost a USB drive (burgundy) metal body. Probably left it at canteen near the juie counter.",
+        "category": "Electronics",
+        "location": "canteen near the juice counter",
+        "itemDate": "2026-09-09",
+        "itemDateTo": null,
+        "color": "red",
+        "brand": null,
+        "createdAt": "2026-09-11T16:02:22.000Z"
+      },
+      "relevant": [
+        "f-032",
+        "f-048"
+      ],
+      "tags": [
+        "multi-relevant",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-059",
+      "split": "tuning",
+      "report": {
+        "id": "l-059",
+        "title": "Has anyone seen my violet cellphone?",
+        "description": "I lost my volet vivo cellphone..",
+        "category": "Electronic devices",
+        "location": "Science Building chemistry lab",
+        "itemDate": "2026-08-21",
+        "itemDateTo": null,
+        "color": "purple",
+        "brand": "vivo",
+        "createdAt": "2026-08-23T20:04:45.000Z"
+      },
+      "relevant": [
+        "f-267"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "found-before-window",
+        "hard-negatives",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-060",
+      "split": "test",
+      "report": {
+        "id": "l-060",
+        "title": "Lost dark grreen ID badge",
+        "description": "I lost my dark geen ID badge..",
+        "category": "Cards",
+        "location": "prayer hall",
+        "itemDate": "2026-10-02",
+        "itemDateTo": "2026-10-04",
+        "color": "green",
+        "brand": null,
+        "createdAt": "2026-10-04T19:50:47.000Z"
+      },
+      "relevant": [
+        "f-154"
+      ],
+      "tags": [
+        "category-differs",
+        "found-late",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-061",
+      "split": "tuning",
+      "report": {
+        "id": "l-061",
+        "title": "Lost book at the main gate",
+        "description": "Left my book at near the main gate. Colour: dark red.",
+        "category": "Books",
+        "location": "main gate security booth",
+        "itemDate": "2026-10-28",
+        "itemDateTo": null,
+        "color": "red",
+        "brand": null,
+        "createdAt": "2026-10-28T15:29:14.000Z"
+      },
+      "relevant": [
+        "f-042"
+      ],
+      "tags": [
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-062",
+      "split": "test",
+      "report": {
+        "id": "l-062",
+        "title": "Lost copy at the aduitorium",
+        "description": "I lost my mint gren Mataor copy with lecture notes inside. before the lab session.",
+        "category": "books",
+        "location": "auditorium hall",
+        "itemDate": "2026-09-02",
+        "itemDateTo": "2026-09-03",
+        "color": "green",
+        "brand": "Matador",
+        "createdAt": "2026-09-05T08:00:32.000Z"
+      },
+      "relevant": [
+        "f-160"
+      ],
+      "tags": [
+        "category-differs",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-063",
+      "split": "tuning",
+      "report": {
+        "id": "l-063",
+        "title": "Lost burgundy food container",
+        "description": "Lost a food container (burgundy) in an insulated bag. Probably left it at dorm common room (North Hall).",
+        "category": "personal items",
+        "location": "dorm common room (North Hall)",
+        "itemDate": "2026-09-16",
+        "itemDateTo": null,
+        "color": "red",
+        "brand": null,
+        "createdAt": "2026-09-18T17:10:21.000Z"
+      },
+      "relevant": [
+        "f-010"
+      ],
+      "tags": [
+        "found-before-window",
+        "hard-negatives",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-064",
+      "split": "test",
+      "report": {
+        "id": "l-064",
+        "title": "Laptop lost",
+        "description": "Left my laptop somewhere on campus. Colour: chrome.",
+        "category": "laptop",
+        "location": "campus bus stop",
+        "itemDate": "2026-09-14",
+        "itemDateTo": null,
+        "color": "silver",
+        "brand": null,
+        "createdAt": "2026-09-16T13:15:08.000Z"
+      },
+      "relevant": [
+        "f-045",
+        "f-229"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-conflict",
+        "location-wording-differs",
+        "multi-relevant",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-065",
+      "split": "test",
+      "report": {
+        "id": "l-065",
+        "title": "Lost notebook computer at the bus stop",
+        "description": "My notebook computer went missing this morning. It is sky blue, with a worn keyboard. Please message me if you find it.",
+        "category": "laptop",
+        "location": "campus bus stop",
+        "itemDate": "2026-09-30",
+        "itemDateTo": "2026-10-04",
+        "color": "blue",
+        "brand": "HP",
+        "createdAt": "2026-10-06T15:11:06.000Z"
+      },
+      "relevant": [
+        "f-276"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-066",
+      "split": "tuning",
+      "report": {
+        "id": "l-066",
+        "title": "Lost phone charger at the main gate",
+        "description": "I lost my black Samsung phone charger with a long braided cable. I last had it at Main Gate.",
+        "category": "Electronics",
+        "location": "near the main gate",
+        "itemDate": "2026-08-22",
+        "itemDateTo": null,
+        "color": null,
+        "brand": "Samsung",
+        "createdAt": "2026-08-23T13:00:36.000Z"
+      },
+      "relevant": [
+        "f-079"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-missing",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-067",
+      "split": "tuning",
+      "report": {
+        "id": "l-067",
+        "title": "Textbook lost",
+        "description": "Lost a textbook (maroon).",
+        "category": "Books",
+        "location": "Main Gate",
+        "itemDate": "2026-08-28",
+        "itemDateTo": null,
+        "color": "red",
+        "brand": null,
+        "createdAt": "2026-08-30T12:46:32.000Z"
+      },
+      "relevant": [
+        "f-092"
+      ],
+      "tags": [
+        "colour-missing",
+        "hard-negatives",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-068",
+      "split": "tuning",
+      "report": {
+        "id": "l-068",
+        "title": "Flask lost",
+        "description": "My flask went missing on Monday. It is navy, with a dent near the bottom. Please message me if you find it.",
+        "category": "Personal items",
+        "location": "admin block lobby",
+        "itemDate": "2026-09-02",
+        "itemDateTo": null,
+        "color": null,
+        "brand": "Hydroflask",
+        "createdAt": "2026-09-02T12:00:53.000Z"
+      },
+      "relevant": [
+        "f-018"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-missing",
+        "hard-negatives",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-069",
+      "split": "tuning",
+      "report": {
+        "id": "l-069",
+        "title": "Keychain lost",
+        "description": "My keychain went missing. It is jet black, with a small torch. Please message me if you find it.",
+        "category": "Keys",
+        "location": "admin block lobby",
+        "itemDate": "2026-08-22",
+        "itemDateTo": "2026-08-23",
+        "color": "black",
+        "brand": null,
+        "createdAt": "2026-08-25T07:00:54.000Z"
+      },
+      "relevant": [
+        "f-089",
+        "f-141"
+      ],
+      "tags": [
+        "category-differs",
+        "found-late",
+        "hard-negatives",
+        "location-wording-differs",
+        "multi-relevant",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-070",
+      "split": "test",
+      "report": {
+        "id": "l-070",
+        "title": "Has anyone seen my metallic silver shades?",
+        "description": "My shades went missing during the exam. It is metallic silver, in a soft pouch. Please message me if you find it.",
+        "category": "Eyewear",
+        "location": "Gymnasium",
+        "itemDate": "2026-11-02",
+        "itemDateTo": null,
+        "color": "silver",
+        "brand": "OAKLEY",
+        "createdAt": "2026-11-03T13:00:30.000Z"
+      },
+      "relevant": [
+        "f-179"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-conflict",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-071",
+      "split": "test",
+      "report": {
+        "id": "l-071",
+        "title": "Bottle lost",
+        "description": "I lost my matte black bottle with a straw lid. during the exam.",
+        "category": "Bottle",
+        "location": "somewhere between the gym and the parking lot",
+        "itemDate": "2026-09-13",
+        "itemDateTo": null,
+        "color": "black",
+        "brand": "nalgene",
+        "createdAt": "2026-09-14T13:48:18.000Z"
+      },
+      "relevant": [
+        "f-112"
+      ],
+      "tags": [
+        "brand-missing",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-072",
+      "split": "test",
+      "report": {
+        "id": "l-072",
+        "title": "Missing reference book",
+        "description": "I lost my green reference book Physics, with notes in the margins..",
+        "category": "Book",
+        "location": "somewhere between the auditorium and the Science Building",
+        "itemDate": "2026-10-29",
+        "itemDateTo": null,
+        "color": "green",
+        "brand": null,
+        "createdAt": "2026-10-29T16:28:44.000Z"
+      },
+      "relevant": [
+        "f-040"
+      ],
+      "tags": [
+        "category-differs",
+        "found-late",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "typo",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-073",
+      "split": "test",
+      "report": {
+        "id": "l-073",
+        "title": "Apple wristwatch lost",
+        "description": "My wristwatch went missing last evening. It is blue, with a leather strap. Please message me if you find it.",
+        "category": "Accessories",
+        "location": "Main Gate",
+        "itemDate": "2026-09-24",
+        "itemDateTo": null,
+        "color": "blue",
+        "brand": "Apple",
+        "createdAt": "2026-09-25T09:58:07.000Z"
+      },
+      "relevant": [
+        "f-268"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-074",
+      "split": "test",
+      "report": {
+        "id": "l-074",
+        "title": "Lost battery pack at North Hall",
+        "description": "I lost my blue baseus battery pack. I last had it somewhere between North Hall and the gym during the exam.",
+        "category": "Electronics",
+        "location": "somewhere between North Hall and the gym",
+        "itemDate": "2026-09-13",
+        "itemDateTo": null,
+        "color": "blue",
+        "brand": "baseus",
+        "createdAt": "2026-09-13T21:13:04.000Z"
+      },
+      "relevant": [
+        "f-104"
+      ],
+      "tags": [
+        "found-before-window",
+        "location-wording-differs",
+        "noun-synonym",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-075",
+      "split": "test",
+      "report": {
+        "id": "l-075",
+        "title": "Nalgene tumbler lost",
+        "description": "Lost a tumbler (Nalgene, cream) with a straw lid. Probably left it at prayer room, ground floor.",
+        "category": "Bottle",
+        "location": "prayer room, ground floor",
+        "itemDate": "2026-10-22",
+        "itemDateTo": null,
+        "color": "white",
+        "brand": "Nalgene",
+        "createdAt": "2026-10-22T07:04:36.000Z"
+      },
+      "relevant": [
+        "f-035",
+        "f-058"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "found-late",
+        "hard-negatives",
+        "location-wording-differs",
+        "multi-relevant",
+        "noun-synonym",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-076",
+      "split": "test",
+      "report": {
+        "id": "l-076",
+        "title": "Missing pen case",
+        "description": "Left my faber-castell pen case at campus bus stop. With pens and a ruler inside.",
+        "category": "Personal items",
+        "location": "shuttle stop near the main gate",
+        "itemDate": "2026-10-23",
+        "itemDateTo": "2026-10-25",
+        "color": null,
+        "brand": "faber-castell",
+        "createdAt": "2026-10-27T18:49:52.000Z"
+      },
+      "relevant": [
+        "f-293"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-missing",
+        "found-late",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window",
+        "typo"
+      ]
+    },
+    {
+      "id": "q-077",
+      "split": "test",
+      "report": {
+        "id": "l-077",
+        "title": "Missing ID badge",
+        "description": "Lost a ID badge (burgundy) on a retractable reel. Probably left it at Admin Building reception.",
+        "category": "Cards",
+        "location": "Administration Building, accounts office queue",
+        "itemDate": "2026-09-29",
+        "itemDateTo": "2026-09-30",
+        "color": "red",
+        "brand": null,
+        "createdAt": "2026-10-02T15:20:35.000Z"
+      },
+      "relevant": [
+        "f-277"
+      ],
+      "tags": [
+        "category-differs",
+        "found-before-window",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym",
+        "time-window"
+      ]
+    },
+    {
+      "id": "q-078",
+      "split": "test",
+      "report": {
+        "id": "l-078",
+        "title": "Has anyone seen my black flash drive?",
+        "description": "Lost a flash drive (Sandisk, black) on a keyring.",
+        "category": "Electronics",
+        "location": "food court, Student Centre",
+        "itemDate": "2026-10-19",
+        "itemDateTo": null,
+        "color": "black",
+        "brand": "Sandisk",
+        "createdAt": "2026-10-19T16:25:36.000Z"
+      },
+      "relevant": [
+        "f-139"
+      ],
+      "tags": [
+        "brand-missing",
+        "category-differs",
+        "colour-missing",
+        "hard-negatives",
+        "location-wording-differs",
+        "noun-synonym"
+      ]
+    },
+    {
+      "id": "q-079",
+      "split": "tuning",
+      "report": {
+        "id": "l-079",
+        "title": "Jumper lost",
+        "description": "My jumper went missing during the exam. It is navy blue. Please message me if you find it.",
+        "category": "Clothing",
+        "location": "somewhere between the computer lab and Lecture Hall B",
+        "itemDate": "2026-10-25",
+        "itemDateTo": null,
+        "color": "blue",
+        "brand": null,
+        "createdAt": "2026-10-26T10:15:08.000Z"
+      },
+      "relevant": [
+        "f-055",
+        "f-261"
+      ],
+      "tags": [
+        "hard-negatives",
+        "location-wording-differs",
+        "multi-relevant",
+        "noun-synonym",
+        "typo",
+        "vague-location"
+      ]
+    },
+    {
+      "id": "q-080",
+      "split": "test",
+      "report": {
+        "id": "l-080",
+        "title": "Lost campus card at the bus stop",
+        "description": "My campus card went missing. It is olive, with a clip. Please message me if you find it.",
+        "category": "Documents",
+        "location": "shuttle stop near the main gate",
+        "itemDate": "2026-09-10",
+        "itemDateTo": "2026-09-13",
+        "color": "green",
+        "brand": null,
+        "createdAt": "2026-09-15T11:13:24.000Z"
+      },
+      "relevant": [
+        "f-041"
+      ],
+      "tags": [
+        "category-differs",
+        "hard-negatives",
+        "noun-synonym",
+        "time-window"
+      ]
+    }
+  ]
+}
