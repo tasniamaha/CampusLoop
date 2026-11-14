@@ -8,5 +8,7 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.spec.ts'],
+    // Preloads @nestjs/platform-express outside the test timeout; see the file for why.
+    setupFiles: ['./test/unit-setup.ts'],
   },
 });

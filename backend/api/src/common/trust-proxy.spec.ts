@@ -76,4 +76,4 @@ describe('applyTrustProxy: what req.ip becomes (the value the audit log records)
     const ipOf = await start('none');
     expect(await ipOf('198.51.100.7')).toMatch(/^(::1|::ffff:127\.0\.0\.1|127\.0\.0\.1)$/);
   });
-}, 20_000);
+});
