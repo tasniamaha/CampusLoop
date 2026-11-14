@@ -57,6 +57,21 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+### e2e tests on Windows
+
+Start the test containers first: `docker compose -f docker-compose.test.yml up -d` (MySQL on 3317, Redis on 6390). Then, from `backend/api`:
+
+```powershell
+# All specs
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/e2e.ps1
+# Selected specs
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/e2e.ps1 test/reviews.e2e-spec.ts
+```
+
+`scripts/e2e.ps1` points every DB variable at `campusloop_test` on 127.0.0.1:3317, runs `migration:run` there, and then runs vitest. It exits non-zero if the migrations fail, vitest fails, or vitest exits without results. Redis defaults to `redis://127.0.0.1:6390`; set `TEST_REDIS_URL` to override it.
+
+`npm run test:e2e` on its own does neither of these things. It uses whatever `DB_*` values are in the environment or `.env`, and it does not run migrations. The test guard (`test/guard-test-db.ts`) refuses to run if `DB_DATABASE` or `TEST_DB_NAME` names a database that does not end in `_test`. With the default `.env` (`campusloop_db`), it therefore stops straight away. To use it, point `DB_*` and `TEST_DB_*` at a `*_test` database and migrate that database yourself first.
+
 ## Create the first admin
 
 The admin API can only be used by an admin, so the first admin is created from the command line. `admin:promote` promotes an existing account to admin. It is a command-line script only, with no HTTP route.

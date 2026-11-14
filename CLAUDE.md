@@ -29,6 +29,8 @@ Inspect the actual files before assuming where something lives.
 
 Node 24 (see `.nvmrc`), the same version CI uses.
 
+**e2e on Windows:** from `backend/api`, run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/e2e.ps1 [spec files]`. It targets `campusloop_test` on port 3317, runs migrations first and exits non-zero on any failure. Plain `npm run test:e2e` needs `DB_*` pointing at a migrated `*_test` database, and it does not run migrations. See `backend/api/README.md`.
+
 Environment: copy `backend/api/.env.example` to `backend/api/.env` and `frontend/web/.env.example` to `frontend/web/.env.local`. The API refuses to boot unless the MySQL server clock runs in UTC.
 
 ## Non-negotiables
@@ -72,6 +74,6 @@ Environment: copy `backend/api/.env.example` to `backend/api/.env` and `frontend
   3. After the user says they've committed, run `git log --oneline -1` and `git status` to confirm, then continue.
 - **No attribution.** Never add a `Co-Authored-By` line or any other AI attribution to commit messages.
 - **Before any push,** run all of these and never push if any fail:
-  - Backend: `npm run build`, `npm run lint`, `npm test`, `npm run test:e2e` (against the test containers).
+  - Backend: `npm run build`, `npm run lint`, `npm test`, `npm run test:e2e` (against the test containers; on Windows use `scripts/e2e.ps1`).
   - Frontend: `npm run lint`, `npm run build`.
 - **Pushing.** Push only when asked. Never force-push to `main`. To undo a pushed commit, use `git revert`, never `reset`.
