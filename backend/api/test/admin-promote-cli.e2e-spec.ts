@@ -13,6 +13,7 @@ import { AppModule } from '../src/app.module.js';
 import { MailService } from '../src/mail/mail.service.js';
 import { User, UserRole } from '../src/users/entities/user.entity.js';
 import { AdminUsersService } from '../src/admin/admin-users.service.js';
+import { timedStep } from './helpers/timed-step.js';
 
 // The admin:promote bootstrap path against the real test database: the service rules it shares
 // with the admin API, and the compiled CLI itself (dist/, built by `npm run build` before tests).
@@ -21,6 +22,13 @@ const RUN = randomUUID().slice(0, 8);
 const CAMPUS = `cli-${RUN}`;
 const CLI = join(import.meta.dirname, '..', 'dist', 'scripts', 'admin-promote.js');
 const run = promisify(execFile);
+const SPEC = 'admin-promote-cli';
+// These limits cover slow process startup on Windows dev machines, not a hang: each call starts a
+// fresh node process, measured at 2 to 8 s just to load the CLI. A CLI still running after
+// CLI_TIMEOUT_MS is killed and the test fails with its output so far. One test calls it 3 times,
+// hence CLI_TEST_TIMEOUT_MS for that describe.
+const CLI_TIMEOUT_MS = 25_000;
+const CLI_TEST_TIMEOUT_MS = 90_000;
 
 let app: INestApplication;
 let ds: DataSource;
@@ -31,7 +39,7 @@ const emailFor = (label: string) => `cli-${label}-${RUN}@example.com`;
 
 async function makeUser(label: string, opts: { role?: UserRole; verified?: boolean; deactivated?: boolean } = {}) {
   const repo = ds.getRepository(User);
-  const user = await repo.save(
+  const user = await timedStep(SPEC, `makeUser ${label}`, async () => repo.save(
     repo.create({
       name: `cli-${label}`,
       email: emailFor(label),
@@ -41,7 +49,7 @@ async function makeUser(label: string, opts: { role?: UserRole; verified?: boole
       emailVerifiedAt: opts.verified === false ? null : new Date(),
       deactivatedAt: opts.deactivated ? new Date() : null,
     }),
-  );
+  ));
   userIds.push(user.id);
   return user;
 }
@@ -56,13 +64,24 @@ const meta = (m: unknown) => (typeof m === 'string' ? JSON.parse(m) : m);
 /** Runs the compiled CLI with ONLY the variables given (plus PATH/SystemRoot so node can start). */
 async function cli(args: string[], env: Record<string, string>) {
   const base = { PATH: process.env.PATH ?? '', SystemRoot: process.env.SystemRoot ?? '' };
-  try {
-    const { stdout, stderr } = await run(process.execPath, [CLI, ...args], { env: { ...base, ...env }, cwd: join(import.meta.dirname, '..') });
-    return { code: 0, stdout, stderr };
-  } catch (err) {
-    const e = err as { code: number; stdout: string; stderr: string };
-    return { code: e.code, stdout: e.stdout, stderr: e.stderr };
-  }
+  return timedStep(SPEC, `cli ${JSON.stringify(args)}`, async () => {
+    try {
+      const { stdout, stderr } = await run(process.execPath, [CLI, ...args], {
+        env: { ...base, ...env },
+        cwd: join(import.meta.dirname, '..'),
+        timeout: CLI_TIMEOUT_MS,
+      });
+      return { code: 0, stdout, stderr };
+    } catch (err) {
+      const e = err as { code: number | null; killed?: boolean; signal?: string | null; stdout: string; stderr: string };
+      if (e.killed) {
+        throw new Error(
+          `admin-promote CLI did not exit within ${CLI_TIMEOUT_MS} ms (killed with ${e.signal}). stdout so far: ${JSON.stringify(e.stdout)}; stderr so far: ${JSON.stringify(e.stderr)}`,
+        );
+      }
+      return { code: e.code, stdout: e.stdout, stderr: e.stderr };
+    }
+  });
 }
 
 /** Every DB variable set explicitly to the TEST database, so .env can never fill one in. */
@@ -75,12 +94,14 @@ const testDbEnv = () => ({
 });
 
 beforeAll(async () => {
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-    .overrideProvider(MailService)
-    .useValue({ send: async () => undefined })
-    .compile();
+  const moduleRef = await timedStep(SPEC, 'compile AppModule', () =>
+    Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(MailService)
+      .useValue({ send: async () => undefined })
+      .compile(),
+  );
   app = moduleRef.createNestApplication();
-  await app.init();
+  await timedStep(SPEC, 'app.init (connects, runs pending migrations)', () => app.init());
   ds = app.get(DataSource);
   service = app.get(AdminUsersService);
 }, 90_000);
@@ -130,7 +151,7 @@ describe('promoteBySystem (shared with the admin API rules)', () => {
   });
 });
 
-describe('npm run admin:promote (compiled CLI)', () => {
+describe('npm run admin:promote (compiled CLI)', { timeout: CLI_TEST_TIMEOUT_MS }, () => {
   beforeAll(() => {
     if (!existsSync(CLI)) throw new Error(`${CLI} is missing: run "npm run build" before the e2e tests`);
   });

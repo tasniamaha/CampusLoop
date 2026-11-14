@@ -13,6 +13,9 @@ import { ResourceCategory } from '../src/resources/entities/resource-category.en
 import { LoanEvent, LoanEventType } from '../src/borrow-requests/entities/loan-event.entity.js';
 import { Review } from '../src/reviews/entities/review.entity.js';
 import { REVIEW_WINDOW_DAYS } from '../src/reviews/reviews.service.js';
+import { timedStep } from './helpers/timed-step.js';
+
+const SPEC = 'reviews-flow-http';
 
 // Goal: prove reviews work on a loan produced by the REAL borrow + QR flow, not on hand-inserted rows.
 // request -> approve -> pickup QR -> confirm pickup -> return QR -> confirm return -> reviews.
@@ -60,28 +63,34 @@ let resourceId = '';
 let loanId = '';
 
 beforeAll(async () => {
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-    .overrideProvider(MailService)
-    .useValue({ send: async () => undefined })
-    .compile();
+  const moduleRef = await timedStep(SPEC, 'compile AppModule', () =>
+    Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(MailService)
+      .useValue({ send: async () => undefined })
+      .compile(),
+  );
   app = moduleRef.createNestApplication();
   app.getHttpAdapter().getInstance().set('trust proxy', true);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
-  await app.init();
+  await timedStep(SPEC, 'app.init (connects, runs pending migrations)', () => app.init());
   ds = app.get(DataSource);
 
-  await makeUser('owner');
-  await makeUser('borrower');
+  await timedStep(SPEC, 'makeUser owner (save + login)', () => makeUser('owner'));
+  await timedStep(SPEC, 'makeUser borrower (save + login)', () => makeUser('borrower'));
 
-  const category = await ds.getRepository(ResourceCategory).findOneByOrFail({ slug: 'calculators' });
-  const resource = await ds.getRepository(Resource).save(
-    ds.getRepository(Resource).create({
-      ownerId: ids.owner,
-      categoryId: category.id,
-      title: 'Flow-test calculator',
-      description: null,
-      isListed: true,
-    }),
+  const category = await timedStep(SPEC, 'find category calculators', () =>
+    ds.getRepository(ResourceCategory).findOneByOrFail({ slug: 'calculators' }),
+  );
+  const resource = await timedStep(SPEC, 'save resource', () =>
+    ds.getRepository(Resource).save(
+      ds.getRepository(Resource).create({
+        ownerId: ids.owner,
+        categoryId: category.id,
+        title: 'Flow-test calculator',
+        description: null,
+        isListed: true,
+      }),
+    ),
   );
   resourceId = resource.id;
 }, 90_000);
