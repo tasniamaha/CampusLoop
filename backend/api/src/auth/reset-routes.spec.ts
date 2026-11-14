@@ -1,4 +1,4 @@
-﻿import 'reflect-metadata';
+import 'reflect-metadata';
 import { describe, expect, it } from 'vitest';
 import { RequestMethod } from '@nestjs/common';
 import { AuthController } from './auth.controller.js';
