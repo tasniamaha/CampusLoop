@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { call } from '../../lib/api-client';
 
 type Notice = {
   id: string;
@@ -24,17 +25,6 @@ type PageData = {
 
 const btn =
   'rounded-xl px-3 py-2 text-sm font-semibold transition disabled:opacity-50';
-
-async function errorText(response: Response) {
-  try {
-    const data = await response.json();
-    return Array.isArray(data.message)
-      ? data.message.join(', ')
-      : data.message || 'Request failed';
-  } catch {
-    return 'Request failed';
-  }
-}
 
 export default function NotificationsPage() {
   const router = useRouter();
@@ -58,21 +48,17 @@ export default function NotificationsPage() {
         ...(unreadOnly ? { unreadOnly: 'true' } : {}),
       });
 
-      const response = await fetch(
-        `/api/backend/notifications?${query}`,
-        { cache: 'no-store' },
-      );
+      const result = await call<PageData>(`/notifications?${query}`);
 
-      if (response.status === 401) {
-        router.replace('/login');
-        return;
+      if (!result.ok) {
+        if (result.status === 401) {
+          router.replace('/login');
+          return;
+        }
+        throw new Error(result.message);
       }
 
-      if (!response.ok) {
-        throw new Error(await errorText(response));
-      }
-
-      setData(await response.json());
+      setData(result.data);
     } catch (e) {
       setError(
         e instanceof Error ? e.message : 'Could not load notifications',
@@ -93,12 +79,10 @@ export default function NotificationsPage() {
     setNotice('');
 
     try {
-      const response = await fetch(`/api/backend/notifications${path}`, {
-        method: 'PATCH',
-      });
+      const result = await call(`/notifications${path}`, { method: 'PATCH' });
 
-      if (!response.ok) {
-        throw new Error(await errorText(response));
+      if (!result.ok) {
+        throw new Error(result.message);
       }
 
       setNotice(
@@ -127,13 +111,10 @@ export default function NotificationsPage() {
     setNotice('');
 
     try {
-      const response = await fetch(
-        `/api/backend/notifications/${encodeURIComponent(id)}`,
-        { method: 'DELETE' },
-      );
+      const result = await call(`/notifications/${encodeURIComponent(id)}`, { method: 'DELETE' });
 
-      if (!response.ok) {
-        throw new Error(await errorText(response));
+      if (!result.ok) {
+        throw new Error(result.message);
       }
 
       setNotice('Notification deleted successfully.');

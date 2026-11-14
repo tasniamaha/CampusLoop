@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { Html5Qrcode } from 'html5-qrcode';
+import { call, json } from '../lib/api-client';
 
 type Props = {
   requestId: string;
@@ -10,17 +11,6 @@ type Props = {
   status: string;
   onComplete: () => void;
 };
-
-async function readError(response: Response) {
-  try {
-    const body = await response.json();
-    return Array.isArray(body.message)
-      ? body.message.join(', ')
-      : body.message || 'Request failed';
-  } catch {
-    return 'Request failed';
-  }
-}
 
 export default function QrLoanVerification({
   requestId,
@@ -54,15 +44,14 @@ export default function QrLoanVerification({
 
     try {
       const purpose = role === 'incoming' ? 'pickup-qr' : 'return-qr';
-      const response = await fetch(
-        `/api/backend/borrow-requests/${requestId}/${purpose}`,
+      const result = await call<{ token: string }>(
+        `/borrow-requests/${requestId}/${purpose}`,
         { method: 'POST' },
       );
 
-      if (!response.ok) throw new Error(await readError(response));
+      if (!result.ok) throw new Error(result.message);
 
-      const data: { token: string } = await response.json();
-      setQrImage(await QRCode.toDataURL(data.token));
+      setQrImage(await QRCode.toDataURL(result.data.token));
       setNotice('QR generated. It expires in five minutes.');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not generate QR.');
@@ -97,16 +86,12 @@ export default function QrLoanVerification({
           mode === 'pickup' ? 'confirm-pickup' : 'return';
         const method = mode === 'pickup' ? 'POST' : 'PATCH';
 
-        const response = await fetch(
-          `/api/backend/borrow-requests/${requestId}/${endpoint}`,
-          {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token }),
-          },
+        const result = await call(
+          `/borrow-requests/${requestId}/${endpoint}`,
+          json(method, { token }),
         );
 
-        if (!response.ok) throw new Error(await readError(response));
+        if (!result.ok) throw new Error(result.message);
 
         setNotice(
           mode === 'pickup'

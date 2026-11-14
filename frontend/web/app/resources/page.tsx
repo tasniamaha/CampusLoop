@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { call, json } from '../../lib/api-client';
 
 type Category = { id: string; name: string; slug: string };
 type Resource = {
@@ -26,16 +27,6 @@ type ResourceResponse = { items: Resource[]; total: number; page: number; limit:
 const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10';
 const buttonClass = 'inline-flex items-center justify-center rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50';
 
-async function readError(response: Response) {
-  try {
-    const data = await response.json();
-    const message = data?.message;
-    return Array.isArray(message) ? message.join(', ') : message || 'Request failed. Please try again.';
-  } catch {
-    return 'Request failed. Please try again.';
-  }
-}
-
 export default function ResourcesPage() {
   const router = useRouter();
   const [resources, setResources] = useState<Resource[]>([]);
@@ -53,10 +44,12 @@ export default function ResourcesPage() {
   const [formError, setFormError] = useState('');
 
   const loadCategories = useCallback(async () => {
-    const response = await fetch('/api/backend/resource-categories', { cache: 'no-store' });
-    if (response.status === 401) { router.replace('/login'); return null; }
-    if (!response.ok) throw new Error(await readError(response));
-    return await response.json() as Category[];
+    const result = await call<Category[]>('/resource-categories');
+    if (!result.ok) {
+      if (result.status === 401) { router.replace('/login'); return null; }
+      throw new Error(result.message);
+    }
+    return result.data;
   }, [router]);
 
   const loadResources = useCallback(async () => {
@@ -70,11 +63,12 @@ export default function ResourcesPage() {
       if (mode === 'available') params.set('available', 'true');
       if (mode === 'mine') params.set('mine', 'true');
       if (mode === 'favorites') params.set('favorites', 'true');
-      const response = await fetch(`/api/backend/resources?${params.toString()}`, { cache: 'no-store' });
-      if (response.status === 401) { router.replace('/login'); return; }
-      if (!response.ok) throw new Error(await readError(response));
-      const data: ResourceResponse = await response.json();
-      setResources(Array.isArray(data.items) ? data.items : []);
+      const result = await call<ResourceResponse>(`/resources?${params.toString()}`);
+      if (!result.ok) {
+        if (result.status === 401) { router.replace('/login'); return; }
+        throw new Error(result.message);
+      }
+      setResources(Array.isArray(result.data.items) ? result.data.items : []);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unable to load resources.');
     } finally {
@@ -94,9 +88,11 @@ export default function ResourcesPage() {
   async function toggleFavorite(resource: Resource) {
     setBusyId(resource.id); setNotice(''); setError('');
     try {
-      const response = await fetch(`/api/backend/resources/${resource.id}/favorite`, { method: resource.favorited ? 'DELETE' : 'PUT' });
-      if (response.status === 401) { router.replace('/login'); return; }
-      if (!response.ok) throw new Error(await readError(response));
+      const result = await call(`/resources/${resource.id}/favorite`, { method: resource.favorited ? 'DELETE' : 'PUT' });
+      if (!result.ok) {
+        if (result.status === 401) { router.replace('/login'); return; }
+        throw new Error(result.message);
+      }
       setNotice(resource.favorited ? 'Removed from saved resources.' : 'Resource saved to your favorites.');
       await loadResources();
     } catch (e) { setError(e instanceof Error ? e.message : 'Could not update favorite.'); }
@@ -110,12 +106,14 @@ export default function ResourcesPage() {
     const dueDate = due.toISOString();
     setBusyId(resource.id); setNotice(''); setError('');
     try {
-      const response = await fetch('/api/backend/borrow-requests', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resourceId: resource.id, dueDate, message: 'Requested through CampusLoop.' }),
-      });
-      if (response.status === 401) { router.replace('/login'); return; }
-      if (!response.ok) throw new Error(await readError(response));
+      const result = await call(
+        '/borrow-requests',
+        json('POST', { resourceId: resource.id, dueDate, message: 'Requested through CampusLoop.' }),
+      );
+      if (!result.ok) {
+        if (result.status === 401) { router.replace('/login'); return; }
+        throw new Error(result.message);
+      }
       setNotice(`Borrow request sent for “${resource.title}”.`);
       await loadResources();
     } catch (e) { setError(e instanceof Error ? e.message : 'Could not send the borrow request.'); }
@@ -135,9 +133,11 @@ export default function ResourcesPage() {
       borrowingRules: String(data.get('borrowingRules') || '').trim(),
     };
     try {
-      const response = await fetch('/api/backend/resources', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      if (response.status === 401) { router.replace('/login'); return; }
-      if (!response.ok) throw new Error(await readError(response));
+      const result = await call('/resources', json('POST', payload));
+      if (!result.ok) {
+        if (result.status === 401) { router.replace('/login'); return; }
+        throw new Error(result.message);
+      }
       setShowCreate(false); setMode('mine'); setQuery(''); setCategory(''); setCondition('');
       setNotice('Your resource has been listed.');
       await loadResources();

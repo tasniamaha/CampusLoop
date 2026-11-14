@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ChangeEvent, Suspense, useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ResourceReviews from '../../../components/ResourceReviews';
+import { call, json } from '../../../lib/api-client';
 
 type Category = { id: string; name: string; slug: string };
 type ImageItem = { id: string; url: string; sortOrder: number };
@@ -37,15 +38,7 @@ const dangerButton =
 const inputClass =
   'rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10';
 
-async function readError(response: Response) {
-  try {
-    const data = await response.json();
-    const message = data?.message;
-    return Array.isArray(message) ? message.join(', ') : message || 'Request failed. Please try again.';
-  } catch {
-    return 'Request failed. Please try again.';
-  }
-}
+type Me = { id?: string; sub?: string; user?: { id?: string } };
 
 function ResourceDetailContent() {
   const router = useRouter();
@@ -64,26 +57,28 @@ function ResourceDetailContent() {
   const load = useCallback(async () => {
     setError('');
     try {
-      const [resRes, meRes] = await Promise.all([
-        fetch(`/api/backend/resources/${id}`, { cache: 'no-store' }),
-        fetch('/api/backend/auth/me', { cache: 'no-store' }),
+      const [resResult, meResult] = await Promise.all([
+        call<ResourceDetail>(`/resources/${id}`),
+        call<Me | null>('/auth/me'),
       ]);
-      if (resRes.status === 401 || meRes.status === 401) {
+      if ((!resResult.ok && resResult.status === 401) || (!meResult.ok && meResult.status === 401)) {
         router.replace('/login');
         return;
       }
-      if (resRes.status === 404) {
-        setResource(null);
-        setError('This resource does not exist or is not available.');
-        return;
+      if (!resResult.ok) {
+        if (resResult.status === 404) {
+          setResource(null);
+          setError('This resource does not exist or is not available.');
+          return;
+        }
+        throw new Error(resResult.message);
       }
-      if (!resRes.ok) throw new Error(await readError(resRes));
-      const data: ResourceDetail = await resRes.json();
+      const data = resResult.data;
       setResource(data);
       setDays((d) => Math.min(Math.max(d, 1), data.maxLoanDays));
 
-      if (meRes.ok) {
-        const me = await meRes.json();
+      if (meResult.ok) {
+        const me = meResult.data;
         setMeId(me?.id ?? me?.sub ?? me?.user?.id ?? '');
       }
     } catch (e) {
@@ -101,17 +96,19 @@ function ResourceDetailContent() {
     return () => window.clearTimeout(timeout);
   }, [load]);
 
-  async function send(url: string, init: RequestInit, success: string) {
+  async function send(path: string, init: RequestInit, success: string) {
     setBusy(true);
     setNotice('');
     setError('');
     try {
-      const response = await fetch(url, init);
-      if (response.status === 401) {
-        router.replace('/login');
-        return false;
+      const result = await call(path, init);
+      if (!result.ok) {
+        if (result.status === 401) {
+          router.replace('/login');
+          return false;
+        }
+        throw new Error(result.message);
       }
-      if (!response.ok) throw new Error(await readError(response));
       setNotice(success);
       return true;
     } catch (e) {
@@ -125,7 +122,7 @@ function ResourceDetailContent() {
   async function toggleFavorite() {
     if (!resource) return;
     const ok = await send(
-      `/api/backend/resources/${resource.id}/favorite`,
+      `/resources/${resource.id}/favorite`,
       { method: resource.favorited ? 'DELETE' : 'PUT' },
       resource.favorited ? 'Removed from saved resources.' : 'Saved to your favorites.',
     );
@@ -137,16 +134,12 @@ function ResourceDetailContent() {
     // Exactly N days minus a minute, so it is always inside the owner's maximum.
     const dueDate = new Date(Date.now() + days * 24 * 3600 * 1000 - 60_000).toISOString();
     const ok = await send(
-      '/api/backend/borrow-requests',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          resourceId: resource.id,
-          dueDate,
-          ...(message.trim() ? { message: message.trim() } : {}),
-        }),
-      },
+      '/borrow-requests',
+      json('POST', {
+        resourceId: resource.id,
+        dueDate,
+        ...(message.trim() ? { message: message.trim() } : {}),
+      }),
       'Borrow request sent. Track it on the Borrowings page.',
     );
     if (ok) setMessage('');
@@ -155,12 +148,8 @@ function ResourceDetailContent() {
   async function toggleListed() {
     if (!resource) return;
     const ok = await send(
-      `/api/backend/resources/${resource.id}`,
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isListed: !resource.isListed }),
-      },
+      `/resources/${resource.id}`,
+      json('PATCH', { isListed: !resource.isListed }),
       resource.isListed ? 'Listing hidden from other students.' : 'Listing is visible again.',
     );
     if (ok) await load();
@@ -174,7 +163,7 @@ function ResourceDetailContent() {
     event.target.value = '';
 
     const ok = await send(
-      `/api/backend/resources/${resource.id}/images`,
+      `/resources/${resource.id}/images`,
       { method: 'POST', body: form },
       'Photos uploaded.',
     );
@@ -184,7 +173,7 @@ function ResourceDetailContent() {
   async function deleteImage(imageId: string) {
     if (!resource || !window.confirm('Remove this photo?')) return;
     const ok = await send(
-      `/api/backend/resources/${resource.id}/images/${imageId}`,
+      `/resources/${resource.id}/images/${imageId}`,
       { method: 'DELETE' },
       'Photo removed.',
     );

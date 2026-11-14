@@ -7,7 +7,7 @@ export type ApiResult<T> = { ok: true; data: T } | { ok: false; status: number; 
 export async function readError(response: Response): Promise<string> {
   const body = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
   if (Array.isArray(body?.message)) return body.message.join(', ');
-  return body?.message || `Request failed (${response.status})`;
+  return body?.message || 'Something went wrong. Please try again.';
 }
 
 export async function call<T>(path: string, init: RequestInit = {}): Promise<ApiResult<T>> {

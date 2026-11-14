@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import StarRating from './StarRating';
+import { call, json } from '../lib/api-client';
 
 type ReviewItem = {
   id: string;
@@ -31,16 +32,6 @@ type Reputation = {
 const REASON_MIN = 3;
 const REASON_MAX = 255;
 const buttonClass = 'rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50';
-
-async function responseError(response: Response) {
-  try {
-    const data = await response.json();
-    const message = data?.message;
-    return Array.isArray(message) ? message.join(', ') : message || 'Request failed.';
-  } catch {
-    return 'Request failed.';
-  }
-}
 
 function dateLabel(value: string) {
   return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
@@ -73,17 +64,17 @@ export default function ResourceReviews({
     setLoading(true);
     setError('');
     try {
-      const [reviewsResponse, reputationResponse] = await Promise.all([
-        fetch(`/api/backend/reviews/resource/${encodeURIComponent(resourceId)}?page=1&limit=10`, { cache: 'no-store' }),
-        fetch(`/api/backend/reviews/reputation/${encodeURIComponent(ownerId)}`, { cache: 'no-store' }),
+      const [reviewsResult, reputationResult] = await Promise.all([
+        call<ReviewList>(`/reviews/resource/${encodeURIComponent(resourceId)}?page=1&limit=10`),
+        call<Reputation>(`/reviews/reputation/${encodeURIComponent(ownerId)}`),
       ]);
-      if (reviewsResponse.status === 401 || reputationResponse.status === 401) {
+      if ((!reviewsResult.ok && reviewsResult.status === 401) || (!reputationResult.ok && reputationResult.status === 401)) {
         router.replace('/login');
         return;
       }
-      if (!reviewsResponse.ok) throw new Error(await responseError(reviewsResponse));
-      setData((await reviewsResponse.json()) as ReviewList);
-      if (reputationResponse.ok) setReputation((await reputationResponse.json()) as Reputation);
+      if (!reviewsResult.ok) throw new Error(reviewsResult.message);
+      setData(reviewsResult.data);
+      if (reputationResult.ok) setReputation(reputationResult.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unable to load reviews.');
     } finally {
@@ -119,16 +110,14 @@ export default function ResourceReviews({
     setBusyId(review.id);
     setReportError('');
     try {
-      const response = await fetch(`/api/backend/reviews/${encodeURIComponent(review.id)}/report`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: trimmed }),
-      });
-      if (response.status === 401) {
-        router.replace('/login');
-        return;
+      const result = await call(`/reviews/${encodeURIComponent(review.id)}/report`, json('POST', { reason: trimmed }));
+      if (!result.ok) {
+        if (result.status === 401) {
+          router.replace('/login');
+          return;
+        }
+        throw new Error(result.message);
       }
-      if (!response.ok) throw new Error(await responseError(response));
       setReportedIds((ids) => [...ids, review.id]);
       closeReport();
       setNotice('Report submitted. A moderator will review it.');

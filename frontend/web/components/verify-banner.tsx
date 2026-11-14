@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { call } from '../lib/api-client';
 
 export default function VerifyBanner({ email }: { email: string }) {
   const [busy, setBusy] = useState(false);
@@ -10,12 +11,12 @@ export default function VerifyBanner({ email }: { email: string }) {
     setBusy(true);
     setNote('');
     try {
-      const response = await fetch('/api/backend/auth/resend-verification', { method: 'POST' });
+      const result = await call('/auth/resend-verification', { method: 'POST' });
       setNote(
-        response.status === 429
-          ? 'Too many requests. Please try again in an hour.'
-          : response.ok
-            ? 'If your email is not verified yet, a new link is on its way.'
+        result.ok
+          ? 'If your email is not verified yet, a new link is on its way.'
+          : result.status === 429
+            ? 'Too many requests. Please try again in an hour.'
             : 'Could not send the link. Please try again later.',
       );
     } catch {

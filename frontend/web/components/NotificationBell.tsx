@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { call } from '../lib/api-client';
 
 /**
  * Unread-notification bell. `signedIn` comes from the site header (session cookies), so the bell
@@ -21,24 +22,22 @@ export default function NotificationBell({ signedIn }: { signedIn: boolean }) {
       if (stopped || document.hidden) return;
 
       try {
-        const response = await fetch(
-          '/api/backend/notifications/unread-count',
-          { cache: 'no-store' },
+        const result = await call<{ unreadCount?: number; count?: number }>(
+          '/notifications/unread-count',
         );
 
-        if (response.status === 401) {
-          stopped = true;
+        if (!result.ok) {
+          if (result.status === 401) {
+            stopped = true;
 
-          window.clearInterval(interval);
+            window.clearInterval(interval);
 
-          setUnreadCount(0);
+            setUnreadCount(0);
+          }
           return;
         }
 
-        if (!response.ok) return;
-
-        const data: { unreadCount?: number; count?: number } =
-          await response.json();
+        const data = result.data;
 
         if (!stopped) {
           setUnreadCount(data.unreadCount ?? data.count ?? 0);

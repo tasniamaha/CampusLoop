@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import StarRating from './StarRating';
+import { call, json } from '../lib/api-client';
 
 type Eligibility = {
   eligible: boolean;
@@ -19,16 +20,6 @@ const reasonText: Record<string, string> = {
   window_closed: 'The 14-day review window has closed.',
 };
 
-async function responseError(response: Response) {
-  try {
-    const data = await response.json();
-    const message = data?.message;
-    return Array.isArray(message) ? message.join(', ') : message || 'Request failed.';
-  } catch {
-    return 'Request failed.';
-  }
-}
-
 export default function LoanReviewForm({ borrowRequestId }: { borrowRequestId: string }) {
   const router = useRouter();
   const [eligibility, setEligibility] = useState<Eligibility | null>(null);
@@ -43,16 +34,15 @@ export default function LoanReviewForm({ borrowRequestId }: { borrowRequestId: s
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(
-        `/api/backend/reviews/eligibility/${encodeURIComponent(borrowRequestId)}`,
-        { cache: 'no-store' },
-      );
-      if (response.status === 401) {
-        router.replace('/login');
-        return;
+      const result = await call<Eligibility>(`/reviews/eligibility/${encodeURIComponent(borrowRequestId)}`);
+      if (!result.ok) {
+        if (result.status === 401) {
+          router.replace('/login');
+          return;
+        }
+        throw new Error(result.message);
       }
-      if (!response.ok) throw new Error(await responseError(response));
-      setEligibility((await response.json()) as Eligibility);
+      setEligibility(result.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unable to check review eligibility.');
     } finally {
@@ -72,20 +62,21 @@ export default function LoanReviewForm({ borrowRequestId }: { borrowRequestId: s
     setError('');
     setNotice('');
     try {
-      const response = await fetch('/api/backend/reviews', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const result = await call(
+        '/reviews',
+        json('POST', {
           borrowRequestId,
           rating,
           ...(comment.trim() ? { comment: comment.trim() } : {}),
         }),
-      });
-      if (response.status === 401) {
-        router.replace('/login');
-        return;
+      );
+      if (!result.ok) {
+        if (result.status === 401) {
+          router.replace('/login');
+          return;
+        }
+        throw new Error(result.message);
       }
-      if (!response.ok) throw new Error(await responseError(response));
       setNotice('Review submitted. Blind-review rules may keep it hidden until both parties review or the review window closes.');
       setComment('');
       setRating(null);

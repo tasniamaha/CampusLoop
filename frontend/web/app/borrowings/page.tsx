@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import QrLoanVerification from '../../components/QrLoanVerification';
 import LoanReviewForm from '../../components/LoanReviewForm';
+import { call } from '../../lib/api-client';
 type Status = 'pending' | 'approved' | 'active' | 'returned' | 'rejected' | 'cancelled' | 'expired';
 type Role = 'incoming' | 'outgoing';
 type Action = 'approve' | 'reject' | 'return' | 'cancel';
@@ -66,15 +67,6 @@ const secondaryButton =
 const dangerButton =
   'inline-flex items-center justify-center rounded-xl border border-rose-200 bg-white px-3.5 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50';
 
-async function readError(response: Response) {
-  try {
-    const data = await response.json();
-    const message = data?.message;
-    return Array.isArray(message) ? message.join(', ') : message || 'Request failed. Please try again.';
-  } catch {
-    return 'Request failed. Please try again.';
-  }
-}
 function actionsFor(role: Role, status: Status): Action[] {
   if (role === 'incoming') {
     if (status === 'pending') return ['approve', 'reject'];
@@ -115,14 +107,15 @@ export default function BorrowingsPage() {
     try {
       const params = new URLSearchParams({ role, page: '1', limit: '50' });
       if (statusFilter) params.set('status', statusFilter);
-      const response = await fetch(`/api/backend/borrow-requests?${params.toString()}`, { cache: 'no-store' });
-      if (response.status === 401) {
-        router.replace('/login');
-        return;
+      const result = await call<BorrowResponse>(`/borrow-requests?${params.toString()}`);
+      if (!result.ok) {
+        if (result.status === 401) {
+          router.replace('/login');
+          return;
+        }
+        throw new Error(result.message);
       }
-      if (!response.ok) throw new Error(await readError(response));
-      const data: BorrowResponse = await response.json();
-      setItems(Array.isArray(data.items) ? data.items : []);
+      setItems(Array.isArray(result.data.items) ? result.data.items : []);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unable to load borrow requests.');
     } finally {
@@ -139,14 +132,15 @@ export default function BorrowingsPage() {
     async (id: string) => {
       setHistoryLoading(id);
       try {
-        const response = await fetch(`/api/backend/borrow-requests/${id}/events`, { cache: 'no-store' });
-        if (response.status === 401) {
-          router.replace('/login');
-          return;
+        const result = await call<{ items: LoanEvent[] }>(`/borrow-requests/${id}/events`);
+        if (!result.ok) {
+          if (result.status === 401) {
+            router.replace('/login');
+            return;
+          }
+          throw new Error(result.message);
         }
-        if (!response.ok) throw new Error(await readError(response));
-        const data: { items: LoanEvent[] } = await response.json();
-        setHistory((prev) => ({ ...prev, [id]: data.items }));
+        setHistory((prev) => ({ ...prev, [id]: result.data.items }));
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Unable to load history.');
       } finally {
@@ -176,12 +170,14 @@ export default function BorrowingsPage() {
     setNotice('');
     setError('');
     try {
-      const response = await fetch(`/api/backend/borrow-requests/${item.id}/${action}`, { method: 'PATCH' });
-      if (response.status === 401) {
-        router.replace('/login');
-        return;
+      const result = await call(`/borrow-requests/${item.id}/${action}`, { method: 'PATCH' });
+      if (!result.ok) {
+        if (result.status === 401) {
+          router.replace('/login');
+          return;
+        }
+        throw new Error(result.message);
       }
-      if (!response.ok) throw new Error(await readError(response));
       setNotice(`${ACTION_LABELS[action]} completed for "${item.resource.title}".`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Action failed.');
